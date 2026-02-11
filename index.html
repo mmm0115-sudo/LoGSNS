@@ -3,10 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LoG</title>
+    
+    <title>LoG | 次世代テキストベースSNSプロトコル</title>
+
+    <meta name="google-site-verification" content="Z2rHXTn9RZClgr4XgNlPX0di9h8peZXKxsakNEp9v-E" />
+    
+    <meta name="description" content="LoGは、テキストのみで繋がるシンプルなSNS。90日で消えるログと、匿名性の高いコミュニケーションを体験しよう。">
+    <meta name="keywords" content="SNS, LoG, テキストベース, 匿名, 開発">
+
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1539164935971262" crossorigin="anonymous"></script>
+    
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+
     <style>
         body { background-color: #000; color: #fff; font-family: 'Courier New', monospace; }
         .hidden { display: none; }
@@ -16,9 +25,8 @@
         .btn-outline:hover { border-color: #fff; color: #fff; }
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 50; display: flex; align-items: center; justify-content: center; }
         .terms-scroll { max-height: 250px; overflow-y: auto; background: #0a0a0a; padding: 12px; border: 1px solid #222; font-size: 0.75em; line-height: 1.6; color: #888; }
-        .ad-space { background-color: #050505; border-y: 1px solid #111; padding: 15px; text-align: center; margin: 10px 0; }
+        .ad-space { background-color: #050505; border-top: 1px solid #111; border-bottom: 1px solid #111; padding: 15px; text-align: center; margin: 10px 0; }
         input, textarea { background-color: #0a0a0a !important; border: 1px solid #222 !important; color: white !important; }
-        input:focus, textarea:focus { border-color: #555 !important; }
     </style>
 </head>
 <body>
@@ -49,7 +57,7 @@
         </p>
     </div>
 
-    <div id="app-screen" class="hidden max-w-xl mx-auto min-h-screen border-x border-gray-900 relative pb-20">
+    <div id="app-screen" class="hidden max-w-xl mx-auto min-h-screen border-x border-gray-800 relative pb-20">
         <header class="sticky top-0 bg-black/95 backdrop-blur z-10 border-b border-gray-900 p-4 flex justify-between items-center">
             <h1 class="text-2xl font-bold tracking-tighter cursor-pointer" onclick="switchTab('home')">LoG</h1>
             <img id="header-icon" src="" class="w-8 h-8 rounded bg-gray-800 cursor-pointer" onclick="switchTab('profile')">
@@ -67,8 +75,8 @@
         </div>
 
         <div id="tab-profile" class="hidden">
-            <div class="p-8 border-b border-gray-900">
-                <div class="flex justify-between items-start mb-4">
+            <div class="p-8 border-b border-gray-900 text-center md:text-left">
+                <div class="flex flex-col md:flex-row justify-between items-center mb-4 gap-4">
                     <img id="profile-big-icon" src="" class="w-24 h-24 rounded bg-gray-800 shadow-xl">
                     <div class="flex flex-col gap-2">
                         <button onclick="openProfileEditor()" class="btn-outline">Edit Profile</button>
@@ -107,11 +115,7 @@
             <h2 class="text-lg font-bold mb-4 tracking-widest text-gray-400">TERMS OF SERVICE</h2>
             <div class="terms-scroll mb-6">
                 <p class="font-bold text-gray-500 mt-2">[1] 免責事項</p>
-                <p>本サービスは個人による試験的なプロジェクトです。データの損失、不具合、または利用者間のトラブル等について、運営者は法的・道義的な責任を一切負いません。</p>
-                <p class="font-bold text-gray-500 mt-4">[2] データの取り扱い</p>
-                <p>サーバー維持のため、投稿データは作成から約90日経過後に自動的に完全に削除されます。永続的な保存は保証されません。</p>
-                <p class="font-bold text-gray-500 mt-4">[3] 禁止行為</p>
-                <p>誹謗中傷、荒らし、不正アクセスを禁止します。運営者の裁量により予告なくアクセスを遮断する場合があります。</p>
+                <p>運営者は、本サービスの利用により生じた損害について一切の責任を負いません。データは90日後に自動削除されます。</p>
             </div>
             <button onclick="document.getElementById('terms-modal').classList.add('hidden')" class="w-full btn-outline">ACKNOWLEDGE</button>
         </div>
@@ -136,17 +140,16 @@
         const db = getFirestore(app);
         let currentUser = null, myProfile = null;
 
-        // --- 認証ロジック ---
-        const login = (fn) => fn.catch(e => alert("Auth Error: " + e.message));
-        document.getElementById('google-login-btn').onclick = () => login(signInWithPopup(auth, new GoogleAuthProvider()));
+        // 認証関連
+        const loginErr = (e) => alert("Auth Error: " + e.message);
+        document.getElementById('google-login-btn').onclick = () => signInWithPopup(auth, new GoogleAuthProvider()).catch(loginErr);
         document.getElementById('email-login-btn').onclick = () => {
             const e = document.getElementById('auth-email').value, p = document.getElementById('auth-password').value;
-            login(signInWithEmailAndPassword(auth, e, p));
+            signInWithEmailAndPassword(auth, e, p).catch(loginErr);
         };
         document.getElementById('email-signup-btn').onclick = () => {
             const e = document.getElementById('auth-email').value, p = document.getElementById('auth-password').value;
-            if(p.length < 6) return alert("Password must be 6+ characters");
-            login(createUserWithEmailAndPassword(auth, e, p));
+            createUserWithEmailAndPassword(auth, e, p).catch(loginErr);
         };
         window.signOutApp = () => signOut(auth);
 
@@ -162,7 +165,6 @@
             }
         });
 
-        // --- アプリ基本動作 ---
         function initApp() {
             document.getElementById('login-screen').classList.add('hidden');
             document.getElementById('app-screen').classList.remove('hidden');
@@ -171,7 +173,7 @@
             document.getElementById('input-icon').src = myProfile.icon;
             document.getElementById('profile-big-icon').src = myProfile.icon;
             document.getElementById('profile-name').innerText = myProfile.name;
-            document.getElementById('profile-uid').innerText = "SYSTEM_ID: " + currentUser.uid.slice(0, 12);
+            document.getElementById('profile-uid').innerText = "ID: " + currentUser.uid.slice(0, 12);
             loadTimeline();
         }
 
@@ -179,11 +181,13 @@
             const text = document.getElementById('post-text').value;
             if (!text.trim() || !myProfile) return;
             const exp = new Date(); exp.setDate(exp.getDate() + 90);
-            await addDoc(collection(db, "logs"), {
-                text, uid: currentUser.uid, authorName: myProfile.name, authorIcon: myProfile.icon,
-                createdAt: serverTimestamp(), expireAt: exp
-            });
-            document.getElementById('post-text').value = "";
+            try {
+                await addDoc(collection(db, "logs"), {
+                    text, uid: currentUser.uid, authorName: myProfile.name, authorIcon: myProfile.icon,
+                    createdAt: serverTimestamp(), expireAt: exp
+                });
+                document.getElementById('post-text').value = "";
+            } catch(e) { alert("投稿エラー: 開発者コンソールを確認してください"); console.error(e); }
         };
 
         function loadTimeline() {
@@ -194,7 +198,7 @@
                 snap.docs.forEach((doc, i) => {
                     if (i > 0 && i % 5 === 0) {
                         const ad = document.createElement('div'); ad.className = "ad-space";
-                        ad.innerHTML = `<span class="ad-label">SYSTEM ADVERTISEMENT</span><ins class="adsbygoogle" style="display:block" data-ad-format="fluid" data-ad-layout-key="-fb+5w+4e-db+86" data-ad-client="ca-pub-1539164935971262" data-ad-slot="YOUR_AD_SLOT_ID"></ins>`;
+                        ad.innerHTML = `<span class="ad-label">SPONSORED</span><ins class="adsbygoogle" style="display:block" data-ad-format="fluid" data-ad-layout-key="-fb+5w+4e-db+86" data-ad-client="ca-pub-1539164935971262" data-ad-slot="YOUR_AD_SLOT_ID"></ins>`;
                         container.appendChild(ad); (adsbygoogle = window.adsbygoogle || []).push({});
                     }
                     container.appendChild(createPostEl(doc.data()));
@@ -209,14 +213,13 @@
 
         function createPostEl(d) {
             const div = document.createElement('div');
-            div.className = "p-5 flex gap-4 border-b border-gray-950 hover:bg-zinc-950 transition";
-            div.innerHTML = `<img src="${d.authorIcon}" class="w-10 h-10 rounded-sm bg-gray-900 border border-gray-800"><div class="w-full">
+            div.className = "p-5 flex gap-4 border-b border-gray-900 hover:bg-zinc-950 transition";
+            div.innerHTML = `<img src="${d.authorIcon}" class="w-10 h-10 rounded-sm bg-gray-900"><div class="w-full">
                 <div class="flex justify-between items-center"><span class="font-bold text-sm text-gray-200">${d.authorName}</span><span class="text-[9px] font-mono text-gray-600">${d.createdAt ? d.createdAt.toDate().toLocaleString() : 'PENDING...'}</span></div>
                 <p class="mt-2 text-gray-400 text-sm whitespace-pre-wrap leading-relaxed">${d.text}</p></div>`;
             return div;
         }
 
-        // --- プロフィール編集 ---
         window.openProfileEditor = () => {
             document.getElementById('profile-modal').classList.remove('hidden');
             if(myProfile) { document.getElementById('edit-name-input').value = myProfile.name; document.getElementById('edit-icon-url').value = myProfile.icon; document.getElementById('edit-preview-icon').src = myProfile.icon; }
@@ -237,9 +240,7 @@
             myProfile = { name, icon }; initApp();
         };
 
-        window.switchTab = (t) => {
-            ['home', 'profile'].forEach(x => document.getElementById(`tab-${x}`).classList.toggle('hidden', x !== t));
-        };
+        window.switchTab = (t) => { ['home', 'profile'].forEach(x => document.getElementById(`tab-${x}`).classList.toggle('hidden', x !== t)); };
         window.openTerms = () => document.getElementById('terms-modal').classList.remove('hidden');
     </script>
 </body>
