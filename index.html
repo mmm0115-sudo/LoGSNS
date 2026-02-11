@@ -14,8 +14,11 @@
         .btn-outline { border: 1px solid #666; color: #ccc; border-radius: 4px; padding: 6px 12px; font-size: 0.9em; }
         .btn-outline:hover { border-color: #fff; color: #fff; }
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 50; display: flex; align-items: center; justify-content: center; }
-        /* 規約用のスクロールエリア */
         .terms-scroll { max-height: 300px; overflow-y: auto; background: #111; padding: 10px; border: 1px solid #333; font-size: 0.8em; line-height: 1.6; }
+        
+        /* 広告スペースのデザイン */
+        .ad-space { background-color: #111; border-top: 1px solid #333; border-bottom: 1px solid #333; padding: 20px; text-align: center; margin: 10px 0; }
+        .ad-label { font-size: 10px; color: #666; display: block; margin-bottom: 5px; }
     </style>
 </head>
 <body>
@@ -27,7 +30,6 @@
         <button id="login-btn" class="border border-white px-6 py-3 rounded hover:bg-white hover:text-black transition flex items-center gap-2 mb-4">
             <span class="material-icons">login</span> Start Session
         </button>
-
         <p class="text-xs text-gray-500">
             開始することで <span class="underline cursor-pointer hover:text-white" onclick="openTerms()">利用規約</span> に同意したものとみなします。
         </p>
@@ -65,7 +67,6 @@
                 <div class="mt-6 border-b border-gray-800 pb-2 mb-2 font-bold text-gray-400">YOUR LOGS</div>
             </div>
             <div id="my-timeline" class="divide-y divide-gray-800"></div>
-            
             <div class="p-6 text-center">
                 <span class="text-xs text-gray-600 underline cursor-pointer hover:text-gray-400" onclick="openTerms()">利用規約を確認</span>
             </div>
@@ -98,21 +99,12 @@
             <h2 class="text-xl font-bold mb-4">利用規約 (Terms)</h2>
             <div class="terms-scroll mb-4 text-gray-300">
                 <p class="font-bold mb-1">第1条（はじめに）</p>
-                <p class="mb-2">本サービス「LoG」（以下「本サービス」）は、開発者が個人的に運営する試験的なサービスです。利用者は、本規約に同意した上で利用するものとします。</p>
-                
+                <p class="mb-2">本サービス「LoG」（以下「本サービス」）は、試験的なサービスです。利用者は、本規約に同意した上で利用するものとします。</p>
                 <p class="font-bold mb-1">第2条（免責事項：重要）</p>
-                <p class="mb-2">1. 運営者は、本サービスの利用により利用者に生じた損害（データの消失、第三者とのトラブル等）について、一切の責任を負いません。<br>
-                2. 本サービスは予告なく内容の変更、停止、または終了することがあります。</p>
-
+                <p class="mb-2">1. 運営者は、本サービスの利用により生じた損害（データ消失等）について、一切の責任を負いません。<br>
+                2. 投稿データは一定期間経過後に自動削除される場合があります。</p>
                 <p class="font-bold mb-1">第3条（禁止事項）</p>
-                <p class="mb-2">以下の行為を禁止します。<br>
-                ・法令に違反する行為<br>
-                ・他者を誹謗中傷する行為<br>
-                ・過度に暴力的、性的な投稿<br>
-                ・サーバーに過度な負荷をかける行為</p>
-
-                <p class="font-bold mb-1">第4条（利用停止）</p>
-                <p class="mb-0">運営者は、本規約に違反した利用者に対し、事前の通知なく投稿の削除やアカウントの停止を行う権利を有します。</p>
+                <p class="mb-0">法令違反、誹謗中傷、荒らし行為を禁止します。違反者は予告なく利用停止となります。</p>
             </div>
             <button onclick="document.getElementById('terms-modal').classList.add('hidden')" class="w-full border border-white text-white py-2 rounded font-bold hover:bg-white hover:text-black">閉じる</button>
         </div>
@@ -123,7 +115,7 @@
         import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
         import { getFirestore, collection, addDoc, query, orderBy, limit, onSnapshot, serverTimestamp, doc, getDoc, setDoc, where } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-        // ★設定キー（ここに正しいキーが入っています）
+        // ★設定キー（正しいもの）
         const firebaseConfig = {
             apiKey: "AIzaSyCA4NQzxcz2gh8uaw3LKrKl_NEnE_fMybs",
             authDomain: "lo-g-8a620.firebaseapp.com",
@@ -140,12 +132,12 @@
         let currentUser = null;
         let myProfile = null;
 
-        // ログインボタン処理
+        // ログイン
         document.getElementById('login-btn').addEventListener('click', () => {
             signInWithPopup(auth, new GoogleAuthProvider()).catch(alert);
         });
 
-        // ログイン状態監視
+        // 状態監視
         onAuthStateChanged(auth, async (user) => {
             if (user) {
                 currentUser = user;
@@ -182,14 +174,14 @@
             document.getElementById('profile-uid').innerText = "ID: " + currentUser.uid.slice(0, 8);
         }
 
-     // 投稿ボタンの処理（ここを書き換える）
+        // --- 投稿機能（自動削除タイマー付き） ---
         document.getElementById('post-btn').addEventListener('click', async () => {
             const text = document.getElementById('post-text').value;
             if (!text.trim() || !myProfile) return;
 
-            // ★削除予定日を計算（今は「90日後」に設定しています）
+            // ★削除予定日（90日後）を計算
             const expireDate = new Date();
-            expireDate.setDate(expireDate.getDate() + 90); 
+            expireDate.setDate(expireDate.getDate() + 90);
 
             try {
                 await addDoc(collection(db, "logs"), {
@@ -198,26 +190,50 @@
                     authorName: myProfile.name,
                     authorIcon: myProfile.icon,
                     createdAt: serverTimestamp(),
-                    expireAt: expireDate // ★これに追加！「この日に消してね」という予約
+                    expireAt: expireDate // ★自動削除用の日付
                 });
                 document.getElementById('post-text').value = "";
                 switchTab('home');
             } catch (e) { alert("Error: " + e.message); }
         });
 
-        // タイムライン
+        // --- タイムライン（広告混ぜ込み版） ---
         function loadTimeline() {
+            // 全体（広告あり）
             const q = query(collection(db, "logs"), orderBy("createdAt", "desc"), limit(50));
             onSnapshot(q, (snapshot) => {
                 const container = document.getElementById('timeline');
                 container.innerHTML = "";
-                snapshot.forEach(doc => container.appendChild(createPostEl(doc.data())));
+                
+                // docsプロパティを使ってインデックス番号を取得
+                snapshot.docs.forEach((doc, index) => {
+                    const data = doc.data();
+
+                    // ★5件ごとに広告を挟む（0番目は除く）
+                    if (index > 0 && index % 5 === 0) {
+                        const adDiv = document.createElement('div');
+                        adDiv.className = "ad-space";
+                        // ※ここに将来、広告タグを貼ります
+                        adDiv.innerHTML = `
+                            <span class="ad-label">Sponsored</span>
+                            <div class="text-gray-500 text-sm py-4 border border-dashed border-gray-700">
+                                広告スペース<br>(Ad Space)
+                            </div>
+                        `;
+                        container.appendChild(adDiv);
+                    }
+
+                    // 通常の投稿
+                    container.appendChild(createPostEl(data));
+                });
             });
+
+            // 自分のみ（広告なし）
             const myQ = query(collection(db, "logs"), where("uid", "==", currentUser.uid), orderBy("createdAt", "desc"), limit(20));
             onSnapshot(myQ, (snapshot) => {
                 const container = document.getElementById('my-timeline');
                 container.innerHTML = "";
-                snapshot.forEach(doc => container.appendChild(createPostEl(doc.data())));
+                snapshot.docs.forEach(doc => container.appendChild(createPostEl(doc.data())));
             });
         }
 
@@ -226,7 +242,7 @@
             div.className = "p-4 hover:bg-gray-900 transition flex gap-3";
             div.innerHTML = `
                 <img src="${data.authorIcon}" class="w-10 h-10 rounded bg-gray-800">
-                <div class="overflow-hidden">
+                <div class="overflow-hidden w-full">
                     <div class="flex items-center gap-2">
                         <span class="font-bold text-sm text-white">${data.authorName}</span>
                         <span class="text-gray-500 text-xs">${data.createdAt ? new Date(data.createdAt.toDate()).toLocaleTimeString() : '...'}</span>
@@ -270,7 +286,6 @@
             document.getElementById(`tab-${tabName}`).classList.remove('hidden');
         };
 
-        // 規約モーダルの開閉
         window.openTerms = () => {
             document.getElementById('terms-modal').classList.remove('hidden');
         };
