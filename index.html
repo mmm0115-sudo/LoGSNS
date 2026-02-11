@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>LoG</title>
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1539164935971262" crossorigin="anonymous"></script>
+    
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <style>
@@ -17,8 +19,8 @@
         .terms-scroll { max-height: 300px; overflow-y: auto; background: #111; padding: 10px; border: 1px solid #333; font-size: 0.8em; line-height: 1.6; }
         
         /* 広告スペースのデザイン */
-        .ad-space { background-color: #111; border-top: 1px solid #333; border-bottom: 1px solid #333; padding: 20px; text-align: center; margin: 10px 0; }
-        .ad-label { font-size: 10px; color: #666; display: block; margin-bottom: 5px; }
+        .ad-space { background-color: #050505; border-top: 1px solid #222; border-bottom: 1px solid #222; padding: 15px; text-align: center; margin: 10px 0; }
+        .ad-label { font-size: 10px; color: #444; display: block; margin-bottom: 8px; text-align: left; }
     </style>
 </head>
 <body>
@@ -79,14 +81,14 @@
     </div>
 
     <div id="profile-modal" class="modal-overlay hidden">
-        <div class="bg-gray-900 border border-gray-700 p-6 rounded-lg w-80 shadow-2xl">
+        <div class="bg-gray-900 border border-gray-700 p-6 rounded-lg w-80 shadow-2xl text-center">
             <h2 class="text-xl font-bold mb-4">Setup Profile</h2>
             <div class="flex flex-col items-center mb-4">
                 <img id="edit-preview-icon" src="" class="w-20 h-20 rounded bg-gray-800 mb-2">
                 <button id="random-icon-btn" class="text-xs border border-gray-600 px-2 py-1 rounded hover:bg-gray-700">🎲 Random Icon</button>
                 <input type="hidden" id="edit-icon-url">
             </div>
-            <div class="mb-6">
+            <div class="mb-6 text-left">
                 <label class="block text-gray-500 text-sm mb-1">Display Name</label>
                 <input id="edit-name-input" type="text" class="w-full bg-gray-800 border border-gray-600 rounded p-2 text-white outline-none focus:border-white" placeholder="Enter name">
             </div>
@@ -98,13 +100,13 @@
         <div class="bg-gray-900 border border-gray-700 p-6 rounded-lg w-full max-w-md shadow-2xl m-4">
             <h2 class="text-xl font-bold mb-4">利用規約 (Terms)</h2>
             <div class="terms-scroll mb-4 text-gray-300">
-                <p class="font-bold mb-1">第1条（はじめに）</p>
-                <p class="mb-2">本サービス「LoG」（以下「本サービス」）は、試験的なサービスです。利用者は、本規約に同意した上で利用するものとします。</p>
-                <p class="font-bold mb-1">第2条（免責事項：重要）</p>
+                <p class="font-bold mb-1">第1条（免責事項：重要）</p>
                 <p class="mb-2">1. 運営者は、本サービスの利用により生じた損害（データ消失等）について、一切の責任を負いません。<br>
-                2. 投稿データは一定期間経過後に自動削除される場合があります。</p>
+                2. 投稿データは90日経過後に自動削除されます。</p>
+                <p class="font-bold mb-1">第2条（広告について）</p>
+                <p class="mb-2">本サービスには運営維持のため広告が表示されます。</p>
                 <p class="font-bold mb-1">第3条（禁止事項）</p>
-                <p class="mb-0">法令違反、誹謗中傷、荒らし行為を禁止します。違反者は予告なく利用停止となります。</p>
+                <p class="mb-0">誹謗中傷、荒らし、不正利用を禁止します。違反者は即刻BANします。</p>
             </div>
             <button onclick="document.getElementById('terms-modal').classList.add('hidden')" class="w-full border border-white text-white py-2 rounded font-bold hover:bg-white hover:text-black">閉じる</button>
         </div>
@@ -115,7 +117,6 @@
         import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
         import { getFirestore, collection, addDoc, query, orderBy, limit, onSnapshot, serverTimestamp, doc, getDoc, setDoc, where } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-        // ★設定キー（正しいもの）
         const firebaseConfig = {
             apiKey: "AIzaSyCA4NQzxcz2gh8uaw3LKrKl_NEnE_fMybs",
             authDomain: "lo-g-8a620.firebaseapp.com",
@@ -137,20 +138,18 @@
             signInWithPopup(auth, new GoogleAuthProvider()).catch(alert);
         });
 
-        // 状態監視
+        // ログイン状態監視
         onAuthStateChanged(auth, async (user) => {
             if (user) {
                 currentUser = user;
-                try {
-                    const userDoc = await getDoc(doc(db, "users", user.uid));
-                    if (userDoc.exists()) {
-                        myProfile = userDoc.data();
-                        initApp(); 
-                    } else {
-                        document.getElementById('login-screen').classList.add('hidden');
-                        openProfileEditor(true); 
-                    }
-                } catch(e) { console.error(e); }
+                const userDoc = await getDoc(doc(db, "users", user.uid));
+                if (userDoc.exists()) {
+                    myProfile = userDoc.data();
+                    initApp(); 
+                } else {
+                    document.getElementById('login-screen').classList.add('hidden');
+                    openProfileEditor(); 
+                }
             } else {
                 document.getElementById('login-screen').classList.remove('hidden');
                 document.getElementById('app-screen').classList.add('hidden');
@@ -174,12 +173,11 @@
             document.getElementById('profile-uid').innerText = "ID: " + currentUser.uid.slice(0, 8);
         }
 
-        // --- 投稿機能（自動削除タイマー付き） ---
+        // 投稿機能 (90日後のTTL付与)
         document.getElementById('post-btn').addEventListener('click', async () => {
             const text = document.getElementById('post-text').value;
             if (!text.trim() || !myProfile) return;
 
-            // ★削除予定日（90日後）を計算
             const expireDate = new Date();
             expireDate.setDate(expireDate.getDate() + 90);
 
@@ -190,45 +188,43 @@
                     authorName: myProfile.name,
                     authorIcon: myProfile.icon,
                     createdAt: serverTimestamp(),
-                    expireAt: expireDate // ★自動削除用の日付
+                    expireAt: expireDate
                 });
                 document.getElementById('post-text').value = "";
                 switchTab('home');
             } catch (e) { alert("Error: " + e.message); }
         });
 
-        // --- タイムライン（広告混ぜ込み版） ---
+        // タイムライン (AdSense 混合表示)
         function loadTimeline() {
-            // 全体（広告あり）
             const q = query(collection(db, "logs"), orderBy("createdAt", "desc"), limit(50));
             onSnapshot(q, (snapshot) => {
                 const container = document.getElementById('timeline');
                 container.innerHTML = "";
                 
-                // docsプロパティを使ってインデックス番号を取得
                 snapshot.docs.forEach((doc, index) => {
-                    const data = doc.data();
-
-                    // ★5件ごとに広告を挟む（0番目は除く）
+                    // 5件ごとに広告を挿入
                     if (index > 0 && index % 5 === 0) {
                         const adDiv = document.createElement('div');
                         adDiv.className = "ad-space";
-                        // ※ここに将来、広告タグを貼ります
                         adDiv.innerHTML = `
                             <span class="ad-label">Sponsored</span>
-                            <div class="text-gray-500 text-sm py-4 border border-dashed border-gray-700">
-                                広告スペース<br>(Ad Space)
-                            </div>
+                            <ins class="adsbygoogle"
+                                 style="display:block"
+                                 data-ad-format="fluid"
+                                 data-ad-layout-key="-fb+5w+4e-db+86"
+                                 data-ad-client="ca-pub-1539164935971262"
+                                 data-ad-slot="ここに広告スロットIDを入れる"></ins>
                         `;
                         container.appendChild(adDiv);
+                        // AdSenseにこの要素を認識させる
+                        (adsbygoogle = window.adsbygoogle || []).push({});
                     }
-
-                    // 通常の投稿
-                    container.appendChild(createPostEl(data));
+                    container.appendChild(createPostEl(doc.data()));
                 });
             });
 
-            // 自分のみ（広告なし）
+            // 自分の投稿
             const myQ = query(collection(db, "logs"), where("uid", "==", currentUser.uid), orderBy("createdAt", "desc"), limit(20));
             onSnapshot(myQ, (snapshot) => {
                 const container = document.getElementById('my-timeline');
@@ -247,7 +243,7 @@
                         <span class="font-bold text-sm text-white">${data.authorName}</span>
                         <span class="text-gray-500 text-xs">${data.createdAt ? new Date(data.createdAt.toDate()).toLocaleTimeString() : '...'}</span>
                     </div>
-                    <p class="mt-1 text-gray-300 break-words whitespace-pre-wrap">${data.text}</p>
+                    <p class="mt-1 text-gray-300 break-words whitespace-pre-wrap text-sm">${data.text}</p>
                 </div>`;
             return div;
         }
