@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LoG</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <style>
+        body { background-color: #000; color: #fff; font-family: 'Courier New', monospace; } /* LoGっぽいフォント */
+        .hidden { display: none; }
+        .tweet-btn { background-color: #fff; color: #000; border-radius: 4px; padding: 6px 16px; font-weight: bold; }
+        .tweet-btn:hover { background-color: #ccc; }
+    </style>
+</head>
+<body>
+
+    <div id="login-screen" class="h-screen flex flex-col items-center justify-center">
+        <h1 class="text-6xl font-bold mb-4 tracking-tighter">LoG</h1>
+        <p class="mb-8 text-gray-400">text-based communication protocol</p>
+        <button id="login-btn" class="border border-white px-6 py-3 rounded hover:bg-white hover:text-black transition flex items-center gap-2">
+            <span class="material-icons">login</span> Start Session
+        </button>
+    </div>
+
+    <div id="app-screen" class="hidden max-w-xl mx-auto min-h-screen border-x border-gray-800 relative pb-20">
+        <header class="sticky top-0 bg-black/90 backdrop-blur z-10 border-b border-gray-800 p-4 flex justify-between items-center">
+            <h1 class="text-2xl font-bold tracking-tighter">LoG</h1>
+            <div class="flex items-center gap-3">
+                <span id="user-name" class="text-sm text-gray-400"></span>
+                <button onclick="signOutApp()" class="text-xs border border-gray-600 px-2 py-1 rounded">EXIT</button>
+            </div>
+        </header>
+
+        <div class="p-4 border-b border-gray-800">
+            <textarea id="post-text" rows="3" placeholder="Write to log..." class="w-full bg-transparent text-lg outline-none resize-none mb-2"></textarea>
+            <div class="flex justify-end">
+                <button id="post-btn" class="tweet-btn">COMMIT</button>
+            </div>
+        </div>
+
+        <div id="timeline" class="divide-y divide-gray-800"></div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getFirestore, collection, addDoc, query, orderBy, limit, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        // あなたのFirebase設定 (LoG)
+        const firebaseConfig = {
+            apiKey: "AIzaSyCA4NQzxcz2gh8uaw3LKrKl_NEnE_fMybs",
+            authDomain: "lo-g-8a620.firebaseapp.com",
+            projectId: "lo-g-8a620",
+            storageBucket: "lo-g-8a620.firebasestorage.app",
+            messagingSenderId: "780857099698",
+            appId: "1:780857099698:web:b6cb359114da98ab3e50ab"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        
+        let currentUser = null;
+
+        // ログイン処理
+        document.getElementById('login-btn').addEventListener('click', () => {
+            const provider = new GoogleAuthProvider();
+            signInWithPopup(auth, provider).catch((error) => {
+                console.error("Login Error:", error);
+                alert("ログインに失敗しました: " + error.message);
+            });
+        });
+
+        // ログアウト処理
+        window.signOutApp = () => signOut(auth);
+
+        // ログイン状態監視
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                currentUser = user;
+                document.getElementById('login-screen').classList.add('hidden');
+                document.getElementById('app-screen').classList.remove('hidden');
+                document.getElementById('user-name').innerText = user.displayName || "User";
+                loadTimeline();
+            } else {
+                currentUser = null;
+                document.getElementById('login-screen').classList.remove('hidden');
+                document.getElementById('app-screen').classList.add('hidden');
+            }
+        });
+
+        // 投稿機能
+        document.getElementById('post-btn').addEventListener('click', async () => {
+            const text = document.getElementById('post-text').value;
+            if (!text.trim()) return;
+
+            try {
+                await addDoc(collection(db, "logs"), { // コレクション名を logs に変更
+                    text: text,
+                    uid: currentUser.uid,
+                    authorName: currentUser.displayName,
+                    authorIcon: currentUser.photoURL,
+                    createdAt: serverTimestamp()
+                });
+                document.getElementById('post-text').value = "";
+            } catch (e) {
+                console.error("Post Error", e);
+                alert("投稿できませんでした。コンソールを確認してください。");
+            }
+        });
+
+        // タイムライン読み込み
+        function loadTimeline() {
+            const q = query(collection(db, "logs"), orderBy("createdAt", "desc"), limit(50));
+            onSnapshot(q, (snapshot) => {
+                const container = document.getElementById('timeline');
+                container.innerHTML = ""; 
+                
+                snapshot.forEach((docSnap) => {
+                    const data = docSnap.data();
+                    const div = document.createElement('div');
+                    div.className = "p-4 hover:bg-gray-900 transition";
+                    div.innerHTML = `
+                        <div class="flex gap-3">
+                            <img src="${data.authorIcon}" class="w-10 h-10 rounded bg-gray-700">
+                            <div>
+                                <div class="flex items-center gap-2">
+                                    <span class="font-bold text-sm">${data.authorName}</span>
+                                    <span class="text-gray-500 text-xs">${data.createdAt ? new Date(data.createdAt.toDate()).toLocaleString() : 'Just now'}</span>
+                                </div>
+                                <p class="mt-1 text-gray-300">${data.text}</p>
+                            </div>
+                        </div>
+                    `;
+                    container.appendChild(div);
+                });
+            });
+        }
+    </script>
+</body>
+</html>
