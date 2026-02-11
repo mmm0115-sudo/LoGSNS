@@ -182,17 +182,23 @@
             document.getElementById('profile-uid').innerText = "ID: " + currentUser.uid.slice(0, 8);
         }
 
-        // 投稿
+     // 投稿ボタンの処理（ここを書き換える）
         document.getElementById('post-btn').addEventListener('click', async () => {
             const text = document.getElementById('post-text').value;
             if (!text.trim() || !myProfile) return;
+
+            // ★削除予定日を計算（今は「90日後」に設定しています）
+            const expireDate = new Date();
+            expireDate.setDate(expireDate.getDate() + 90); 
+
             try {
                 await addDoc(collection(db, "logs"), {
                     text: text,
                     uid: currentUser.uid,
                     authorName: myProfile.name,
                     authorIcon: myProfile.icon,
-                    createdAt: serverTimestamp()
+                    createdAt: serverTimestamp(),
+                    expireAt: expireDate // ★これに追加！「この日に消してね」という予約
                 });
                 document.getElementById('post-text').value = "";
                 switchTab('home');
