@@ -7,10 +7,14 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <style>
-        body { background-color: #000; color: #fff; font-family: 'Courier New', monospace; } /* LoGっぽいフォント */
+        body { background-color: #000; color: #fff; font-family: 'Courier New', monospace; }
         .hidden { display: none; }
-        .tweet-btn { background-color: #fff; color: #000; border-radius: 4px; padding: 6px 16px; font-weight: bold; }
-        .tweet-btn:hover { background-color: #ccc; }
+        .btn-primary { background-color: #fff; color: #000; font-weight: bold; border-radius: 4px; padding: 8px 16px; transition: 0.2s; }
+        .btn-primary:hover { background-color: #ccc; }
+        .btn-outline { border: 1px solid #666; color: #ccc; border-radius: 4px; padding: 6px 12px; font-size: 0.9em; }
+        .btn-outline:hover { border-color: #fff; color: #fff; }
+        /* モーダル */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 50; display: flex; align-items: center; justify-content: center; }
     </style>
 </head>
 <body>
@@ -25,36 +29,77 @@
 
     <div id="app-screen" class="hidden max-w-xl mx-auto min-h-screen border-x border-gray-800 relative pb-20">
         <header class="sticky top-0 bg-black/90 backdrop-blur z-10 border-b border-gray-800 p-4 flex justify-between items-center">
-            <h1 class="text-2xl font-bold tracking-tighter">LoG</h1>
+            <h1 class="text-2xl font-bold tracking-tighter cursor-pointer" onclick="switchTab('home')">LoG</h1>
             <div class="flex items-center gap-3">
-                <span id="user-name" class="text-sm text-gray-400"></span>
-                <button onclick="signOutApp()" class="text-xs border border-gray-600 px-2 py-1 rounded">EXIT</button>
+                <img id="header-icon" src="" class="w-8 h-8 rounded bg-gray-700 cursor-pointer" onclick="switchTab('profile')">
             </div>
         </header>
 
-        <div class="p-4 border-b border-gray-800">
-            <textarea id="post-text" rows="3" placeholder="Write to log..." class="w-full bg-transparent text-lg outline-none resize-none mb-2"></textarea>
-            <div class="flex justify-end">
-                <button id="post-btn" class="tweet-btn">COMMIT</button>
+        <div id="tab-home">
+            <div class="p-4 border-b border-gray-800 flex gap-3">
+                <img id="input-icon" src="" class="w-10 h-10 rounded bg-gray-700">
+                <div class="flex-1">
+                    <textarea id="post-text" rows="3" placeholder="Write to log..." class="w-full bg-transparent text-lg outline-none resize-none mb-2 text-white"></textarea>
+                    <div class="flex justify-end">
+                        <button id="post-btn" class="btn-primary">COMMIT</button>
+                    </div>
+                </div>
             </div>
+            <div id="timeline" class="divide-y divide-gray-800"></div>
         </div>
 
-        <div id="timeline" class="divide-y divide-gray-800"></div>
+        <div id="tab-profile" class="hidden">
+            <div class="p-6 border-b border-gray-800">
+                <div class="flex justify-between items-start">
+                    <img id="profile-big-icon" src="" class="w-20 h-20 rounded bg-gray-700 mb-4">
+                    <button onclick="openProfileEditor()" class="btn-outline">Edit Profile</button>
+                </div>
+                <h2 id="profile-name" class="text-2xl font-bold"></h2>
+                <p id="profile-uid" class="text-gray-500 text-xs font-mono mt-1"></p>
+                
+                <div class="mt-6 border-b border-gray-800 pb-2 mb-2 font-bold text-gray-400">YOUR LOGS</div>
+            </div>
+            <div id="my-timeline" class="divide-y divide-gray-800"></div>
+        </div>
+
+        <nav class="fixed bottom-0 w-full max-w-xl bg-black border-t border-gray-800 flex justify-around p-3 text-gray-400">
+            <button onclick="switchTab('home')" class="hover:text-white"><span class="material-icons">home</span></button>
+            <button onclick="switchTab('profile')" class="hover:text-white"><span class="material-icons">person</span></button>
+        </nav>
+    </div>
+
+    <div id="profile-modal" class="modal-overlay hidden">
+        <div class="bg-gray-900 border border-gray-700 p-6 rounded-lg w-80 shadow-2xl">
+            <h2 class="text-xl font-bold mb-4">Setup Profile</h2>
+            
+            <div class="flex flex-col items-center mb-4">
+                <img id="edit-preview-icon" src="" class="w-20 h-20 rounded bg-gray-800 mb-2">
+                <button id="random-icon-btn" class="text-xs border border-gray-600 px-2 py-1 rounded hover:bg-gray-700">🎲 Random Icon</button>
+                <input type="hidden" id="edit-icon-url">
+            </div>
+
+            <div class="mb-6">
+                <label class="block text-gray-500 text-sm mb-1">Display Name</label>
+                <input id="edit-name-input" type="text" class="w-full bg-gray-800 border border-gray-600 rounded p-2 text-white outline-none focus:border-white" placeholder="Enter name">
+            </div>
+
+            <button id="save-profile-btn" class="w-full btn-primary">SAVE</button>
+        </div>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-        import { getFirestore, collection, addDoc, query, orderBy, limit, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, query, orderBy, limit, onSnapshot, serverTimestamp, doc, getDoc, setDoc, where } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-        // あなたのFirebase設定 (LoG)
+        // ★★★ ここにAPIキーを貼る ★★★
         const firebaseConfig = {
-            apiKey: "AIzaSyCA4NQzxcz2gh8uaw3LKrKl_NEnE_fMybs",
-            authDomain: "lo-g-8a620.firebaseapp.com",
-            projectId: "lo-g-8a620",
-            storageBucket: "lo-g-8a620.firebasestorage.app",
-            messagingSenderId: "780857099698",
-            appId: "1:780857099698:web:b6cb359114da98ab3e50ab"
+            apiKey: "AIzaSy...",
+            authDomain: "logsns.netlify.app", // 自分のドメインなど
+            projectId: "...",
+            storageBucket: "...",
+            messagingSenderId: "...",
+            appId: "..."
         };
 
         const app = initializeApp(firebaseConfig);
@@ -62,81 +107,169 @@
         const db = getFirestore(app);
         
         let currentUser = null;
+        let myProfile = null; // LoG専用のプロフィールデータ
 
-        // ログイン処理
+        // --- 認証 ---
         document.getElementById('login-btn').addEventListener('click', () => {
-            const provider = new GoogleAuthProvider();
-            signInWithPopup(auth, provider).catch((error) => {
-                console.error("Login Error:", error);
-                alert("ログインに失敗しました: " + error.message);
-            });
+            signInWithPopup(auth, new GoogleAuthProvider()).catch(alert);
         });
 
-        // ログアウト処理
-        window.signOutApp = () => signOut(auth);
-
-        // ログイン状態監視
-        onAuthStateChanged(auth, (user) => {
+        onAuthStateChanged(auth, async (user) => {
             if (user) {
                 currentUser = user;
-                document.getElementById('login-screen').classList.add('hidden');
-                document.getElementById('app-screen').classList.remove('hidden');
-                document.getElementById('user-name').innerText = user.displayName || "User";
-                loadTimeline();
+                // LoGのusersコレクションからプロフィールを取得
+                const userDocRef = doc(db, "users", user.uid);
+                const userDoc = await getDoc(userDocRef);
+
+                if (userDoc.exists()) {
+                    // プロフィールがあればロード
+                    myProfile = userDoc.data();
+                    initApp();
+                } else {
+                    // プロフィールがなければ作成画面へ
+                    document.getElementById('login-screen').classList.add('hidden');
+                    openProfileEditor(true); // 初回モード
+                }
             } else {
-                currentUser = null;
                 document.getElementById('login-screen').classList.remove('hidden');
                 document.getElementById('app-screen').classList.add('hidden');
             }
         });
 
-        // 投稿機能
+        // --- アプリ初期化 ---
+        function initApp() {
+            document.getElementById('login-screen').classList.add('hidden');
+            document.getElementById('app-screen').classList.remove('hidden');
+            document.getElementById('profile-modal').classList.add('hidden');
+            
+            updateHeaderUI();
+            loadTimeline();
+        }
+
+        function updateHeaderUI() {
+            if(!myProfile) return;
+            // 画面のアイコンなどを更新
+            document.getElementById('header-icon').src = myProfile.icon;
+            document.getElementById('input-icon').src = myProfile.icon;
+            
+            // プロフィールタブの中身
+            document.getElementById('profile-big-icon').src = myProfile.icon;
+            document.getElementById('profile-name').innerText = myProfile.name;
+            document.getElementById('profile-uid').innerText = "ID: " + currentUser.uid.slice(0, 8);
+        }
+
+        // --- 投稿機能 ---
         document.getElementById('post-btn').addEventListener('click', async () => {
             const text = document.getElementById('post-text').value;
             if (!text.trim()) return;
+            if (!myProfile) return alert("プロフィールが設定されていません");
 
             try {
-                await addDoc(collection(db, "logs"), { // コレクション名を logs に変更
+                await addDoc(collection(db, "logs"), {
                     text: text,
                     uid: currentUser.uid,
-                    authorName: currentUser.displayName,
-                    authorIcon: currentUser.photoURL,
+                    authorName: myProfile.name, // ★Google名ではなくLoGの名前を使う
+                    authorIcon: myProfile.icon, // ★LoGのアイコンを使う
                     createdAt: serverTimestamp()
                 });
                 document.getElementById('post-text').value = "";
+                switchTab('home');
             } catch (e) {
-                console.error("Post Error", e);
-                alert("投稿できませんでした。コンソールを確認してください。");
+                console.error(e);
+                alert("投稿エラー: " + e.message);
             }
         });
 
-        // タイムライン読み込み
+        // --- タイムライン ---
         function loadTimeline() {
+            // 全体
             const q = query(collection(db, "logs"), orderBy("createdAt", "desc"), limit(50));
             onSnapshot(q, (snapshot) => {
                 const container = document.getElementById('timeline');
-                container.innerHTML = ""; 
-                
-                snapshot.forEach((docSnap) => {
-                    const data = docSnap.data();
-                    const div = document.createElement('div');
-                    div.className = "p-4 hover:bg-gray-900 transition";
-                    div.innerHTML = `
-                        <div class="flex gap-3">
-                            <img src="${data.authorIcon}" class="w-10 h-10 rounded bg-gray-700">
-                            <div>
-                                <div class="flex items-center gap-2">
-                                    <span class="font-bold text-sm">${data.authorName}</span>
-                                    <span class="text-gray-500 text-xs">${data.createdAt ? new Date(data.createdAt.toDate()).toLocaleString() : 'Just now'}</span>
-                                </div>
-                                <p class="mt-1 text-gray-300">${data.text}</p>
-                            </div>
-                        </div>
-                    `;
-                    container.appendChild(div);
-                });
+                container.innerHTML = "";
+                snapshot.forEach(doc => container.appendChild(createPostEl(doc.data())));
+            });
+
+            // 自分のみ（プロフィールタブ用）
+            const myQ = query(collection(db, "logs"), where("uid", "==", currentUser.uid), orderBy("createdAt", "desc"), limit(20));
+            onSnapshot(myQ, (snapshot) => {
+                const container = document.getElementById('my-timeline');
+                container.innerHTML = "";
+                snapshot.forEach(doc => container.appendChild(createPostEl(doc.data())));
             });
         }
+
+        function createPostEl(data) {
+            const div = document.createElement('div');
+            div.className = "p-4 hover:bg-gray-900 transition flex gap-3";
+            div.innerHTML = `
+                <img src="${data.authorIcon}" class="w-10 h-10 rounded bg-gray-800">
+                <div class="overflow-hidden">
+                    <div class="flex items-center gap-2">
+                        <span class="font-bold text-sm text-white">${data.authorName}</span>
+                        <span class="text-gray-500 text-xs">${data.createdAt ? new Date(data.createdAt.toDate()).toLocaleTimeString() : '...'}</span>
+                    </div>
+                    <p class="mt-1 text-gray-300 break-words whitespace-pre-wrap">${data.text}</p>
+                </div>
+            `;
+            return div;
+        }
+
+        // --- プロフィール編集まわり ---
+        window.openProfileEditor = (isFirstTime = false) => {
+            const modal = document.getElementById('profile-modal');
+            modal.classList.remove('hidden');
+            
+            if (myProfile) {
+                document.getElementById('edit-name-input').value = myProfile.name;
+                document.getElementById('edit-icon-url').value = myProfile.icon;
+                document.getElementById('edit-preview-icon').src = myProfile.icon;
+            } else {
+                // 初回はランダム生成
+                generateRandomIcon();
+            }
+        };
+
+        // ランダムアイコン生成 (DiceBear API)
+        function generateRandomIcon() {
+            const seed = Math.random().toString(36).substring(7);
+            // 幾何学模様(identicon)を使用。ロボットが好きなら "bottts" に変えてもOK
+            const url = `https://api.dicebear.com/7.x/identicon/svg?seed=${seed}&backgroundColor=c0aede,b6e3f4,c1f4c6`;
+            document.getElementById('edit-icon-url').value = url;
+            document.getElementById('edit-preview-icon').src = url;
+        }
+        document.getElementById('random-icon-btn').addEventListener('click', generateRandomIcon);
+
+        // 保存ボタン
+        document.getElementById('save-profile-btn').addEventListener('click', async () => {
+            const name = document.getElementById('edit-name-input').value;
+            const icon = document.getElementById('edit-icon-url').value;
+            if(!name) return alert("名前を入力してください");
+
+            try {
+                // usersコレクションに保存
+                await setDoc(doc(db, "users", currentUser.uid), {
+                    name: name,
+                    icon: icon,
+                    updatedAt: serverTimestamp()
+                }, { merge: true });
+
+                // ローカル変数も更新
+                myProfile = { name, icon };
+                initApp();
+            } catch(e) {
+                console.error(e);
+                alert("保存失敗: " + e.message);
+            }
+        });
+
+        // --- タブ切り替え ---
+        window.switchTab = (tabName) => {
+            document.getElementById('tab-home').classList.add('hidden');
+            document.getElementById('tab-profile').classList.add('hidden');
+            document.getElementById(`tab-${tabName}`).classList.remove('hidden');
+        };
+
     </script>
 </body>
 </html>
