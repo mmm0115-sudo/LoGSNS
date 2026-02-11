@@ -1,9 +1,93 @@
-<script type="module">
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LoG</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <style>
+        body { background-color: #000; color: #fff; font-family: 'Courier New', monospace; }
+        .hidden { display: none; }
+        .btn-primary { background-color: #fff; color: #000; font-weight: bold; border-radius: 4px; padding: 8px 16px; transition: 0.2s; }
+        .btn-primary:hover { background-color: #ccc; }
+        .btn-outline { border: 1px solid #666; color: #ccc; border-radius: 4px; padding: 6px 12px; font-size: 0.9em; }
+        .btn-outline:hover { border-color: #fff; color: #fff; }
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 50; display: flex; align-items: center; justify-content: center; }
+    </style>
+</head>
+<body>
+
+    <div id="login-screen" class="h-screen flex flex-col items-center justify-center">
+        <h1 class="text-6xl font-bold mb-4 tracking-tighter">LoG</h1>
+        <p class="mb-8 text-gray-400">text-based communication protocol</p>
+        <button id="login-btn" class="border border-white px-6 py-3 rounded hover:bg-white hover:text-black transition flex items-center gap-2">
+            <span class="material-icons">login</span> Start Session
+        </button>
+    </div>
+
+    <div id="app-screen" class="hidden max-w-xl mx-auto min-h-screen border-x border-gray-800 relative pb-20">
+        <header class="sticky top-0 bg-black/90 backdrop-blur z-10 border-b border-gray-800 p-4 flex justify-between items-center">
+            <h1 class="text-2xl font-bold tracking-tighter cursor-pointer" onclick="switchTab('home')">LoG</h1>
+            <div class="flex items-center gap-3">
+                <img id="header-icon" src="" class="w-8 h-8 rounded bg-gray-700 cursor-pointer" onclick="switchTab('profile')">
+            </div>
+        </header>
+
+        <div id="tab-home">
+            <div class="p-4 border-b border-gray-800 flex gap-3">
+                <img id="input-icon" src="" class="w-10 h-10 rounded bg-gray-700">
+                <div class="flex-1">
+                    <textarea id="post-text" rows="3" placeholder="Write to log..." class="w-full bg-transparent text-lg outline-none resize-none mb-2 text-white"></textarea>
+                    <div class="flex justify-end">
+                        <button id="post-btn" class="btn-primary">COMMIT</button>
+                    </div>
+                </div>
+            </div>
+            <div id="timeline" class="divide-y divide-gray-800"></div>
+        </div>
+
+        <div id="tab-profile" class="hidden">
+            <div class="p-6 border-b border-gray-800">
+                <div class="flex justify-between items-start">
+                    <img id="profile-big-icon" src="" class="w-20 h-20 rounded bg-gray-700 mb-4">
+                    <button onclick="openProfileEditor()" class="btn-outline">Edit Profile</button>
+                </div>
+                <h2 id="profile-name" class="text-2xl font-bold"></h2>
+                <p id="profile-uid" class="text-gray-500 text-xs font-mono mt-1"></p>
+                <div class="mt-6 border-b border-gray-800 pb-2 mb-2 font-bold text-gray-400">YOUR LOGS</div>
+            </div>
+            <div id="my-timeline" class="divide-y divide-gray-800"></div>
+        </div>
+
+        <nav class="fixed bottom-0 w-full max-w-xl bg-black border-t border-gray-800 flex justify-around p-3 text-gray-400">
+            <button onclick="switchTab('home')" class="hover:text-white"><span class="material-icons">home</span></button>
+            <button onclick="switchTab('profile')" class="hover:text-white"><span class="material-icons">person</span></button>
+        </nav>
+    </div>
+
+    <div id="profile-modal" class="modal-overlay hidden">
+        <div class="bg-gray-900 border border-gray-700 p-6 rounded-lg w-80 shadow-2xl">
+            <h2 class="text-xl font-bold mb-4">Setup Profile</h2>
+            <div class="flex flex-col items-center mb-4">
+                <img id="edit-preview-icon" src="" class="w-20 h-20 rounded bg-gray-800 mb-2">
+                <button id="random-icon-btn" class="text-xs border border-gray-600 px-2 py-1 rounded hover:bg-gray-700">🎲 Random Icon</button>
+                <input type="hidden" id="edit-icon-url">
+            </div>
+            <div class="mb-6">
+                <label class="block text-gray-500 text-sm mb-1">Display Name</label>
+                <input id="edit-name-input" type="text" class="w-full bg-gray-800 border border-gray-600 rounded p-2 text-white outline-none focus:border-white" placeholder="Enter name">
+            </div>
+            <button id="save-profile-btn" class="w-full btn-primary">SAVE</button>
+        </div>
+    </div>
+
+    <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
         import { getFirestore, collection, addDoc, query, orderBy, limit, onSnapshot, serverTimestamp, doc, getDoc, setDoc, where } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-        // ★★★ ここをいただいた正しい情報に書き換えました ★★★
+        // ★設定キー（ここに正しいキーが入っています）
         const firebaseConfig = {
             apiKey: "AIzaSyCA4NQzxcz2gh8uaw3LKrKl_NEnE_fMybs",
             authDomain: "lo-g-8a620.firebaseapp.com",
@@ -20,43 +104,37 @@
         let currentUser = null;
         let myProfile = null;
 
-        // --- 認証 ---
+        // ログインボタン処理
         document.getElementById('login-btn').addEventListener('click', () => {
-            signInWithPopup(auth, new GoogleAuthProvider()).catch((error) => {
-                console.error("Login Failed:", error);
-                alert("ログインエラー: " + error.message);
-            });
+            signInWithPopup(auth, new GoogleAuthProvider()).catch(alert);
         });
 
+        // ログイン状態監視
         onAuthStateChanged(auth, async (user) => {
             if (user) {
                 currentUser = user;
-                const userDocRef = doc(db, "users", user.uid);
-                
+                // プロフィール確認
                 try {
-                    const userDoc = await getDoc(userDocRef);
+                    const userDoc = await getDoc(doc(db, "users", user.uid));
                     if (userDoc.exists()) {
                         myProfile = userDoc.data();
-                        initApp();
+                        initApp(); // アプリ開始
                     } else {
                         document.getElementById('login-screen').classList.add('hidden');
-                        openProfileEditor(true); 
+                        openProfileEditor(true); // 初回登録へ
                     }
-                } catch (e) {
-                    console.error("Profile Load Error:", e);
-                }
+                } catch(e) { console.error(e); }
             } else {
+                // 未ログインならログイン画面を表示
                 document.getElementById('login-screen').classList.remove('hidden');
                 document.getElementById('app-screen').classList.add('hidden');
             }
         });
 
-        // --- アプリ初期化 ---
         function initApp() {
             document.getElementById('login-screen').classList.add('hidden');
             document.getElementById('app-screen').classList.remove('hidden');
             document.getElementById('profile-modal').classList.add('hidden');
-            
             updateHeaderUI();
             loadTimeline();
         }
@@ -70,12 +148,10 @@
             document.getElementById('profile-uid').innerText = "ID: " + currentUser.uid.slice(0, 8);
         }
 
-        // --- 投稿機能 ---
+        // 投稿
         document.getElementById('post-btn').addEventListener('click', async () => {
             const text = document.getElementById('post-text').value;
-            if (!text.trim()) return;
-            if (!myProfile) return alert("プロフィールが設定されていません");
-
+            if (!text.trim() || !myProfile) return;
             try {
                 await addDoc(collection(db, "logs"), {
                     text: text,
@@ -86,13 +162,10 @@
                 });
                 document.getElementById('post-text').value = "";
                 switchTab('home');
-            } catch (e) {
-                console.error(e);
-                alert("投稿エラー: " + e.message);
-            }
+            } catch (e) { alert("Error: " + e.message); }
         });
 
-        // --- タイムライン ---
+        // タイムライン
         function loadTimeline() {
             const q = query(collection(db, "logs"), orderBy("createdAt", "desc"), limit(50));
             onSnapshot(q, (snapshot) => {
@@ -100,7 +173,6 @@
                 container.innerHTML = "";
                 snapshot.forEach(doc => container.appendChild(createPostEl(doc.data())));
             });
-
             const myQ = query(collection(db, "logs"), where("uid", "==", currentUser.uid), orderBy("createdAt", "desc"), limit(20));
             onSnapshot(myQ, (snapshot) => {
                 const container = document.getElementById('my-timeline');
@@ -120,23 +192,18 @@
                         <span class="text-gray-500 text-xs">${data.createdAt ? new Date(data.createdAt.toDate()).toLocaleTimeString() : '...'}</span>
                     </div>
                     <p class="mt-1 text-gray-300 break-words whitespace-pre-wrap">${data.text}</p>
-                </div>
-            `;
+                </div>`;
             return div;
         }
 
-        // --- プロフィール編集 ---
-        window.openProfileEditor = (isFirstTime = false) => {
-            const modal = document.getElementById('profile-modal');
-            modal.classList.remove('hidden');
-            
+        // プロフィール編集
+        window.openProfileEditor = () => {
+            document.getElementById('profile-modal').classList.remove('hidden');
             if (myProfile) {
                 document.getElementById('edit-name-input').value = myProfile.name;
                 document.getElementById('edit-icon-url').value = myProfile.icon;
                 document.getElementById('edit-preview-icon').src = myProfile.icon;
-            } else {
-                generateRandomIcon();
-            }
+            } else generateRandomIcon();
         };
 
         function generateRandomIcon() {
@@ -151,25 +218,17 @@
             const name = document.getElementById('edit-name-input').value;
             const icon = document.getElementById('edit-icon-url').value;
             if(!name) return alert("名前を入力してください");
-
             try {
-                await setDoc(doc(db, "users", currentUser.uid), {
-                    name: name,
-                    icon: icon,
-                    updatedAt: serverTimestamp()
-                }, { merge: true });
-
+                await setDoc(doc(db, "users", currentUser.uid), { name, icon, updatedAt: serverTimestamp() }, { merge: true });
                 myProfile = { name, icon };
                 initApp();
-            } catch(e) {
-                console.error(e);
-                alert("保存失敗: " + e.message);
-            }
+            } catch(e) { alert("保存失敗: " + e.message); }
         });
 
         window.switchTab = (tabName) => {
-            document.getElementById('tab-home').classList.add('hidden');
-            document.getElementById('tab-profile').classList.add('hidden');
+            ['home', 'profile'].forEach(t => document.getElementById(`tab-${t}`).classList.add('hidden'));
             document.getElementById(`tab-${tabName}`).classList.remove('hidden');
         };
     </script>
+</body>
+</html>
