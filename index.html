@@ -5,124 +5,202 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     
     <title>LoG | 次世代テキストベースSNSプロトコル</title>
-    <meta name="description" content="LoG（ログ）は、中学生が開発したテキスト限定のシンプルなSNS。90日で自動消去されるログを通じて、今この瞬間の思考を共有しよう。">
+    <meta name="description" content="LoGは、テキストのみで繋がるシンプルなSNS。90日で消えるログと、匿名性の高いコミュニケーションを体験しよう。">
     <meta name="google-site-verification" content="Z2rHXTn9RZClgr4XgNlPX0di9h8peZXKxsakNEp9v-E" />
 
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1539164935971262" crossorigin="anonymous"></script>
-    
-    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1539164935971262" crossorigin="anonymous"></script>
 
     <style>
-        body { background-color: #000; color: #fff; font-family: 'Courier New', monospace; }
-        .hidden { display: none; }
-        .btn-primary { background-color: #fff; color: #000; font-weight: bold; border-radius: 4px; padding: 10px 16px; transition: 0.2s; }
-        .btn-outline { border: 1px solid #333; color: #888; border-radius: 4px; padding: 8px 12px; font-size: 0.9em; }
-        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 100; display: flex; align-items: center; justify-content: center; }
-        .terms-scroll { max-height: 300px; overflow-y: auto; background: #0a0a0a; padding: 15px; border: 1px solid #222; font-size: 0.8em; color: #ccc; }
-        input, textarea { background-color: #0d0d0d !important; border: 1px solid #222 !important; color: #fff !important; }
+        /* --- 1. 全体の設定 --- */
+        body { 
+            background-color: #050505; 
+            color: #e0e0e0; 
+            font-family: 'Share Tech Mono', monospace; /* フォント変更 */
+            overflow-x: hidden; 
+        }
+
+        /* --- 2. カスタムスクロールバー --- */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #0a0a0a; }
+        ::-webkit-scrollbar-thumb { background: #333; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #555; }
+
+        /* --- 3. 光る入力フォーム --- */
+        input, textarea { 
+            background-color: #0a0a0a !important; 
+            border: 1px solid #222 !important; 
+            color: #fff !important; 
+            transition: all 0.3s ease;
+        }
+        input:focus, textarea:focus { 
+            border-color: #fff !important; 
+            box-shadow: 0 0 15px rgba(255, 255, 255, 0.15); /* 白い光 */
+            outline: none; 
+        }
+
+        /* --- 4. カッコいいボタン --- */
+        .btn-primary { 
+            background: linear-gradient(135deg, #fff 0%, #ccc 100%); 
+            color: #000; 
+            font-weight: bold; 
+            border-radius: 2px; 
+            padding: 10px 20px; 
+            transition: all 0.2s; 
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.1);
+            letter-spacing: 1px;
+        }
+        .btn-primary:hover { 
+            transform: translateY(-1px); 
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.4); 
+        }
+        .btn-outline { 
+            border: 1px solid #444; 
+            color: #888; 
+            border-radius: 2px; 
+            padding: 8px 12px; 
+            transition: 0.2s; 
+        }
+        .btn-outline:hover { 
+            border-color: #fff; 
+            color: #fff; 
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.1); 
+        }
+
+        /* --- 5. グラスモーフィズム（すりガラス） --- */
+        .glass-header {
+            background: rgba(5, 5, 5, 0.85);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        /* --- 6. アニメーション --- */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .post-item { animation: fadeIn 0.4s cubic-bezier(0.22, 1, 0.36, 1) forwards; }
+        
+        .modal-overlay { 
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+            background: rgba(0,0,0,0.9); 
+            backdrop-filter: blur(5px);
+            z-index: 100; 
+            display: flex; align-items: center; justify-content: center; 
+        }
+
+        /* 選択範囲の色 */
+        ::selection { background: #fff; color: #000; }
     </style>
 </head>
 <body>
 
-    <div id="login-screen" class="min-h-screen flex flex-col items-center p-6 text-center">
-        <div class="mt-20 mb-10">
-            <h1 class="text-7xl font-bold mb-2 tracking-tighter">LoG</h1>
-            <p class="text-gray-500 text-sm tracking-widest uppercase">Protocol v1.1 / Shiga-Minakuchi Node</p>
-        </div>
+    <div id="login-screen" class="min-h-screen flex flex-col items-center justify-center p-6 text-center relative overflow-hidden">
+        <div class="absolute inset-0 z-0 opacity-20 pointer-events-none" 
+             style="background-image: radial-gradient(circle at 50% 50%, #222 1px, transparent 1px); background-size: 30px 30px;"></div>
 
-        <div class="w-full max-w-xs space-y-3 mb-10 bg-zinc-950 p-6 rounded-lg border border-zinc-900">
-            <h2 class="text-xs font-bold text-gray-400 mb-4 uppercase">Session Start</h2>
-            <input id="auth-email" type="email" placeholder="Email / ID" class="w-full rounded p-3">
-            <input id="auth-password" type="password" placeholder="Password" class="w-full rounded p-3">
-            <div class="flex gap-2">
-                <button id="email-login-btn" class="flex-1 btn-primary text-sm">LOGIN</button>
-                <button id="email-signup-btn" class="flex-1 btn-outline text-sm">SIGNUP</button>
+        <div class="z-10 bg-black/50 p-8 rounded-lg border border-zinc-800 backdrop-blur-sm max-w-md w-full shadow-2xl">
+            <h1 class="text-7xl font-bold mb-2 tracking-tighter text-white drop-shadow-[0_0_10px_rgba(255,255,255,0.3)]">LoG</h1>
+            <p class="text-gray-500 text-xs tracking-[0.3em] uppercase mb-8">Secure Communication Protocol</p>
+
+            <div class="space-y-4 mb-8">
+                <input id="auth-email" type="email" placeholder="ACCESS ID (EMAIL)" class="w-full rounded p-3 text-center tracking-widest">
+                <input id="auth-password" type="password" placeholder="PASSPHRASE" class="w-full rounded p-3 text-center tracking-widest">
+                <div class="flex gap-3">
+                    <button id="email-login-btn" class="flex-1 btn-primary text-xs">CONNECT</button>
+                    <button id="email-signup-btn" class="flex-1 btn-outline text-xs">REGISTER</button>
+                </div>
             </div>
-            <button id="google-login-btn" class="w-full border border-gray-800 py-2 rounded text-xs text-gray-500 mt-4 flex justify-center items-center gap-2">
-                <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" class="w-3 h-3"> Google Auth
+
+            <button id="google-login-btn" class="w-full border border-zinc-800 hover:border-zinc-600 py-3 rounded text-xs text-gray-400 hover:text-white transition flex justify-center items-center gap-2 mb-6">
+                <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" class="w-4 h-4 grayscale opacity-70"> 
+                AUTHENTICATE VIA GOOGLE
             </button>
-        </div>
 
-        <div class="max-w-2xl text-left space-y-8 border-t border-zinc-900 pt-10 mb-20">
-            <section>
-                <h3 class="text-xl font-bold text-white mb-3">LoGとは？</h3>
-                <p class="text-gray-400 leading-relaxed text-sm">
-                    LoGは、装飾を削ぎ落とした「テキストのみ」のコミュニケーションプロトコルです。
-                    画像や動画による情報の過多から解放され、純粋な言葉のやり取りを目的として開発されました。
-                    滋賀県甲賀市の学生開発者によって運営されている実験的プロジェクトです。
-                </p>
-            </section>
-
-            <section>
-                <h3 class="text-xl font-bold text-white mb-3">3つの特徴</h3>
-                <ul class="text-gray-400 text-sm space-y-2 list-disc list-inside">
-                    <li><strong class="text-white">Ephemeral Log:</strong> 全ての投稿は90日後に自動的に消去され、過去に縛られない対話を実現します。</li>
-                    <li><strong class="text-white">Minimal Interface:</strong> 集中を妨げる複雑なUIを排除し、思考の即時記録に特化しています。</li>
-                    <li><strong class="text-white">Privacy First:</strong> 独自のIDシステムと匿名性を重視した設計で、自由な発言をサポートします。</li>
+            <div class="text-left text-xs text-gray-500 border-t border-zinc-800 pt-6 space-y-4">
+                <h3 class="text-gray-300 font-bold uppercase tracking-widest border-l-2 border-white pl-2">System Manifesto</h3>
+                <p>LoG is a minimal text-based network designed for ephemeral thought sharing.</p>
+                <ul class="list-disc list-inside opacity-70 space-y-1">
+                    <li>Logs auto-purge after 90 days.</li>
+                    <li>No images, no noise. Text only.</li>
+                    <li>Anonymous identity management.</li>
                 </ul>
-            </section>
-
-            <p class="text-[10px] text-gray-600 text-center">
-                <span class="underline cursor-pointer hover:text-gray-400" onclick="openTerms()">利用規約・プライバシーポリシー</span> を確認して開始してください。
-            </p>
+                <p class="text-[9px] text-center pt-4 opacity-50">
+                    <span class="underline cursor-pointer hover:text-white" onclick="openTerms()">Terms & Privacy</span>
+                </p>
+            </div>
         </div>
     </div>
 
-    <div id="app-screen" class="hidden max-w-xl mx-auto min-h-screen border-x border-gray-900 relative pb-24">
-        <header class="sticky top-0 bg-black/95 backdrop-blur z-10 border-b border-gray-900 p-4 flex justify-between items-center">
-            <h1 class="text-2xl font-bold tracking-tighter cursor-pointer" onclick="switchTab('home')">LoG</h1>
-            <img id="header-icon" src="" class="w-8 h-8 rounded bg-gray-900 cursor-pointer border border-gray-800" onclick="switchTab('profile')">
+    <div id="app-screen" class="hidden max-w-xl mx-auto min-h-screen border-x border-zinc-900 relative pb-24 shadow-[0_0_50px_rgba(0,0,0,0.5)]">
+        
+        <header class="glass-header sticky top-0 z-20 p-4 flex justify-between items-center">
+            <h1 class="text-2xl font-bold tracking-tighter cursor-pointer hover:text-gray-300 transition" onclick="switchTab('home')">LoG_</h1>
+            <img id="header-icon" src="" class="w-8 h-8 rounded-sm bg-zinc-900 cursor-pointer border border-zinc-700 hover:border-white transition" onclick="switchTab('profile')">
         </header>
 
         <div id="tab-home">
-            <div class="p-4 border-b border-gray-900 flex gap-3">
-                <img id="input-icon" src="" class="w-10 h-10 rounded bg-gray-900">
+            <div class="p-5 border-b border-zinc-900 flex gap-4 bg-black/40">
+                <img id="input-icon" src="" class="w-10 h-10 rounded-sm bg-zinc-900 border border-zinc-800">
                 <div class="flex-1">
-                    <textarea id="post-text" rows="3" placeholder="Input transmission..." class="w-full text-lg resize-none mb-2 p-3 rounded"></textarea>
-                    <div class="flex justify-end"><button id="post-btn" class="btn-primary px-8">COMMIT</button></div>
+                    <textarea id="post-text" rows="3" placeholder="Write to log..." class="w-full text-base resize-none mb-3 p-3 rounded-sm bg-zinc-950"></textarea>
+                    <div class="flex justify-end"><button id="post-btn" class="btn-primary px-6 text-sm">COMMIT LOG</button></div>
                 </div>
             </div>
-            <div id="timeline" class="divide-y divide-gray-900"></div>
+            <div id="timeline" class="divide-y divide-zinc-900"></div>
         </div>
 
         <div id="tab-profile" class="hidden">
-            <div class="p-8 border-b border-gray-900">
+            <div class="p-10 border-b border-zinc-900 bg-gradient-to-b from-zinc-900/50 to-transparent">
                 <div class="flex justify-between items-start mb-6">
-                    <img id="profile-big-icon" src="" class="w-24 h-24 rounded bg-gray-900 border border-gray-800 shadow-2xl">
-                    <button onclick="openProfileEditor()" class="btn-outline">Modify Identity</button>
+                    <img id="profile-big-icon" src="" class="w-24 h-24 rounded-sm bg-zinc-900 border border-zinc-700 shadow-xl">
+                    <button onclick="openProfileEditor()" class="btn-outline text-xs">EDIT IDENTITY</button>
                 </div>
-                <h2 id="profile-name" class="text-3xl font-bold tracking-tight"></h2>
-                <button onclick="signOutApp()" class="text-[9px] text-red-900 mt-4 block">TERMINATE_SESSION</button>
+                <h2 id="profile-name" class="text-3xl font-bold tracking-tighter text-white mb-1"></h2>
+                <p id="profile-uid" class="text-zinc-600 text-[10px] font-mono tracking-widest uppercase"></p>
+                <button onclick="signOutApp()" class="text-[10px] text-red-900 hover:text-red-500 mt-6 tracking-widest border border-red-900/30 px-3 py-1 rounded">TERMINATE SESSION</button>
             </div>
-            <div id="my-timeline" class="divide-y divide-gray-900"></div>
+            <div class="px-4 py-2 text-[10px] text-zinc-600 font-bold uppercase tracking-widest border-b border-zinc-900">Personal Archives</div>
+            <div id="my-timeline" class="divide-y divide-zinc-900"></div>
         </div>
 
-        <nav class="fixed bottom-0 w-full max-w-xl bg-black/90 border-t border-gray-900 flex justify-around p-4 text-gray-600">
-            <button onclick="switchTab('home')" class="hover:text-white"><span class="material-icons text-3xl">terminal</span></button>
-            <button onclick="switchTab('profile')" class="hover:text-white"><span class="material-icons text-3xl">fingerprint</span></button>
+        <nav class="glass-header fixed bottom-0 w-full max-w-xl flex justify-around p-4 text-zinc-600">
+            <button onclick="switchTab('home')" class="hover:text-white transition transform hover:scale-110"><span class="material-icons text-3xl">terminal</span></button>
+            <button onclick="switchTab('profile')" class="hover:text-white transition transform hover:scale-110"><span class="material-icons text-3xl">fingerprint</span></button>
         </nav>
     </div>
 
-    <div id="terms-modal" class="modal-overlay hidden">
-        <div class="bg-black border border-gray-800 p-6 rounded max-w-md w-full m-4">
-            <h2 class="text-xs font-bold mb-4 tracking-widest text-gray-400 uppercase">Legal Compliance</h2>
-            <div class="terms-scroll mb-6">
-                <p class="font-bold text-gray-300">[1] プライバシーポリシー</p>
-                <p class="mb-4">本サイトでは、広告配信のためにGoogle AdSenseを利用しています。Google等の第三者配信事業者は、Cookieを使用して、ユーザーが当サイトや他のサイトに過去にアクセスした際の情報に基づき広告を配信します。ユーザーは広告設定でパーソナライズ広告を無効にできます。</p>
-                <p class="font-bold text-gray-300">[2] 免責事項</p>
-                <p class="mb-4">運営者は本サービス利用による損害について一切責任を負いません。投稿は90日後に自動削除されます。</p>
-                <p class="font-bold text-gray-300">[3] コンテンツの品質</p>
-                <p>ユーザーは、有用で健全なコミュニティ維持に努めるものとします。違反投稿は削除対象となります。</p>
+    <div id="profile-modal" class="modal-overlay hidden">
+        <div class="bg-black border border-zinc-800 p-8 rounded-sm shadow-2xl w-80 text-center relative">
+            <button onclick="document.getElementById('profile-modal').classList.add('hidden')" class="absolute top-2 right-2 text-zinc-700 hover:text-white">✕</button>
+            
+            <h2 class="text-xs font-bold mb-6 tracking-[0.3em] text-zinc-500 uppercase">Identity Setup</h2>
+            <div class="flex flex-col items-center mb-8">
+                <img id="edit-preview-icon" src="" class="w-24 h-24 rounded-sm bg-zinc-900 mb-4 border border-zinc-800">
+                <button id="random-icon-btn" class="text-[9px] border border-zinc-800 px-3 py-1 rounded hover:bg-white hover:text-black transition uppercase">Re-Generate Seed</button>
+                <input type="hidden" id="edit-icon-url">
             </div>
-            <button onclick="document.getElementById('terms-modal').classList.add('hidden')" class="w-full btn-outline py-2">ACKNOWLEDGE</button>
+            <input id="edit-name-input" type="text" class="w-full rounded-sm p-3 mb-8 text-center bg-zinc-900" placeholder="ENTER ALIAS">
+            <button id="save-profile-btn" class="w-full btn-primary py-3 text-xs">SYNCHRONIZE</button>
         </div>
     </div>
 
-    <div id="profile-modal" class="modal-overlay hidden">
-        <div class="bg-black border border-gray-800 p-8 rounded shadow-2xl w-80 text-center">
-            <input id="edit-name-input" type="text" class="w-full rounded p-3 mb-8" placeholder="Alias Name">
-            <button id="save-profile-btn" class="w-full btn-primary py-3">SYNCHRONIZE</button>
+    <div id="terms-modal" class="modal-overlay hidden">
+        <div class="bg-black border border-zinc-800 p-6 rounded-sm max-w-md w-full m-4 shadow-[0_0_30px_rgba(255,255,255,0.1)]">
+            <h2 class="text-xs font-bold mb-4 tracking-widest text-zinc-400 uppercase">System Protocols</h2>
+            <div class="overflow-y-auto max-h-60 bg-zinc-950 p-4 border border-zinc-900 text-xs text-zinc-500 leading-relaxed font-mono">
+                <p class="font-bold text-zinc-300">[1] Privacy Policy</p>
+                <p class="mb-2">We use Google AdSense cookies for ad delivery. You can opt-out via Google settings.</p>
+                <p class="font-bold text-zinc-300">[2] Disclaimer</p>
+                <p class="mb-2">The operator assumes no responsibility for data loss or disputes. Logs are purged after 90 days.</p>
+                <p class="font-bold text-zinc-300">[3] User Conduct</p>
+                <p>Maintain a constructive environment. Violations result in immediate ban.</p>
+            </div>
+            <button onclick="document.getElementById('terms-modal').classList.add('hidden')" class="w-full btn-outline py-2 mt-4 text-xs">ACKNOWLEDGE</button>
         </div>
     </div>
 
@@ -145,7 +223,6 @@
         const db = getFirestore(app);
         let currentUser = null, myProfile = null;
 
-        // 認証
         const handleAuthError = (e) => alert("Auth Error: " + e.message);
         document.getElementById('google-login-btn').onclick = () => signInWithPopup(auth, new GoogleAuthProvider()).catch(handleAuthError);
         document.getElementById('email-login-btn').onclick = () => {
@@ -154,6 +231,7 @@
         };
         document.getElementById('email-signup-btn').onclick = () => {
             const e = document.getElementById('auth-email').value, p = document.getElementById('auth-password').value;
+            if(p.length < 6) return alert("Password must be 6+ characters.");
             createUserWithEmailAndPassword(auth, e, p).catch(handleAuthError);
         };
         window.signOutApp = () => signOut(auth);
@@ -178,6 +256,7 @@
             document.getElementById('input-icon').src = myProfile.icon;
             document.getElementById('profile-big-icon').src = myProfile.icon;
             document.getElementById('profile-name').innerText = myProfile.name;
+            document.getElementById('profile-uid').innerText = "ID::" + currentUser.uid.slice(0,8).toUpperCase();
             loadTimeline();
         }
 
@@ -198,40 +277,65 @@
                 const container = document.getElementById('timeline');
                 container.innerHTML = "";
                 snap.docs.forEach((doc, i) => {
-                    // ★ 5件ごとに広告を挿入 (ログイン後画面)
                     if (i > 0 && i % 5 === 0) {
-                        const ad = document.createElement('div'); ad.className = "p-4 bg-zinc-950 my-2 text-center border-y border-zinc-900";
-                        ad.innerHTML = `<ins class="adsbygoogle" style="display:block" data-ad-format="fluid" data-ad-layout-key="-fb+5w+4e-db+86" data-ad-client="ca-pub-1539164935971262" data-ad-slot="YOUR_AD_SLOT_ID"></ins>`;
+                        const ad = document.createElement('div'); 
+                        ad.className = "p-6 bg-black/50 my-2 text-center border-y border-zinc-900 ad-space";
+                        ad.innerHTML = `<span class="text-[9px] text-zinc-700 tracking-[0.2em] block mb-2 uppercase">Sponsored Node</span><ins class="adsbygoogle" style="display:block" data-ad-format="fluid" data-ad-layout-key="-fb+5w+4e-db+86" data-ad-client="ca-pub-1539164935971262" data-ad-slot="YOUR_AD_SLOT_ID"></ins>`;
                         container.appendChild(ad); (adsbygoogle = window.adsbygoogle || []).push({});
                     }
                     container.appendChild(createPostEl(doc.data()));
                 });
             });
+            
+            const myQ = query(collection(db, "logs"), where("uid", "==", currentUser.uid), orderBy("createdAt", "desc"), limit(20));
+            onSnapshot(myQ, (snap) => {
+                const c = document.getElementById('my-timeline'); c.innerHTML = "";
+                snap.docs.forEach(doc => c.appendChild(createPostEl(doc.data())));
+            });
         }
 
         function createPostEl(d) {
             const div = document.createElement('div');
-            div.className = "p-6 flex gap-4 border-b border-zinc-900";
-            div.innerHTML = `<img src="${d.authorIcon}" class="w-10 h-10 rounded bg-gray-900 border border-gray-800"><div class="w-full">
-                <div class="flex justify-between items-center"><span class="font-bold text-xs text-gray-300">${d.authorName}</span><span class="text-[8px] text-gray-700">${d.createdAt ? d.createdAt.toDate().toLocaleString() : '...'}</span></div>
-                <p class="mt-2 text-gray-400 text-sm whitespace-pre-wrap">${d.text}</p></div>`;
+            div.className = "post-item p-6 flex gap-4 border-b border-zinc-900 hover:bg-zinc-900/30 transition duration-300";
+            div.innerHTML = `
+                <img src="${d.authorIcon}" class="w-10 h-10 rounded-sm bg-zinc-900 border border-zinc-800">
+                <div class="w-full">
+                    <div class="flex justify-between items-center mb-1">
+                        <span class="font-bold text-sm text-zinc-300 tracking-wide">${d.authorName}</span>
+                        <span class="text-[9px] font-mono text-zinc-600 uppercase tracking-widest">${d.createdAt ? d.createdAt.toDate().toLocaleTimeString() : 'SYNC...'}</span>
+                    </div>
+                    <p class="text-zinc-400 text-sm whitespace-pre-wrap leading-relaxed font-light">${d.text}</p>
+                </div>`;
             return div;
         }
 
         window.openProfileEditor = () => {
             document.getElementById('profile-modal').classList.remove('hidden');
-            if(myProfile) document.getElementById('edit-name-input').value = myProfile.name;
+            if(myProfile) { 
+                document.getElementById('edit-name-input').value = myProfile.name; 
+                document.getElementById('edit-icon-url').value = myProfile.icon; 
+                document.getElementById('edit-preview-icon').src = myProfile.icon; 
+            } else generateRandomIcon();
         };
 
+        function generateRandomIcon() {
+            const url = `https://api.dicebear.com/7.x/identicon/svg?seed=${Math.random().toString(36).substring(7)}&backgroundColor=000000`;
+            document.getElementById('edit-icon-url').value = url;
+            document.getElementById('edit-preview-icon').src = url;
+        }
+        document.getElementById('random-icon-btn').onclick = generateRandomIcon;
+
         document.getElementById('save-profile-btn').onclick = async () => {
-            const name = document.getElementById('edit-name-input').value;
-            const icon = `https://api.dicebear.com/7.x/identicon/svg?seed=${auth.currentUser.uid}&backgroundColor=000000`;
-            if(!name) return alert("Name required.");
+            const name = document.getElementById('edit-name-input').value, icon = document.getElementById('edit-icon-url').value;
+            if(!name) return alert("Identity Required.");
             await setDoc(doc(db, "users", currentUser.uid), { name, icon, updatedAt: serverTimestamp() }, { merge: true });
             myProfile = { name, icon }; initApp();
         };
 
-        window.switchTab = (t) => { ['home', 'profile'].forEach(x => document.getElementById(`tab-${x}`).classList.toggle('hidden', x !== t)); };
+        window.switchTab = (t) => { 
+            ['home', 'profile'].forEach(x => document.getElementById(`tab-${x}`).classList.toggle('hidden', x !== t)); 
+            window.scrollTo(0,0);
+        };
         window.openTerms = () => document.getElementById('terms-modal').classList.remove('hidden');
     </script>
 </body>
