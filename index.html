@@ -5,11 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     
     <title>LoG | 次世代テキストベースSNSプロトコル</title>
-
+    <meta name="description" content="LoG（ログ）は、中学生が開発したテキスト限定のシンプルなSNS。90日で自動消去されるログを通じて、今この瞬間の思考を共有しよう。">
     <meta name="google-site-verification" content="Z2rHXTn9RZClgr4XgNlPX0di9h8peZXKxsakNEp9v-E" />
-    
-    <meta name="description" content="LoGは、テキストのみで繋がるシンプルなSNS。90日で消えるログと、匿名性の高いコミュニケーションを体験しよう。">
-    <meta name="keywords" content="SNS, LoG, テキストベース, 匿名, 開発">
 
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1539164935971262" crossorigin="anonymous"></script>
     
@@ -20,104 +17,112 @@
         body { background-color: #000; color: #fff; font-family: 'Courier New', monospace; }
         .hidden { display: none; }
         .btn-primary { background-color: #fff; color: #000; font-weight: bold; border-radius: 4px; padding: 10px 16px; transition: 0.2s; }
-        .btn-primary:hover { background-color: #ccc; }
-        .btn-outline { border: 1px solid #444; color: #aaa; border-radius: 4px; padding: 8px 12px; font-size: 0.9em; }
-        .btn-outline:hover { border-color: #fff; color: #fff; }
-        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 50; display: flex; align-items: center; justify-content: center; }
-        .terms-scroll { max-height: 250px; overflow-y: auto; background: #0a0a0a; padding: 12px; border: 1px solid #222; font-size: 0.75em; line-height: 1.6; color: #888; }
-        .ad-space { background-color: #050505; border-top: 1px solid #111; border-bottom: 1px solid #111; padding: 15px; text-align: center; margin: 10px 0; }
-        input, textarea { background-color: #0a0a0a !important; border: 1px solid #222 !important; color: white !important; }
+        .btn-outline { border: 1px solid #333; color: #888; border-radius: 4px; padding: 8px 12px; font-size: 0.9em; }
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 100; display: flex; align-items: center; justify-content: center; }
+        .terms-scroll { max-height: 300px; overflow-y: auto; background: #0a0a0a; padding: 15px; border: 1px solid #222; font-size: 0.8em; color: #ccc; }
+        input, textarea { background-color: #0d0d0d !important; border: 1px solid #222 !important; color: #fff !important; }
     </style>
 </head>
 <body>
 
-    <div id="login-screen" class="h-screen flex flex-col items-center justify-center p-6 text-center">
-        <h1 class="text-7xl font-bold mb-2 tracking-tighter">LoG</h1>
-        <p class="mb-10 text-gray-500 text-sm">v1.0.0 / text-based communication protocol</p>
-        
-        <div class="w-full max-w-xs space-y-3 mb-6">
-            <input id="auth-email" type="email" placeholder="Email / ID" class="w-full rounded p-3 outline-none">
-            <input id="auth-password" type="password" placeholder="Password (6+ chars)" class="w-full rounded p-3 outline-none">
+    <div id="login-screen" class="min-h-screen flex flex-col items-center p-6 text-center">
+        <div class="mt-20 mb-10">
+            <h1 class="text-7xl font-bold mb-2 tracking-tighter">LoG</h1>
+            <p class="text-gray-500 text-sm tracking-widest uppercase">Protocol v1.1 / Shiga-Minakuchi Node</p>
+        </div>
+
+        <div class="w-full max-w-xs space-y-3 mb-10 bg-zinc-950 p-6 rounded-lg border border-zinc-900">
+            <h2 class="text-xs font-bold text-gray-400 mb-4 uppercase">Session Start</h2>
+            <input id="auth-email" type="email" placeholder="Email / ID" class="w-full rounded p-3">
+            <input id="auth-password" type="password" placeholder="Password" class="w-full rounded p-3">
             <div class="flex gap-2">
-                <button id="email-login-btn" class="flex-1 btn-primary">LOGIN</button>
-                <button id="email-signup-btn" class="flex-1 btn-outline">SIGNUP</button>
+                <button id="email-login-btn" class="flex-1 btn-primary text-sm">LOGIN</button>
+                <button id="email-signup-btn" class="flex-1 btn-outline text-sm">SIGNUP</button>
             </div>
+            <button id="google-login-btn" class="w-full border border-gray-800 py-2 rounded text-xs text-gray-500 mt-4 flex justify-center items-center gap-2">
+                <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" class="w-3 h-3"> Google Auth
+            </button>
         </div>
 
-        <div class="flex items-center gap-4 w-full max-w-xs mb-6 text-gray-700">
-            <hr class="flex-1 border-gray-900"> <span class="text-xs">OR</span> <hr class="flex-1 border-gray-900">
+        <div class="max-w-2xl text-left space-y-8 border-t border-zinc-900 pt-10 mb-20">
+            <section>
+                <h3 class="text-xl font-bold text-white mb-3">LoGとは？</h3>
+                <p class="text-gray-400 leading-relaxed text-sm">
+                    LoGは、装飾を削ぎ落とした「テキストのみ」のコミュニケーションプロトコルです。
+                    画像や動画による情報の過多から解放され、純粋な言葉のやり取りを目的として開発されました。
+                    滋賀県甲賀市の学生開発者によって運営されている実験的プロジェクトです。
+                </p>
+            </section>
+
+            <section>
+                <h3 class="text-xl font-bold text-white mb-3">3つの特徴</h3>
+                <ul class="text-gray-400 text-sm space-y-2 list-disc list-inside">
+                    <li><strong class="text-white">Ephemeral Log:</strong> 全ての投稿は90日後に自動的に消去され、過去に縛られない対話を実現します。</li>
+                    <li><strong class="text-white">Minimal Interface:</strong> 集中を妨げる複雑なUIを排除し、思考の即時記録に特化しています。</li>
+                    <li><strong class="text-white">Privacy First:</strong> 独自のIDシステムと匿名性を重視した設計で、自由な発言をサポートします。</li>
+                </ul>
+            </section>
+
+            <p class="text-[10px] text-gray-600 text-center">
+                <span class="underline cursor-pointer hover:text-gray-400" onclick="openTerms()">利用規約・プライバシーポリシー</span> を確認して開始してください。
+            </p>
         </div>
-
-        <button id="google-login-btn" class="border border-gray-700 px-6 py-2 rounded hover:border-white transition flex items-center gap-2 text-sm text-gray-400 hover:text-white mb-6">
-            <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" class="w-4 h-4"> Login with Google
-        </button>
-
-        <p class="text-[10px] text-gray-600">
-            By accessing, you agree to our <span class="underline cursor-pointer" onclick="openTerms()">Terms of Service</span>.
-        </p>
     </div>
 
-    <div id="app-screen" class="hidden max-w-xl mx-auto min-h-screen border-x border-gray-800 relative pb-20">
+    <div id="app-screen" class="hidden max-w-xl mx-auto min-h-screen border-x border-gray-900 relative pb-24">
         <header class="sticky top-0 bg-black/95 backdrop-blur z-10 border-b border-gray-900 p-4 flex justify-between items-center">
             <h1 class="text-2xl font-bold tracking-tighter cursor-pointer" onclick="switchTab('home')">LoG</h1>
-            <img id="header-icon" src="" class="w-8 h-8 rounded bg-gray-800 cursor-pointer" onclick="switchTab('profile')">
+            <img id="header-icon" src="" class="w-8 h-8 rounded bg-gray-900 cursor-pointer border border-gray-800" onclick="switchTab('profile')">
         </header>
 
         <div id="tab-home">
             <div class="p-4 border-b border-gray-900 flex gap-3">
-                <img id="input-icon" src="" class="w-10 h-10 rounded bg-gray-800">
+                <img id="input-icon" src="" class="w-10 h-10 rounded bg-gray-900">
                 <div class="flex-1">
-                    <textarea id="post-text" rows="3" placeholder="Write to the log..." class="w-full text-lg outline-none resize-none mb-2 p-2"></textarea>
-                    <div class="flex justify-end"><button id="post-btn" class="btn-primary">COMMIT</button></div>
+                    <textarea id="post-text" rows="3" placeholder="Input transmission..." class="w-full text-lg resize-none mb-2 p-3 rounded"></textarea>
+                    <div class="flex justify-end"><button id="post-btn" class="btn-primary px-8">COMMIT</button></div>
                 </div>
             </div>
             <div id="timeline" class="divide-y divide-gray-900"></div>
         </div>
 
         <div id="tab-profile" class="hidden">
-            <div class="p-8 border-b border-gray-900 text-center md:text-left">
-                <div class="flex flex-col md:flex-row justify-between items-center mb-4 gap-4">
-                    <img id="profile-big-icon" src="" class="w-24 h-24 rounded bg-gray-800 shadow-xl">
-                    <div class="flex flex-col gap-2">
-                        <button onclick="openProfileEditor()" class="btn-outline">Edit Profile</button>
-                        <button onclick="signOutApp()" class="text-[10px] text-red-900 hover:text-red-500">TERMINATE SESSION</button>
-                    </div>
+            <div class="p-8 border-b border-gray-900">
+                <div class="flex justify-between items-start mb-6">
+                    <img id="profile-big-icon" src="" class="w-24 h-24 rounded bg-gray-900 border border-gray-800 shadow-2xl">
+                    <button onclick="openProfileEditor()" class="btn-outline">Modify Identity</button>
                 </div>
                 <h2 id="profile-name" class="text-3xl font-bold tracking-tight"></h2>
-                <p id="profile-uid" class="text-gray-600 text-xs font-mono mt-2"></p>
-                <div class="mt-8 border-b border-gray-900 pb-2 font-bold text-gray-500 text-xs uppercase tracking-widest">Personal Archives</div>
+                <button onclick="signOutApp()" class="text-[9px] text-red-900 mt-4 block">TERMINATE_SESSION</button>
             </div>
             <div id="my-timeline" class="divide-y divide-gray-900"></div>
-            <div class="p-10 text-center"><span class="text-[10px] text-gray-800 underline cursor-pointer" onclick="openTerms()">Legal Notice</span></div>
         </div>
 
-        <nav class="fixed bottom-0 w-full max-w-xl bg-black border-t border-gray-900 flex justify-around p-3 text-gray-600">
-            <button onclick="switchTab('home')" class="hover:text-white"><span class="material-icons text-3xl">home</span></button>
-            <button onclick="switchTab('profile')" class="hover:text-white"><span class="material-icons text-3xl">person</span></button>
+        <nav class="fixed bottom-0 w-full max-w-xl bg-black/90 border-t border-gray-900 flex justify-around p-4 text-gray-600">
+            <button onclick="switchTab('home')" class="hover:text-white"><span class="material-icons text-3xl">terminal</span></button>
+            <button onclick="switchTab('profile')" class="hover:text-white"><span class="material-icons text-3xl">fingerprint</span></button>
         </nav>
     </div>
 
-    <div id="profile-modal" class="modal-overlay hidden">
-        <div class="bg-black border border-gray-800 p-8 rounded w-80 text-center shadow-2xl">
-            <h2 class="text-xl font-bold mb-6 tracking-tighter text-gray-300">IDENTITY SETUP</h2>
-            <div class="flex flex-col items-center mb-6">
-                <img id="edit-preview-icon" src="" class="w-24 h-24 rounded bg-gray-900 mb-4 border border-gray-800">
-                <button id="random-icon-btn" class="text-[10px] border border-gray-800 px-3 py-1 rounded hover:bg-gray-900 text-gray-500">GENERATE RANDOM SEED</button>
-                <input type="hidden" id="edit-icon-url">
+    <div id="terms-modal" class="modal-overlay hidden">
+        <div class="bg-black border border-gray-800 p-6 rounded max-w-md w-full m-4">
+            <h2 class="text-xs font-bold mb-4 tracking-widest text-gray-400 uppercase">Legal Compliance</h2>
+            <div class="terms-scroll mb-6">
+                <p class="font-bold text-gray-300">[1] プライバシーポリシー</p>
+                <p class="mb-4">本サイトでは、広告配信のためにGoogle AdSenseを利用しています。Google等の第三者配信事業者は、Cookieを使用して、ユーザーが当サイトや他のサイトに過去にアクセスした際の情報に基づき広告を配信します。ユーザーは広告設定でパーソナライズ広告を無効にできます。</p>
+                <p class="font-bold text-gray-300">[2] 免責事項</p>
+                <p class="mb-4">運営者は本サービス利用による損害について一切責任を負いません。投稿は90日後に自動削除されます。</p>
+                <p class="font-bold text-gray-300">[3] コンテンツの品質</p>
+                <p>ユーザーは、有用で健全なコミュニティ維持に努めるものとします。違反投稿は削除対象となります。</p>
             </div>
-            <input id="edit-name-input" type="text" class="w-full rounded p-3 mb-6 outline-none" placeholder="Enter Alias">
-            <button id="save-profile-btn" class="w-full btn-primary uppercase tracking-widest text-sm">Synchronize</button>
+            <button onclick="document.getElementById('terms-modal').classList.add('hidden')" class="w-full btn-outline py-2">ACKNOWLEDGE</button>
         </div>
     </div>
 
-    <div id="terms-modal" class="modal-overlay hidden">
-        <div class="bg-black border border-gray-800 p-6 rounded max-w-md w-full m-4 shadow-2xl">
-            <h2 class="text-lg font-bold mb-4 tracking-widest text-gray-400">TERMS OF SERVICE</h2>
-            <div class="terms-scroll mb-6">
-                <p class="font-bold text-gray-500 mt-2">[1] 免責事項</p>
-                <p>運営者は、本サービスの利用により生じた損害について一切の責任を負いません。データは90日後に自動削除されます。</p>
-            </div>
-            <button onclick="document.getElementById('terms-modal').classList.add('hidden')" class="w-full btn-outline">ACKNOWLEDGE</button>
+    <div id="profile-modal" class="modal-overlay hidden">
+        <div class="bg-black border border-gray-800 p-8 rounded shadow-2xl w-80 text-center">
+            <input id="edit-name-input" type="text" class="w-full rounded p-3 mb-8" placeholder="Alias Name">
+            <button id="save-profile-btn" class="w-full btn-primary py-3">SYNCHRONIZE</button>
         </div>
     </div>
 
@@ -140,16 +145,16 @@
         const db = getFirestore(app);
         let currentUser = null, myProfile = null;
 
-        // 認証関連
-        const loginErr = (e) => alert("Auth Error: " + e.message);
-        document.getElementById('google-login-btn').onclick = () => signInWithPopup(auth, new GoogleAuthProvider()).catch(loginErr);
+        // 認証
+        const handleAuthError = (e) => alert("Auth Error: " + e.message);
+        document.getElementById('google-login-btn').onclick = () => signInWithPopup(auth, new GoogleAuthProvider()).catch(handleAuthError);
         document.getElementById('email-login-btn').onclick = () => {
             const e = document.getElementById('auth-email').value, p = document.getElementById('auth-password').value;
-            signInWithEmailAndPassword(auth, e, p).catch(loginErr);
+            signInWithEmailAndPassword(auth, e, p).catch(handleAuthError);
         };
         document.getElementById('email-signup-btn').onclick = () => {
             const e = document.getElementById('auth-email').value, p = document.getElementById('auth-password').value;
-            createUserWithEmailAndPassword(auth, e, p).catch(loginErr);
+            createUserWithEmailAndPassword(auth, e, p).catch(handleAuthError);
         };
         window.signOutApp = () => signOut(auth);
 
@@ -173,7 +178,6 @@
             document.getElementById('input-icon').src = myProfile.icon;
             document.getElementById('profile-big-icon').src = myProfile.icon;
             document.getElementById('profile-name').innerText = myProfile.name;
-            document.getElementById('profile-uid').innerText = "ID: " + currentUser.uid.slice(0, 12);
             loadTimeline();
         }
 
@@ -181,13 +185,11 @@
             const text = document.getElementById('post-text').value;
             if (!text.trim() || !myProfile) return;
             const exp = new Date(); exp.setDate(exp.getDate() + 90);
-            try {
-                await addDoc(collection(db, "logs"), {
-                    text, uid: currentUser.uid, authorName: myProfile.name, authorIcon: myProfile.icon,
-                    createdAt: serverTimestamp(), expireAt: exp
-                });
-                document.getElementById('post-text').value = "";
-            } catch(e) { alert("投稿エラー: 開発者コンソールを確認してください"); console.error(e); }
+            await addDoc(collection(db, "logs"), {
+                text, uid: currentUser.uid, authorName: myProfile.name, authorIcon: myProfile.icon,
+                createdAt: serverTimestamp(), expireAt: exp
+            });
+            document.getElementById('post-text').value = "";
         };
 
         function loadTimeline() {
@@ -196,46 +198,35 @@
                 const container = document.getElementById('timeline');
                 container.innerHTML = "";
                 snap.docs.forEach((doc, i) => {
+                    // ★ 5件ごとに広告を挿入 (ログイン後画面)
                     if (i > 0 && i % 5 === 0) {
-                        const ad = document.createElement('div'); ad.className = "ad-space";
-                        ad.innerHTML = `<span class="ad-label">SPONSORED</span><ins class="adsbygoogle" style="display:block" data-ad-format="fluid" data-ad-layout-key="-fb+5w+4e-db+86" data-ad-client="ca-pub-1539164935971262" data-ad-slot="YOUR_AD_SLOT_ID"></ins>`;
+                        const ad = document.createElement('div'); ad.className = "p-4 bg-zinc-950 my-2 text-center border-y border-zinc-900";
+                        ad.innerHTML = `<ins class="adsbygoogle" style="display:block" data-ad-format="fluid" data-ad-layout-key="-fb+5w+4e-db+86" data-ad-client="ca-pub-1539164935971262" data-ad-slot="YOUR_AD_SLOT_ID"></ins>`;
                         container.appendChild(ad); (adsbygoogle = window.adsbygoogle || []).push({});
                     }
                     container.appendChild(createPostEl(doc.data()));
                 });
             });
-            const myQ = query(collection(db, "logs"), where("uid", "==", currentUser.uid), orderBy("createdAt", "desc"), limit(20));
-            onSnapshot(myQ, (snap) => {
-                const c = document.getElementById('my-timeline'); c.innerHTML = "";
-                snap.docs.forEach(doc => c.appendChild(createPostEl(doc.data())));
-            });
         }
 
         function createPostEl(d) {
             const div = document.createElement('div');
-            div.className = "p-5 flex gap-4 border-b border-gray-900 hover:bg-zinc-950 transition";
-            div.innerHTML = `<img src="${d.authorIcon}" class="w-10 h-10 rounded-sm bg-gray-900"><div class="w-full">
-                <div class="flex justify-between items-center"><span class="font-bold text-sm text-gray-200">${d.authorName}</span><span class="text-[9px] font-mono text-gray-600">${d.createdAt ? d.createdAt.toDate().toLocaleString() : 'PENDING...'}</span></div>
-                <p class="mt-2 text-gray-400 text-sm whitespace-pre-wrap leading-relaxed">${d.text}</p></div>`;
+            div.className = "p-6 flex gap-4 border-b border-zinc-900";
+            div.innerHTML = `<img src="${d.authorIcon}" class="w-10 h-10 rounded bg-gray-900 border border-gray-800"><div class="w-full">
+                <div class="flex justify-between items-center"><span class="font-bold text-xs text-gray-300">${d.authorName}</span><span class="text-[8px] text-gray-700">${d.createdAt ? d.createdAt.toDate().toLocaleString() : '...'}</span></div>
+                <p class="mt-2 text-gray-400 text-sm whitespace-pre-wrap">${d.text}</p></div>`;
             return div;
         }
 
         window.openProfileEditor = () => {
             document.getElementById('profile-modal').classList.remove('hidden');
-            if(myProfile) { document.getElementById('edit-name-input').value = myProfile.name; document.getElementById('edit-icon-url').value = myProfile.icon; document.getElementById('edit-preview-icon').src = myProfile.icon; }
-            else generateRandomIcon();
+            if(myProfile) document.getElementById('edit-name-input').value = myProfile.name;
         };
 
-        function generateRandomIcon() {
-            const url = `https://api.dicebear.com/7.x/identicon/svg?seed=${Math.random().toString(36).substring(7)}&backgroundColor=000000`;
-            document.getElementById('edit-icon-url').value = url;
-            document.getElementById('edit-preview-icon').src = url;
-        }
-        document.getElementById('random-icon-btn').onclick = generateRandomIcon;
-
         document.getElementById('save-profile-btn').onclick = async () => {
-            const name = document.getElementById('edit-name-input').value, icon = document.getElementById('edit-icon-url').value;
-            if(!name) return alert("Name required");
+            const name = document.getElementById('edit-name-input').value;
+            const icon = `https://api.dicebear.com/7.x/identicon/svg?seed=${auth.currentUser.uid}&backgroundColor=000000`;
+            if(!name) return alert("Name required.");
             await setDoc(doc(db, "users", currentUser.uid), { name, icon, updatedAt: serverTimestamp() }, { merge: true });
             myProfile = { name, icon }; initApp();
         };
