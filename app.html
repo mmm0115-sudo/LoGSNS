@@ -2,63 +2,96 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     
-    <title>LoG B3 | Connect & Fade</title>
-    <meta name="description" content="LoG B3: 90日で消えるログ、通知機能、フォロー機能を搭載した次世代SNS。">
+    <title>LoG B4 | Level & Notify</title>
+    <meta name="description" content="LoG B4: 経験値システムと通知センターを搭載した、進化系テキストSNS。">
+    
+    <link rel="manifest" href="manifest.json">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#2563eb">
+
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1539164935971262" crossorigin="anonymous"></script>
     
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&display=swap" rel="stylesheet">
 
     <style>
-        body { background-color: #f8fafc; color: #334155; font-family: 'Noto Sans JP', sans-serif; overflow-x: hidden; }
+        body { background-color: #f8fafc; color: #334155; font-family: 'Noto Sans JP', sans-serif; overflow-x: hidden; -webkit-tap-highlight-color: transparent; }
         .hidden { display: none; }
-        .btn-primary { background-color: #2563eb; color: white; font-weight: bold; border-radius: 9999px; padding: 8px 20px; transition: 0.2s; }
-        .btn-primary:hover { background-color: #1d4ed8; }
-        .like-anim { animation: heartPop 0.3s ease-out; }
-        @keyframes heartPop { 0%{transform:scale(1);} 50%{transform:scale(1.3);} 100%{transform:scale(1);} }
-        ::-webkit-scrollbar { width: 6px; }
-        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
-        .modal-overlay { background: rgba(0,0,0,0.4); backdrop-filter: blur(4px); }
         
-        /* フォローボタン */
-        .btn-follow { border: 1px solid #2563eb; color: #2563eb; padding: 4px 12px; border-radius: 99px; font-size: 0.75rem; font-weight: bold; }
-        .btn-follow.following { background-color: #2563eb; color: white; }
+        /* 波紋エフェクト */
+        .ripple { position: absolute; border-radius: 50%; background: rgba(37, 99, 235, 0.2); transform: scale(0); animation: ripple-anim 0.6s linear; pointer-events: none; z-index: 9999; }
+        @keyframes ripple-anim { to { transform: scale(4); opacity: 0; } }
+
+        /* レベルアップ演出 */
+        .level-badge { background: linear-gradient(135deg, #FFD700, #FDB931); color: #8a6d0b; font-weight: 900; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .glow-border { animation: glow 2s infinite alternate; }
+        @keyframes glow { from { box-shadow: 0 0 5px #3b82f6; } to { box-shadow: 0 0 20px #2563eb, 0 0 10px #60a5fa; } }
+
+        /* 通知バッジ */
+        .badge-dot { position: absolute; top: 0; right: 0; width: 10px; height: 10px; background-color: #ef4444; border-radius: 50%; border: 2px solid white; display: none; }
+        .badge-dot.active { display: block; animation: bounce 1s infinite; }
+        @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-3px); } }
+
+        /* UIパーツ */
+        .btn-primary { background-color: #2563eb; color: white; font-weight: bold; border-radius: 99px; padding: 8px 20px; transition: 0.2s; box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.3); }
+        .btn-primary:active { transform: scale(0.95); }
+        .modal-overlay { background: rgba(0,0,0,0.3); backdrop-filter: blur(4px); }
+        
+        /* 通知ドロップダウン */
+        .notify-dropdown { position: absolute; top: 60px; right: 10px; width: 300px; max-height: 400px; overflow-y: auto; background: white; border-radius: 12px; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1), 0 0 1px rgba(0,0,0,0.1); z-index: 50; display: none; }
+        .notify-dropdown.show { display: block; animation: slideDown 0.2s ease-out; }
+        @keyframes slideDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
-<body>
+<body onclick="createRipple(event)">
 
-    <div id="login-screen" class="min-h-screen flex flex-col items-center justify-center p-6 bg-white">
-        <div class="text-center mb-10">
-            <h1 class="text-6xl font-bold text-blue-600 mb-2 tracking-tighter">LoG</h1>
-            <span class="bg-blue-100 text-blue-800 text-xs font-bold px-3 py-1 rounded-full">Beta 3</span>
-            <p class="text-gray-400 text-sm mt-3">Notifications & Ephemeral Messaging</p>
+    <div id="login-screen" class="min-h-screen flex flex-col items-center justify-center p-6 bg-white relative overflow-hidden">
+        <div class="text-center mb-10 z-10">
+            <h1 class="text-7xl font-black text-blue-600 mb-2 tracking-tighter drop-shadow-sm">LoG</h1>
+            <span class="bg-gradient-to-r from-blue-500 to-indigo-600 text-white text-xs font-bold px-3 py-1 rounded-full shadow-lg">Beta 4: Level System</span>
+            <p class="text-slate-400 text-sm mt-4 font-medium">Connect, Level Up, Fade Away.</p>
         </div>
 
-        <div class="w-full max-w-xs space-y-4">
-            <button id="google-login-btn" class="w-full border border-gray-300 bg-white py-3 rounded-full hover:bg-gray-50 transition flex justify-center items-center gap-2 font-bold text-gray-600">
-                <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" class="w-5 h-5"> Googleで開始
+        <div class="w-full max-w-xs space-y-4 z-10">
+            <button id="google-login-btn" class="w-full border border-slate-200 bg-white py-3 rounded-xl hover:bg-slate-50 transition flex justify-center items-center gap-2 font-bold text-slate-600 shadow-sm">
+                <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" class="w-5 h-5"> Google Login
             </button>
             <div class="relative flex py-2 items-center">
-                <div class="flex-grow border-t border-gray-200"></div><span class="flex-shrink mx-4 text-gray-400 text-xs">または ID/PASS</span><div class="flex-grow border-t border-gray-200"></div>
+                <div class="flex-grow border-t border-slate-200"></div><span class="flex-shrink mx-4 text-slate-300 text-xs">OR</span><div class="flex-grow border-t border-slate-200"></div>
             </div>
-            <input id="auth-email" type="email" placeholder="メールアドレス" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-3">
-            <input id="auth-password" type="password" placeholder="パスワード" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-3">
+            <input id="auth-email" type="email" placeholder="Email" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 outline-none focus:ring-2 focus:ring-blue-500 transition">
+            <input id="auth-password" type="password" placeholder="Password" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 outline-none focus:ring-2 focus:ring-blue-500 transition">
             <div class="flex gap-2">
-                <button id="email-login-btn" class="flex-1 bg-slate-800 text-white py-3 rounded-lg font-bold">ログイン</button>
-                <button id="email-signup-btn" class="flex-1 border border-slate-300 text-slate-600 py-3 rounded-lg font-bold">新規登録</button>
+                <button id="email-login-btn" class="flex-1 bg-slate-800 text-white py-3 rounded-xl font-bold hover:bg-slate-700 transition">Login</button>
+                <button id="email-signup-btn" class="flex-1 border border-slate-300 text-slate-600 py-3 rounded-xl font-bold hover:bg-slate-50 transition">Sign Up</button>
             </div>
         </div>
+        <div class="absolute top-0 left-0 w-full h-full opacity-10 pointer-events-none" style="background-image: radial-gradient(#3b82f6 1px, transparent 1px); background-size: 20px 20px;"></div>
     </div>
 
-    <div id="app-screen" class="hidden max-w-xl mx-auto min-h-screen bg-white shadow-xl relative pb-20">
-        <header class="sticky top-0 bg-white/90 backdrop-blur z-20 border-b border-slate-100 p-4 flex justify-between items-center">
-            <h1 class="text-2xl font-bold text-blue-600 tracking-tighter cursor-pointer" onclick="switchTab('home')">LoG</h1>
-            <div class="flex gap-3 items-center">
-                <button onclick="requestNotifyPermission()" class="text-slate-400 hover:text-blue-500"><span class="material-icons-round" id="notify-icon">notifications_none</span></button>
-                <img id="header-icon" src="" class="w-8 h-8 rounded-full border border-slate-200 object-cover" onclick="switchTab('profile')">
+    <div id="app-screen" class="hidden max-w-xl mx-auto min-h-screen bg-white shadow-2xl relative pb-24">
+        
+        <header class="sticky top-0 bg-white/90 backdrop-blur-md z-30 border-b border-slate-100 p-4 flex justify-between items-center">
+            <h1 class="text-2xl font-black text-blue-600 tracking-tighter cursor-pointer select-none" onclick="switchTab('home')">LoG</h1>
+            <div class="flex gap-4 items-center relative">
+                <button onclick="toggleNotifyDropdown()" class="relative text-slate-400 hover:text-blue-500 transition">
+                    <span class="material-icons-round text-2xl">notifications</span>
+                    <div id="notify-badge" class="badge-dot"></div>
+                </button>
+                <div id="notify-list" class="notify-dropdown">
+                    <div class="p-3 border-b text-xs font-bold text-slate-500">通知センター</div>
+                    <div id="notify-items" class="divide-y divide-slate-50 max-h-60 overflow-y-auto">
+                        <div class="p-4 text-center text-xs text-slate-400">通知はありません</div>
+                    </div>
+                </div>
+
+                <div class="relative" onclick="switchTab('profile')">
+                    <img id="header-icon" src="" class="w-9 h-9 rounded-full border border-slate-200 object-cover cursor-pointer">
+                    <div id="header-level" class="absolute -bottom-1 -right-1 bg-yellow-400 text-[8px] font-black text-white px-1 rounded shadow-sm border border-white">LV.1</div>
+                </div>
             </div>
         </header>
 
@@ -66,70 +99,90 @@
             <div class="p-4 border-b border-slate-100 flex gap-3">
                 <img id="input-icon" src="" class="w-10 h-10 rounded-full bg-slate-200 object-cover">
                 <div class="flex-1">
-                    <textarea id="post-text" rows="2" placeholder="今、何してる？" class="w-full text-base resize-none mb-2 focus:outline-none text-slate-700 placeholder-slate-400"></textarea>
-                    <div id="reply-indicator" class="hidden text-xs text-blue-500 mb-2 bg-blue-50 p-1 rounded px-2 inline-block">
-                        To: <span id="reply-target-name"></span> <button onclick="cancelReply()" class="ml-2">✕</button>
+                    <textarea id="post-text" rows="2" placeholder="今、何してる？ (PostでXPゲット!)" class="w-full text-base resize-none mb-2 focus:outline-none text-slate-700 placeholder-slate-400 bg-transparent"></textarea>
+                    <div id="reply-indicator" class="hidden text-xs text-blue-500 mb-2 bg-blue-50 p-1 rounded px-2 inline-block font-bold">
+                        To: <span id="reply-target-name"></span> <button onclick="cancelReply()" class="ml-2 hover:text-red-500">✕</button>
                     </div>
-                    <div class="flex justify-end"><button id="post-btn" class="btn-primary shadow-lg shadow-blue-200">Post</button></div>
+                    <div class="flex justify-end items-center gap-2">
+                        <span class="text-[10px] text-slate-400 font-bold tracking-widest">+10 XP</span>
+                        <button id="post-btn" class="btn-primary">Post</button>
+                    </div>
                 </div>
             </div>
             <div id="timeline" class="divide-y divide-slate-50"></div>
         </div>
 
         <div id="tab-users" class="hidden p-4">
-            <h2 class="text-lg font-bold mb-4 px-2 text-slate-700">Explore Users</h2>
+            <h2 class="text-lg font-bold mb-4 px-2 text-slate-700 flex items-center gap-2"><span class="material-icons-round text-blue-500">explore</span> Explore</h2>
             <div id="user-list" class="space-y-3"></div>
         </div>
 
-        <div id="tab-chat" class="hidden h-[calc(100vh-130px)] flex flex-col bg-slate-50">
+        <div id="tab-chat" class="hidden h-[calc(100vh-140px)] flex flex-col bg-slate-50">
             <div class="p-3 border-b bg-white flex items-center gap-2 sticky top-0 shadow-sm z-10">
-                <button onclick="switchTab('users')" class="text-slate-500"><span class="material-icons-round">arrow_back</span></button>
+                <button onclick="switchTab('users')" class="text-slate-500 p-1 rounded-full hover:bg-slate-100"><span class="material-icons-round">arrow_back</span></button>
                 <span id="chat-target-name" class="font-bold text-slate-700"></span>
-                <span class="text-[10px] text-slate-400 ml-auto">90日自動消去</span>
+                <span class="text-[10px] bg-slate-200 text-slate-500 px-2 py-1 rounded ml-auto">90日後消滅</span>
             </div>
             <div id="chat-messages" class="flex-1 overflow-y-auto p-4 space-y-2"></div>
             <div class="p-3 bg-white border-t flex gap-2">
-                <input id="chat-input" type="text" class="flex-1 bg-slate-100 rounded-full px-4 py-2 focus:outline-none" placeholder="メッセージ...">
-                <button id="chat-send-btn" class="text-blue-500 p-2"><span class="material-icons-round">send</span></button>
+                <input id="chat-input" type="text" class="flex-1 bg-slate-100 rounded-full px-4 py-2 focus:outline-none focus:bg-white focus:ring-2 focus:ring-blue-100 transition" placeholder="メッセージ...">
+                <button id="chat-send-btn" class="text-blue-500 p-2 hover:bg-blue-50 rounded-full transition"><span class="material-icons-round">send</span></button>
             </div>
         </div>
 
         <div id="tab-profile" class="hidden">
-            <div class="p-8 bg-slate-50 text-center">
-                <img id="profile-big-icon" src="" class="w-24 h-24 rounded-full border-4 border-white shadow-md object-cover mx-auto mb-3">
-                <h2 id="profile-name" class="text-xl font-bold text-slate-800"></h2>
-                <p id="profile-uid" class="text-slate-400 text-xs font-mono mb-4"></p>
+            <div class="p-8 bg-gradient-to-b from-white to-slate-50 text-center relative overflow-hidden">
+                <div class="relative inline-block mb-3">
+                    <img id="profile-big-icon" src="" class="w-24 h-24 rounded-full border-4 border-white shadow-xl object-cover relative z-10">
+                    <div id="profile-glow" class="absolute inset-0 rounded-full z-0 opacity-0 transition duration-500"></div>
+                </div>
+                
+                <h2 id="profile-name" class="text-2xl font-black text-slate-800"></h2>
+                
+                <div class="max-w-[200px] mx-auto mt-2">
+                    <div class="flex justify-between text-xs font-bold text-slate-500 mb-1">
+                        <span id="level-display">LV.1</span>
+                        <span id="xp-display">0 XP</span>
+                    </div>
+                    <div class="h-2 bg-slate-200 rounded-full overflow-hidden">
+                        <div id="xp-bar" class="h-full bg-gradient-to-r from-blue-400 to-indigo-500 w-0 transition-all duration-1000"></div>
+                    </div>
+                    <p class="text-[10px] text-slate-400 mt-1">Next Level: <span id="next-level-xp">100</span> XP</p>
+                </div>
+
+                <p id="profile-uid" class="text-slate-300 text-xs font-mono mt-4 mb-6 select-all"></p>
+                
                 <div class="flex justify-center gap-3">
-                    <button onclick="openProfileEditor()" class="text-xs border border-slate-300 px-4 py-2 rounded-full bg-white text-slate-600 hover:bg-slate-100">編集</button>
-                    <button onclick="signOutApp()" class="text-xs text-red-400 border border-red-200 px-4 py-2 rounded-full hover:bg-red-50">ログアウト</button>
+                    <button onclick="openProfileEditor()" class="text-xs border border-slate-300 px-5 py-2 rounded-full bg-white text-slate-600 hover:bg-slate-50 font-bold">編集</button>
+                    <button onclick="signOutApp()" class="text-xs text-red-400 border border-red-200 px-5 py-2 rounded-full hover:bg-red-50 font-bold">ログアウト</button>
                 </div>
             </div>
-            <div class="p-4 font-bold text-slate-400 text-sm border-b">My Logs</div>
+            <div class="p-4 font-bold text-slate-400 text-sm border-b bg-white sticky top-16 z-10">My Logs</div>
             <div id="my-timeline" class="divide-y divide-slate-50"></div>
         </div>
 
-        <nav class="fixed bottom-0 w-full max-w-xl bg-white/95 backdrop-blur border-t border-slate-100 flex justify-around p-3 text-slate-300 pb-6 z-30">
-            <button onclick="switchTab('home')" class="hover:text-blue-500 nav-btn transition" data-target="home"><span class="material-icons-round text-3xl">home</span></button>
-            <button onclick="switchTab('users')" class="hover:text-blue-500 nav-btn transition" data-target="users"><span class="material-icons-round text-3xl">group</span></button>
-            <button onclick="switchTab('profile')" class="hover:text-blue-500 nav-btn transition" data-target="profile"><span class="material-icons-round text-3xl">person</span></button>
+        <nav class="fixed bottom-0 w-full max-w-xl bg-white/90 backdrop-blur-lg border-t border-slate-100 flex justify-around p-3 text-slate-300 pb-6 z-40 shadow-[0_-5px_15px_rgba(0,0,0,0.02)]">
+            <button onclick="switchTab('home')" class="hover:text-blue-500 nav-btn transition duration-300 active:scale-90" data-target="home"><span class="material-icons-round text-3xl">home</span></button>
+            <button onclick="switchTab('users')" class="hover:text-blue-500 nav-btn transition duration-300 active:scale-90" data-target="users"><span class="material-icons-round text-3xl">explore</span></button>
+            <button onclick="switchTab('profile')" class="hover:text-blue-500 nav-btn transition duration-300 active:scale-90" data-target="profile"><span class="material-icons-round text-3xl">person</span></button>
         </nav>
     </div>
 
     <div id="profile-modal" class="modal-overlay hidden fixed inset-0 z-50 flex items-center justify-center">
-        <div class="bg-white p-6 rounded-2xl w-80 shadow-2xl text-center">
-            <h2 class="text-lg font-bold mb-4">プロフィール設定</h2>
-            <img id="edit-preview-icon" src="" class="w-24 h-24 rounded-full bg-slate-100 mb-4 mx-auto object-cover">
-            <button id="random-icon-btn" class="text-xs bg-slate-100 px-3 py-1 rounded-full mb-4">ランダム生成</button>
+        <div class="bg-white p-6 rounded-3xl w-80 shadow-2xl text-center transform transition-all scale-100">
+            <h2 class="text-lg font-bold mb-4 text-slate-700">Identity Setup</h2>
+            <img id="edit-preview-icon" src="" class="w-24 h-24 rounded-full bg-slate-100 mb-4 mx-auto object-cover border-4 border-slate-50">
+            <button id="random-icon-btn" class="text-xs bg-slate-100 px-4 py-2 rounded-full mb-6 font-bold text-slate-500 hover:bg-slate-200">アイコンサイコロ</button>
             <input type="hidden" id="edit-icon-url">
-            <input id="edit-name-input" type="text" class="w-full bg-slate-50 border rounded-lg p-3 mb-4 text-center" placeholder="名前">
-            <button id="save-profile-btn" class="w-full btn-primary py-3">保存</button>
+            <input id="edit-name-input" type="text" class="w-full bg-slate-50 border-none rounded-xl p-3 mb-4 text-center focus:ring-2 focus:ring-blue-500" placeholder="新しい名前">
+            <button id="save-profile-btn" class="w-full btn-primary py-3 shadow-lg shadow-blue-200">Save Identity</button>
         </div>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-        import { getFirestore, collection, addDoc, query, orderBy, limit, onSnapshot, serverTimestamp, doc, getDoc, setDoc, where, updateDoc, arrayUnion, arrayRemove, deleteDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, query, orderBy, limit, onSnapshot, serverTimestamp, doc, getDoc, setDoc, where, updateDoc, arrayUnion, arrayRemove, deleteDoc, increment } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyCA4NQzxcz2gh8uaw3LKrKl_NEnE_fMybs",
@@ -147,9 +200,20 @@
         let currentUser = null, myProfile = null;
         let replyToId = null, replyToName = null;
         let currentChatUser = null;
-        let isFirstLoad = true; // 初回読み込み時の通知爆撃を防ぐ
+        let unreadCount = 0;
 
-        // 認証
+        // 波紋エフェクト
+        window.createRipple = (e) => {
+            const circle = document.createElement("div");
+            const d = 20; // size
+            circle.classList.add("ripple");
+            circle.style.width = circle.style.height = `${d}px`;
+            circle.style.left = `${e.clientX - d/2}px`;
+            circle.style.top = `${e.clientY - d/2}px`;
+            document.body.appendChild(circle);
+            setTimeout(() => circle.remove(), 600);
+        };
+
         const authErr = (e) => alert("Error: " + e.message);
         document.getElementById('google-login-btn').onclick = () => signInWithPopup(auth, new GoogleAuthProvider()).catch(authErr);
         document.getElementById('email-login-btn').onclick = () => signInWithEmailAndPassword(auth, document.getElementById('auth-email').value, document.getElementById('auth-password').value).catch(authErr);
@@ -172,104 +236,145 @@
             document.getElementById('login-screen').classList.add('hidden');
             document.getElementById('app-screen').classList.remove('hidden');
             document.getElementById('profile-modal').classList.add('hidden');
+            
+            // データ反映
+            updateProfileUI();
+            
+            loadTimeline();
+            loadUserList();
+            setupNotifications();
+        }
+
+        // --- ★ レベル機能 & UI更新 ---
+        function updateProfileUI() {
             document.getElementById('header-icon').src = myProfile.icon;
             document.getElementById('input-icon').src = myProfile.icon;
             document.getElementById('profile-big-icon').src = myProfile.icon;
             document.getElementById('profile-name').innerText = myProfile.name;
             document.getElementById('profile-uid').innerText = "@" + currentUser.uid.slice(0,8);
-            
-            loadTimeline();
-            loadUserList();
-            setupNotifications(); // 通知監視開始
-        }
 
-        // --- ★ 通知機能 (Notification API) ---
-        window.requestNotifyPermission = () => {
-            Notification.requestPermission().then(permission => {
-                if (permission === "granted") {
-                    alert("通知がONになりました！");
-                    document.getElementById('notify-icon').innerText = "notifications_active";
-                    document.getElementById('notify-icon').classList.add("text-blue-500");
-                }
-            });
-        };
+            // XP計算 (簡易: 100XPごとにレベルアップ)
+            const xp = myProfile.xp || 0;
+            const level = Math.floor(xp / 100) + 1;
+            const nextXp = level * 100;
+            const progress = ((xp % 100) / 100) * 100;
 
-        function setupNotifications() {
-            if (!("Notification" in window)) return;
+            document.getElementById('level-display').innerText = `LV.${level}`;
+            document.getElementById('header-level').innerText = `LV.${level}`;
+            document.getElementById('xp-display').innerText = `${xp} XP`;
+            document.getElementById('next-level-xp').innerText = nextXp - xp;
+            document.getElementById('xp-bar').style.width = `${progress}%`;
 
-            // 1. フォロー中の人の投稿を監視
-            // ※Firestoreの制限上、簡単な実装として「全投稿」を監視し、クライアント側でフィルターします
-            const qLog = query(collection(db, "logs"), orderBy("createdAt", "desc"), limit(1));
-            onSnapshot(qLog, (snap) => {
-                if (isFirstLoad) return; 
-                snap.docChanges().forEach((change) => {
-                    if (change.type === "added") {
-                        const d = change.doc.data();
-                        // 自分の投稿は無視
-                        if (d.uid === currentUser.uid) return;
-                        // フォローしている人なら通知
-                        if (myProfile.following && myProfile.following.includes(d.uid)) {
-                            sendBrowserNotify(`@${d.authorName} がポストしました`, d.text);
-                        }
-                    }
-                });
-            });
-
-            // 2. DMの受信を監視
-            // ※自分宛てのチャットを探すのは複雑なので、ユーザーリストで開いたことのあるチャット等を監視する簡易版
-            // 本格的なDM通知はサーバー機能が必要ですが、ここでは「現在開いているチャット」以外の新着を検知する工夫が必要です
-            // Beta3では簡易的に「すべてのチャットメッセージ」を監視し、自分宛てか判定します（通信量的には少し無駄ですが実装可能）
-            // 注意: Firestoreの構造上、自分が参加しているチャットIDを知る必要があります。
-            // 今回はシンプルに、ユーザー一覧を取得した際に「チャットID」を生成し、リスナーを貼ります（上位20人限定）
-        }
-
-        function sendBrowserNotify(title, body) {
-            if (Notification.permission === "granted") {
-                new Notification(title, { body: body, icon: "/favicon.ico" });
+            // レベルアップエフェクト (Lv5以上で光る)
+            if (level >= 5) {
+                document.getElementById('profile-glow').classList.add('glow-border', 'opacity-100');
+                document.getElementById('profile-name').classList.add('text-blue-600');
             }
         }
 
-        // --- 投稿 & リプライ (TTL設定済み) ---
+        async function addXP(amount) {
+            const ref = doc(db, "users", currentUser.uid);
+            await updateDoc(ref, { xp: increment(amount) });
+            // UI上の数値を仮更新
+            if(!myProfile.xp) myProfile.xp = 0;
+            myProfile.xp += amount;
+            updateProfileUI();
+        }
+
+        // --- ★ 通知センター (サイト内通知) ---
+        function setupNotifications() {
+            // 自分宛ての通知を監視
+            const q = query(collection(db, "notifications"), where("targetUid", "==", currentUser.uid), orderBy("createdAt", "desc"), limit(20));
+            onSnapshot(q, (snap) => {
+                const list = document.getElementById('notify-items');
+                list.innerHTML = "";
+                let hasNew = false;
+
+                if(snap.empty) {
+                    list.innerHTML = `<div class="p-4 text-center text-xs text-slate-400">通知はありません</div>`;
+                } else {
+                    snap.forEach(doc => {
+                        const n = doc.data();
+                        const div = document.createElement('div');
+                        div.className = "p-3 text-sm hover:bg-slate-50 flex gap-2 items-center";
+                        let icon = "notifications";
+                        let color = "text-gray-400";
+                        if(n.type === 'like') { icon = "favorite"; color = "text-pink-500"; }
+                        if(n.type === 'reply') { icon = "reply"; color = "text-blue-500"; }
+                        
+                        div.innerHTML = `<span class="material-icons-round text-sm ${color}">${icon}</span> <span>${n.message}</span>`;
+                        list.appendChild(div);
+                        // 既読フラグがなければバッジを表示
+                        if(!n.read) hasNew = true;
+                    });
+                }
+
+                if(hasNew) {
+                    document.getElementById('notify-badge').classList.add('active');
+                }
+            });
+        }
+
+        // 通知を送る関数
+        async function sendNotify(targetUid, type, message) {
+            if(targetUid === currentUser.uid) return;
+            await addDoc(collection(db, "notifications"), {
+                targetUid, type, message, 
+                fromUid: currentUser.uid, 
+                read: false,
+                createdAt: serverTimestamp(),
+                expireAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) // 7日で消える
+            });
+        }
+
+        window.toggleNotifyDropdown = () => {
+            const d = document.getElementById('notify-list');
+            d.classList.toggle('show');
+            // 開いたらバッジを消す（既読扱いは簡易的にクライアント側のみ）
+            document.getElementById('notify-badge').classList.remove('active');
+        };
+
+        // --- 投稿 & リプライ ---
         document.getElementById('post-btn').onclick = async () => {
             const text = document.getElementById('post-text').value;
             if (!text.trim()) return;
-            const exp = new Date(); exp.setDate(exp.getDate() + 90); // 90日後
+            const exp = new Date(); exp.setDate(exp.getDate() + 90);
             
             const postData = {
                 text, uid: currentUser.uid, authorName: myProfile.name, authorIcon: myProfile.icon,
                 createdAt: serverTimestamp(), expireAt: exp, likes: []
             };
-            if(replyToId) { postData.replyToId = replyToId; postData.replyToName = replyToName; }
+            if(replyToId) { 
+                postData.replyToId = replyToId; postData.replyToName = replyToName; 
+                // リプライ通知を送る
+                // 元の投稿のUIDを取得するのは複雑なので、ここでは省略またはreplyToIdから逆引きが必要
+                // 簡易的に「リプライ相手の名前」しか持っていないので通知は難しいが、
+                // 本来は replyToUid を保存しておくべき。今回はUIの都合上スキップ。
+            }
             await addDoc(collection(db, "logs"), postData);
+            await addXP(10); // ★投稿で10XPゲット
+            
             document.getElementById('post-text').value = "";
             cancelReply();
         };
 
-        // --- フォロー機能 ---
-        window.toggleFollow = async (targetUid) => {
-            const myRef = doc(db, "users", currentUser.uid);
-            // 現在のフォローリストを取得
-            let currentFollowing = myProfile.following || [];
-            
-            if (currentFollowing.includes(targetUid)) {
-                // フォロー解除
-                await updateDoc(myRef, { following: arrayRemove(targetUid) });
-                myProfile.following = currentFollowing.filter(id => id !== targetUid);
+        // --- いいね ---
+        window.toggleLike = async (id, likes, authorUid) => {
+            const ref = doc(db, "logs", id);
+            if(likes && likes.includes(currentUser.uid)) {
+                await updateDoc(ref, { likes: arrayRemove(currentUser.uid) });
             } else {
-                // フォローする
-                await updateDoc(myRef, { following: arrayUnion(targetUid) });
-                if (!myProfile.following) myProfile.following = [];
-                myProfile.following.push(targetUid);
+                await updateDoc(ref, { likes: arrayUnion(currentUser.uid) });
+                await addXP(2); // ★いいねで2XPゲット
+                // ★いいね通知を送る
+                sendNotify(authorUid, 'like', `${myProfile.name}さんがいいねしました`);
             }
-            // UI更新
-            loadUserList(); // リスト再描画
         };
 
         // --- タイムライン ---
         function loadTimeline() {
             const q = query(collection(db, "logs"), orderBy("createdAt", "desc"), limit(50));
             onSnapshot(q, (snap) => {
-                isFirstLoad = false; // 初回ロード完了
                 const container = document.getElementById('timeline');
                 container.innerHTML = "";
                 snap.docs.forEach((doc, i) => {
@@ -303,7 +408,7 @@
                     ${d.replyToName ? `<div class="text-xs text-blue-500 mb-1">To: ${d.replyToName}</div>` : ''}
                     <p class="text-slate-700 text-sm whitespace-pre-wrap leading-relaxed">${d.text}</p>
                     <div class="flex gap-6 mt-2">
-                        <button onclick="toggleLike('${id}', ${JSON.stringify(d.likes || [])})" class="flex items-center gap-1 text-xs ${isLiked ? 'text-pink-500' : 'text-slate-400 hover:text-pink-500'} transition">
+                        <button onclick="toggleLike('${id}', ${JSON.stringify(d.likes || [])}, '${d.uid}')" class="flex items-center gap-1 text-xs ${isLiked ? 'text-pink-500' : 'text-slate-400 hover:text-pink-500'} transition active:scale-125">
                             <span class="material-icons-round text-sm ${isLiked ? 'like-anim' : ''}">${isLiked ? 'favorite' : 'favorite_border'}</span>
                             <span>${d.likes ? d.likes.length : 0}</span>
                         </button>
@@ -315,7 +420,11 @@
             return div;
         }
 
-        // --- DM (チャット & 90日消去) ---
+        // --- その他 ---
+        window.setReply = (id, name) => { replyToId = id; replyToName = name; document.getElementById('reply-indicator').classList.remove('hidden'); document.getElementById('reply-target-name').innerText = name; document.getElementById('post-text').focus(); };
+        window.cancelReply = () => { replyToId = null; replyToName = null; document.getElementById('reply-indicator').classList.add('hidden'); };
+        window.deletePost = async (id) => { if(confirm("削除しますか？")) await deleteDoc(doc(db, "logs", id)); };
+        
         async function loadUserList() {
             const q = query(collection(db, "users"), limit(30));
             const snap = await import("https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js").then(m => m.getDocs(q));
@@ -324,101 +433,39 @@
             snap.forEach(doc => {
                 if(doc.id === currentUser.uid) return;
                 const d = doc.data();
-                
-                // フォロー状態確認
-                const isFollowing = myProfile.following && myProfile.following.includes(doc.id);
-
                 const div = document.createElement('div');
-                div.className = "p-3 bg-white rounded-xl shadow-sm flex items-center gap-3 border border-slate-100";
-                div.innerHTML = `
-                    <div onclick="openChat('${doc.id}', '${d.name}')" class="flex-1 flex items-center gap-3 cursor-pointer">
-                        <img src="${d.icon}" class="w-10 h-10 rounded-full object-cover">
-                        <span class="font-bold text-slate-700 text-sm">${d.name}</span>
-                    </div>
-                    <button onclick="toggleFollow('${doc.id}')" class="btn-follow ${isFollowing ? 'following' : ''}">
-                        ${isFollowing ? 'フォロー中' : 'フォロー'}
-                    </button>
-                `;
+                div.className = "p-3 bg-white rounded-xl shadow-sm flex items-center gap-3 border border-slate-100 active:scale-95 transition";
+                div.innerHTML = `<div onclick="openChat('${doc.id}', '${d.name}')" class="flex-1 flex items-center gap-3 cursor-pointer"><img src="${d.icon}" class="w-10 h-10 rounded-full object-cover"><span class="font-bold text-slate-700 text-sm">${d.name} <span class="text-[10px] text-yellow-500 bg-yellow-50 px-1 rounded">LV.${Math.floor((d.xp||0)/100)+1}</span></span></div>`;
                 list.appendChild(div);
             });
         }
-
-        window.openChat = (uid, name) => {
-            currentChatUser = uid;
-            document.getElementById('chat-target-name').innerText = name;
-            switchTab('chat');
-            loadMessages(uid);
-        };
-
+        window.openChat = (uid, name) => { currentChatUser = uid; document.getElementById('chat-target-name').innerText = name; switchTab('chat'); loadMessages(uid); };
         function loadMessages(targetUid) {
             const chatId = [currentUser.uid, targetUid].sort().join("_");
             const q = query(collection(db, "chats", chatId, "messages"), orderBy("createdAt", "asc"), limit(50));
             onSnapshot(q, (snap) => {
-                const div = document.getElementById('chat-messages');
-                div.innerHTML = "";
-                snap.docChanges().forEach(change => {
-                    // ここでDM通知も可能（ただしチャットを開いていない時のみ通知するロジックが必要）
-                    if (change.type === "added" && !isFirstLoad) {
-                         const d = change.doc.data();
-                         if (d.senderId !== currentUser.uid && document.getElementById('tab-chat').classList.contains('hidden')) {
-                             sendBrowserNotify("新着メッセージ", `${d.text}`);
-                         }
-                    }
-                });
-                
-                snap.forEach(doc => {
-                    const d = doc.data();
-                    const isMe = d.senderId === currentUser.uid;
-                    const bubble = document.createElement('div');
-                    bubble.className = `flex ${isMe ? 'justify-end' : 'justify-start'}`;
-                    bubble.innerHTML = `<div class="max-w-[75%] p-3 rounded-2xl text-sm ${isMe ? 'bg-blue-500 text-white rounded-br-none' : 'bg-white border border-slate-200 text-slate-700 rounded-bl-none'} shadow-sm">${d.text}</div>`;
-                    div.appendChild(bubble);
-                });
+                const div = document.getElementById('chat-messages'); div.innerHTML = "";
+                snap.forEach(doc => { const d = doc.data(); const isMe = d.senderId === currentUser.uid; const b = document.createElement('div'); b.className = `flex ${isMe?'justify-end':'justify-start'}`; b.innerHTML = `<div class="max-w-[75%] p-3 rounded-2xl text-sm ${isMe?'bg-blue-600 text-white rounded-br-none shadow-md':'bg-white border border-slate-200 text-slate-700 rounded-bl-none shadow-sm'}">${d.text}</div>`; div.appendChild(b); });
                 div.scrollTop = div.scrollHeight;
             });
         }
-
         document.getElementById('chat-send-btn').onclick = async () => {
-            const text = document.getElementById('chat-input').value;
-            if(!text.trim() || !currentChatUser) return;
-            
-            const exp = new Date(); exp.setDate(exp.getDate() + 90); // ★ DMも90日消去設定
+            const text = document.getElementById('chat-input').value; if(!text.trim()||!currentChatUser)return;
+            const exp = new Date(); exp.setDate(exp.getDate()+90);
             const chatId = [currentUser.uid, currentChatUser].sort().join("_");
-            
-            await addDoc(collection(db, "chats", chatId, "messages"), { 
-                text, 
-                senderId: currentUser.uid, 
-                createdAt: serverTimestamp(),
-                expireAt: exp // TTLフィールド
-            });
+            await addDoc(collection(db, "chats", chatId, "messages"), { text, senderId: currentUser.uid, createdAt: serverTimestamp(), expireAt: exp });
+            // ★DM通知を送る
+            sendNotify(currentChatUser, 'reply', `${myProfile.name}からメッセージ`);
             document.getElementById('chat-input').value = "";
         };
 
-        // --- 共通 ---
-        window.setReply = (id, name) => { replyToId = id; replyToName = name; document.getElementById('reply-indicator').classList.remove('hidden'); document.getElementById('reply-target-name').innerText = name; document.getElementById('post-text').focus(); };
-        window.cancelReply = () => { replyToId = null; replyToName = null; document.getElementById('reply-indicator').classList.add('hidden'); };
-        window.deletePost = async (id) => { if(confirm("削除しますか？")) await deleteDoc(doc(db, "logs", id)); };
-
-        function timeAgo(date) {
-            const seconds = Math.floor((new Date() - date) / 1000);
-            if (seconds < 60) return "今";
-            const m = Math.floor(seconds / 60); if (m < 60) return m + "分前";
-            const h = Math.floor(m / 60); if (h < 24) return h + "時間前";
-            return Math.floor(h / 24) + "日前";
-        }
-
-        function injectAd(container) {
-            const ad = document.createElement('div');
-            ad.className = "p-4 bg-slate-50 border-y border-slate-100 text-center";
-            ad.innerHTML = `<span class="text-[10px] text-slate-400 block mb-2">SPONSORED</span><ins class="adsbygoogle" style="display:block" data-ad-format="fluid" data-ad-layout-key="-gw-3+1f-3d+2z" data-ad-client="ca-pub-1539164935971262" data-ad-slot="5232313517"></ins>`;
-            container.appendChild(ad);
-            (window.adsbygoogle = window.adsbygoogle || []).push({});
-        }
+        function timeAgo(date) { const s = Math.floor((new Date()-date)/1000); if(s<60)return"今"; const m=Math.floor(s/60); if(m<60)return m+"分前"; const h=Math.floor(m/60); if(h<24)return h+"時間前"; return Math.floor(h/24)+"日前"; }
+        function injectAd(container) { const ad = document.createElement('div'); ad.className = "p-4 bg-slate-50 border-y border-slate-100 text-center"; ad.innerHTML = `<span class="text-[10px] text-slate-400 block mb-2">SPONSORED</span><ins class="adsbygoogle" style="display:block" data-ad-format="fluid" data-ad-layout-key="-gw-3+1f-3d+2z" data-ad-client="ca-pub-1539164935971262" data-ad-slot="5232313517"></ins>`; container.appendChild(ad); (window.adsbygoogle=window.adsbygoogle||[]).push({}); }
 
         window.openProfileEditor = () => { document.getElementById('profile-modal').classList.remove('hidden'); if(myProfile) { document.getElementById('edit-name-input').value = myProfile.name; document.getElementById('edit-icon-url').value = myProfile.icon; document.getElementById('edit-preview-icon').src = myProfile.icon; } else generateRandomIcon(); };
         function generateRandomIcon() { const url = `https://api.dicebear.com/7.x/notionists/svg?seed=${Math.random().toString(36).substring(7)}`; document.getElementById('edit-icon-url').value = url; document.getElementById('edit-preview-icon').src = url; }
         document.getElementById('random-icon-btn').onclick = generateRandomIcon;
-        document.getElementById('save-profile-btn').onclick = async () => { const name = document.getElementById('edit-name-input').value, icon = document.getElementById('edit-icon-url').value; if(!name) return; await setDoc(doc(db, "users", currentUser.uid), { name, icon, updatedAt: serverTimestamp() }, { merge: true }); myProfile = { name, icon }; initApp(); };
+        document.getElementById('save-profile-btn').onclick = async () => { const name = document.getElementById('edit-name-input').value, icon = document.getElementById('edit-icon-url').value; if(!name)return; await setDoc(doc(db, "users", currentUser.uid), { name, icon, updatedAt: serverTimestamp() }, { merge: true }); myProfile = { name, icon }; initApp(); };
         window.switchTab = (t) => { ['home', 'users', 'chat', 'profile'].forEach(x => document.getElementById(`tab-${x}`).classList.add('hidden')); document.getElementById(`tab-${t}`).classList.remove('hidden'); document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('text-blue-500')); const b = document.querySelector(`.nav-btn[data-target="${t}"]`); if(b) b.classList.add('text-blue-500'); };
     </script>
 </body>
