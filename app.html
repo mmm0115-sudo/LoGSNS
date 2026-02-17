@@ -3,9 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    
-    <title>LoG B5 | Leagues & Themes</title>
-    <meta name="description" content="LoG B5: リーグ昇降格システムと着せ替え機能を搭載。">
+    <title>LoG B5 | Repair Mode</title>
     
     <link rel="manifest" href="manifest.json">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -17,174 +15,84 @@
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&display=swap" rel="stylesheet">
 
     <style>
-        /* テーマ変数定義 */
-        :root { --bg-main: #f8fafc; --bg-card: #ffffff; --text-main: #334155; --accent: #2563eb; --accent-hover: #1d4ed8; }
-        
-        /* テーマ別設定 */
-        body.theme-dark { --bg-main: #0f172a; --bg-card: #1e293b; --text-main: #e2e8f0; --accent: #3b82f6; --accent-hover: #60a5fa; }
-        body.theme-sakura { --bg-main: #fff0f5; --bg-card: #fff; --text-main: #5d4037; --accent: #ec4899; --accent-hover: #db2777; }
-        body.theme-hacker { --bg-main: #000; --bg-card: #111; --text-main: #0f0; --accent: #0f0; --accent-hover: #0a0; font-family: 'Courier New', monospace; }
-
-        body { background-color: var(--bg-main); color: var(--text-main); font-family: 'Noto Sans JP', sans-serif; overflow-x: hidden; transition: background 0.3s, color 0.3s; }
-        .bg-card { background-color: var(--bg-card); }
-        .text-accent { color: var(--accent); }
-        .bg-accent { background-color: var(--accent); }
-        
+        :root { --accent: #2563eb; }
+        body { background-color: #f8fafc; color: #334155; font-family: 'Noto Sans JP', sans-serif; overflow-x: hidden; -webkit-tap-highlight-color: transparent; }
         .hidden { display: none; }
         .btn-primary { background-color: var(--accent); color: white; font-weight: bold; border-radius: 99px; padding: 8px 20px; transition: 0.2s; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.2); }
-        .btn-primary:active { transform: scale(0.95); }
-        
-        /* リーグごとの名前色 */
-        .rank-bronze { color: #cd7f32; font-weight: bold; }
-        .rank-silver { color: #94a3b8; font-weight: bold; text-shadow: 0 0 2px rgba(148,163,184,0.3); }
-        .rank-gold { color: #eab308; font-weight: 900; text-shadow: 0 0 5px rgba(234,179,8,0.4); }
-        .rank-diamond { 
-            background: linear-gradient(90deg, #3b82f6, #06b6d4); 
-            -webkit-background-clip: text; color: transparent; font-weight: 900; 
-            text-shadow: 0 0 10px rgba(59,130,246,0.3);
-        }
-        .rank-obsidian {
-            background: linear-gradient(90deg, #ff0000, #000000, #ff0000); background-size: 200%;
-            -webkit-background-clip: text; color: transparent; font-weight: 900; animation: shine 3s infinite linear;
-        }
-        @keyframes shine { 0% {background-position: 0%} 100% {background-position: 200%} }
-
         .modal-overlay { background: rgba(0,0,0,0.6); backdrop-filter: blur(4px); }
-        .locked { opacity: 0.5; filter: grayscale(1); pointer-events: none; }
+        /* ランク色 */
+        .rank-bronze { color: #cd7f32; } .rank-silver { color: #94a3b8; } .rank-gold { color: #eab308; text-shadow: 0 0 5px rgba(234,179,8,0.4); }
     </style>
 </head>
-<body onclick="createRipple(event)">
+<body>
 
-    <div id="login-screen" class="min-h-screen flex flex-col items-center justify-center p-6 bg-white relative overflow-hidden">
-        <div class="z-10 text-center w-full max-w-xs">
-            <h1 class="text-7xl font-black text-blue-600 mb-2 tracking-tighter">LoG</h1>
-            <span class="bg-black text-white text-xs font-bold px-3 py-1 rounded-full uppercase tracking-widest">B5: Gamified</span>
-            
-            <div class="mt-10 space-y-4">
-                <button id="google-login-btn" class="w-full border border-gray-200 bg-white py-3 rounded-xl hover:bg-gray-50 transition flex justify-center items-center gap-2 font-bold text-gray-600 shadow-sm">
-                    <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" class="w-5 h-5"> Google Login
-                </button>
-                <div class="flex gap-2">
-                    <input id="auth-email" type="email" placeholder="Email" class="flex-1 bg-gray-50 border-none rounded-xl p-3 text-sm">
-                    <input id="auth-password" type="password" placeholder="Pass" class="flex-1 bg-gray-50 border-none rounded-xl p-3 text-sm">
-                </div>
-                <div class="flex gap-2">
-                    <button id="email-login-btn" class="flex-1 bg-gray-900 text-white py-3 rounded-xl font-bold text-sm">Login</button>
-                    <button id="email-signup-btn" class="flex-1 border border-gray-300 text-gray-500 py-3 rounded-xl font-bold text-sm">Sign Up</button>
-                </div>
+    <div id="login-screen" class="min-h-screen flex flex-col items-center justify-center p-6 bg-white">
+        <h1 class="text-7xl font-black text-blue-600 mb-2">LoG</h1>
+        <span class="bg-red-500 text-white text-xs font-bold px-3 py-1 rounded-full">REPAIR MODE</span>
+        <div class="mt-10 w-full max-w-xs space-y-4">
+            <button id="google-login-btn" class="w-full border py-3 rounded-xl font-bold text-gray-600 flex justify-center gap-2"><img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" class="w-5 h-5"> Google Login</button>
+            <div class="flex gap-2">
+                <input id="auth-email" type="email" placeholder="Email" class="flex-1 bg-gray-50 border-none rounded-xl p-3">
+                <input id="auth-password" type="password" placeholder="Pass" class="flex-1 bg-gray-50 border-none rounded-xl p-3">
+            </div>
+            <div class="flex gap-2">
+                <button id="email-login-btn" class="flex-1 bg-gray-900 text-white py-3 rounded-xl font-bold">Login</button>
+                <button id="email-signup-btn" class="flex-1 border py-3 rounded-xl font-bold">Sign Up</button>
             </div>
         </div>
-        <div class="absolute inset-0 opacity-10" style="background-image: radial-gradient(#3b82f6 1px, transparent 1px); background-size: 20px 20px;"></div>
     </div>
 
-    <div id="app-screen" class="hidden max-w-xl mx-auto min-h-screen bg-card shadow-2xl relative pb-24 transition-colors duration-300">
-        
-        <header class="sticky top-0 bg-card/90 backdrop-blur-md z-30 border-b border-gray-100/10 p-4 flex justify-between items-center shadow-sm">
-            <h1 class="text-2xl font-black text-accent tracking-tighter cursor-pointer" onclick="switchTab('home')">LoG</h1>
+    <div id="app-screen" class="hidden max-w-xl mx-auto min-h-screen bg-white shadow-2xl pb-24">
+        <header class="sticky top-0 bg-white/90 backdrop-blur-md z-30 border-b border-gray-100 p-4 flex justify-between items-center">
+            <h1 class="text-2xl font-black text-blue-600" onclick="switchTab('home')">LoG</h1>
             <div class="flex gap-4 items-center">
-                <div class="flex flex-col items-end cursor-pointer" onclick="switchTab('profile')">
-                    <span id="league-name" class="text-[10px] font-bold uppercase tracking-widest text-slate-400">Bronze</span>
-                    <div class="h-1.5 w-16 bg-gray-200 rounded-full overflow-hidden">
-                        <div id="header-xp-bar" class="h-full bg-accent w-0 transition-all duration-1000"></div>
-                    </div>
-                </div>
-                <img id="header-icon" src="" class="w-9 h-9 rounded-full border border-gray-200 object-cover cursor-pointer">
+                <div class="flex flex-col items-end"><span id="league-name" class="text-[10px] font-bold uppercase text-slate-400">Loading...</span></div>
+                <img id="header-icon" src="" class="w-9 h-9 rounded-full border border-gray-200 object-cover" onclick="switchTab('profile')">
             </div>
         </header>
 
         <div id="tab-home" class="pb-24">
-            <div class="p-4 border-b border-gray-100/10 flex gap-3">
-                <img id="input-icon" src="" class="w-10 h-10 rounded-full bg-gray-200 object-cover">
-                <div class="flex-1">
-                    <textarea id="post-text" rows="2" placeholder="サボると降格します..." class="w-full text-base resize-none mb-2 focus:outline-none bg-transparent placeholder-gray-400"></textarea>
-                    <div class="flex justify-end items-center gap-3">
-                        <span class="text-[10px] text-gray-400 font-bold">+15 XP</span>
-                        <button id="post-btn" class="btn-primary text-sm">Post</button>
-                    </div>
-                </div>
+            <div class="p-4 border-b border-gray-100 flex gap-3">
+                <textarea id="post-text" rows="2" placeholder="今、何してる？" class="w-full text-base resize-none mb-2 focus:outline-none bg-transparent placeholder-gray-400"></textarea>
+                <button id="post-btn" class="btn-primary h-10 self-end">Post</button>
             </div>
-            <div id="timeline" class="divide-y divide-gray-100/10"></div>
+            <div id="timeline" class="divide-y divide-gray-100"></div>
         </div>
 
-        <div id="tab-users" class="hidden p-4">
-            <h2 class="text-lg font-bold mb-4 px-2 opacity-70 flex items-center gap-2"><span class="material-icons-round text-accent">emoji_events</span> Ranking & Explore</h2>
-            <div id="user-list" class="space-y-3"></div>
-        </div>
+        <div id="tab-users" class="hidden p-4 space-y-3" id="user-list"></div>
 
         <div id="tab-chat" class="hidden h-[calc(100vh-140px)] flex flex-col">
-            <div class="p-3 border-b border-gray-100/10 flex items-center gap-2 sticky top-0 bg-card z-10">
-                <button onclick="switchTab('users')" class="opacity-60"><span class="material-icons-round">arrow_back</span></button>
+            <div class="p-3 border-b flex items-center gap-2 sticky top-0 bg-white z-10">
+                <button onclick="switchTab('users')"><span class="material-icons-round">arrow_back</span></button>
                 <span id="chat-target-name" class="font-bold"></span>
             </div>
             <div id="chat-messages" class="flex-1 overflow-y-auto p-4 space-y-2"></div>
-            <div class="p-3 border-t border-gray-100/10 flex gap-2">
-                <input id="chat-input" type="text" class="flex-1 bg-gray-100 dark:bg-gray-800 rounded-full px-4 py-2 border-none focus:ring-2 focus:ring-accent outline-none" placeholder="Message...">
-                <button id="chat-send-btn" class="text-accent p-2"><span class="material-icons-round">send</span></button>
+            <div class="p-3 border-t flex gap-2">
+                <input id="chat-input" type="text" class="flex-1 bg-gray-100 rounded-full px-4 py-2 border-none outline-none" placeholder="Message...">
+                <button id="chat-send-btn" class="text-blue-600 p-2"><span class="material-icons-round">send</span></button>
             </div>
         </div>
 
-        <div id="tab-profile" class="hidden">
-            <div class="p-8 text-center relative overflow-hidden">
-                <div id="demote-alert" class="hidden bg-red-500 text-white text-xs font-bold p-2 mb-4 rounded shadow-lg animate-bounce">
-                    ⚠ 放置したためXPが減少しました！
-                </div>
-
-                <div class="relative inline-block mb-3">
-                    <img id="profile-big-icon" src="" class="w-24 h-24 rounded-full border-4 border-card shadow-xl object-cover relative z-10">
-                    <div id="profile-glow" class="absolute inset-0 rounded-full z-0 opacity-0 transition duration-500 shadow-[0_0_30px_var(--accent)]"></div>
-                </div>
-                
-                <h2 id="profile-name" class="text-2xl font-black mb-1"></h2>
-                <p id="current-league-display" class="text-xs font-bold uppercase tracking-[0.2em] text-accent mb-4">Unranked</p>
-
-                <div class="max-w-[240px] mx-auto bg-gray-200 dark:bg-gray-700 rounded-full h-4 mb-6 relative overflow-hidden">
-                    <div id="xp-bar" class="h-full bg-accent w-0 transition-all duration-1000 relative">
-                        <div class="absolute inset-0 bg-white/30 animate-[shimmer_2s_infinite]"></div>
-                    </div>
-                    <span id="xp-text" class="absolute inset-0 flex items-center justify-center text-[9px] font-bold text-black/50">0 / 100 XP</span>
-                </div>
-
-                <button onclick="openThemeModal()" class="mb-8 flex items-center justify-center gap-2 mx-auto bg-gray-100 dark:bg-gray-800 px-4 py-2 rounded-lg hover:scale-105 transition">
-                    <span class="material-icons-round text-sm text-accent">palette</span>
-                    <span class="text-xs font-bold">着せ替えショップ</span>
-                </button>
-                
-                <div class="flex justify-center gap-3">
-                    <button onclick="openProfileEditor()" class="text-xs border border-gray-300 px-5 py-2 rounded-full hover:bg-gray-50 dark:hover:bg-gray-800 font-bold transition">編集</button>
-                    <button onclick="signOutApp()" class="text-xs text-red-400 border border-red-200 px-5 py-2 rounded-full hover:bg-red-50 font-bold transition">ログアウト</button>
-                </div>
-            </div>
-            <div class="p-4 font-bold opacity-50 text-sm border-b border-gray-100/10">My Logs</div>
-            <div id="my-timeline" class="divide-y divide-gray-100/10"></div>
+        <div id="tab-profile" class="hidden text-center p-8">
+            <img id="profile-big-icon" src="" class="w-24 h-24 rounded-full border-4 border-white shadow-xl mx-auto mb-4">
+            <h2 id="profile-name" class="text-2xl font-black mb-1"></h2>
+            <p id="profile-uid" class="text-xs text-gray-400 mb-6"></p>
+            <button onclick="signOutApp()" class="text-xs text-red-400 border border-red-200 px-5 py-2 rounded-full font-bold">Logout</button>
+            <div class="mt-8 text-left font-bold text-gray-400 text-sm border-b pb-2">My Logs</div>
+            <div id="my-timeline" class="divide-y divide-gray-100"></div>
         </div>
 
-        <nav class="fixed bottom-0 w-full max-w-xl bg-card/90 backdrop-blur-lg border-t border-gray-100/10 flex justify-around p-3 pb-6 z-40">
-            <button onclick="switchTab('home')" class="nav-btn transition active:scale-90 opacity-40 hover:opacity-100" data-target="home"><span class="material-icons-round text-3xl">home</span></button>
-            <button onclick="switchTab('users')" class="nav-btn transition active:scale-90 opacity-40 hover:opacity-100" data-target="users"><span class="material-icons-round text-3xl">emoji_events</span></button>
-            <button onclick="switchTab('profile')" class="nav-btn transition active:scale-90 opacity-40 hover:opacity-100" data-target="profile"><span class="material-icons-round text-3xl">person</span></button>
+        <nav class="fixed bottom-0 w-full max-w-xl bg-white/90 backdrop-blur-lg border-t border-gray-100 flex justify-around p-3 pb-6 z-40">
+            <button onclick="switchTab('home')" class="material-icons-round text-3xl text-gray-400 hover:text-blue-500">home</button>
+            <button onclick="switchTab('users')" class="material-icons-round text-3xl text-gray-400 hover:text-blue-500">emoji_events</button>
+            <button onclick="switchTab('profile')" class="material-icons-round text-3xl text-gray-400 hover:text-blue-500">person</button>
         </nav>
-    </div>
-
-    <div id="theme-modal" class="modal-overlay hidden fixed inset-0 z-50 flex items-center justify-center">
-        <div class="bg-card p-6 rounded-3xl w-80 shadow-2xl text-center border border-gray-100/10">
-            <h2 class="text-lg font-bold mb-4">Themes</h2>
-            <div class="grid grid-cols-2 gap-3 mb-6">
-                <button onclick="setTheme('default')" class="p-3 rounded-xl border-2 border-blue-500 bg-white text-slate-800 text-xs font-bold">Default<br>(Lv.1)</button>
-                <button onclick="setTheme('dark')" id="theme-btn-dark" class="p-3 rounded-xl border-2 border-slate-700 bg-slate-900 text-white text-xs font-bold locked">Dark Mode<br>(Lv.3)</button>
-                <button onclick="setTheme('sakura')" id="theme-btn-sakura" class="p-3 rounded-xl border-2 border-pink-400 bg-pink-50 text-pink-900 text-xs font-bold locked">Sakura<br>(Lv.5)</button>
-                <button onclick="setTheme('hacker')" id="theme-btn-hacker" class="p-3 rounded-xl border-2 border-green-500 bg-black text-green-500 text-xs font-bold locked">Hacker<br>(Lv.10)</button>
-            </div>
-            <button onclick="document.getElementById('theme-modal').classList.add('hidden')" class="w-full py-3 rounded-full bg-gray-200 dark:bg-gray-800 text-xs font-bold">閉じる</button>
-        </div>
     </div>
 
     <div id="profile-modal" class="modal-overlay hidden fixed inset-0 z-50 flex items-center justify-center">
         <div class="bg-white p-6 rounded-3xl w-80 shadow-2xl text-center">
-            <h2 class="text-lg font-bold mb-4 text-slate-700">Identity</h2>
-            <img id="edit-preview-icon" src="" class="w-24 h-24 rounded-full bg-slate-100 mb-4 mx-auto object-cover border-4 border-slate-50">
-            <button id="random-icon-btn" class="text-xs bg-slate-100 px-4 py-2 rounded-full mb-6 font-bold text-slate-500">アイコン生成</button>
-            <input type="hidden" id="edit-icon-url">
-            <input id="edit-name-input" type="text" class="w-full bg-slate-50 border-none rounded-xl p-3 mb-4 text-center" placeholder="名前">
+            <h2 class="text-lg font-bold mb-4">Identity Setup</h2>
+            <input id="edit-name-input" type="text" class="w-full bg-gray-50 border-none rounded-xl p-3 mb-4 text-center" placeholder="名前">
             <button id="save-profile-btn" class="w-full btn-primary py-3">Save</button>
         </div>
     </div>
@@ -208,19 +116,9 @@
         const db = getFirestore(app);
         
         let currentUser = null, myProfile = null;
-        let replyToId = null, replyToName = null;
         let currentChatUser = null;
 
-        // --- ★ リーグシステム設定 ---
-        const LEAGUES = [
-            { name: "Unranked", min: 0, class: "text-slate-400" },
-            { name: "Bronze", min: 50, class: "rank-bronze" },
-            { name: "Silver", min: 200, class: "rank-silver" },
-            { name: "Gold", min: 500, class: "rank-gold" },
-            { name: "Diamond", min: 1000, class: "rank-diamond" },
-            { name: "Obsidian", min: 2000, class: "rank-obsidian" }
-        ];
-
+        // エラーハンドリング
         const authErr = (e) => alert("Error: " + e.message);
         document.getElementById('google-login-btn').onclick = () => signInWithPopup(auth, new GoogleAuthProvider()).catch(authErr);
         document.getElementById('email-login-btn').onclick = () => signInWithEmailAndPassword(auth, document.getElementById('auth-email').value, document.getElementById('auth-password').value).catch(authErr);
@@ -230,14 +128,14 @@
         onAuthStateChanged(auth, async (user) => {
             if (user) {
                 currentUser = user;
-                const userDoc = await getDoc(doc(db, "users", user.uid));
-                if (userDoc.exists()) { 
-                    myProfile = userDoc.data(); 
-                    await checkDailyPenalty(); // ログイン時にサボりチェック
-                    initApp(); 
-                } else { 
-                    document.getElementById('login-screen').classList.add('hidden'); 
-                    openProfileEditor(); 
+                try {
+                    const userDoc = await getDoc(doc(db, "users", user.uid));
+                    if (userDoc.exists()) { myProfile = userDoc.data(); initApp(); } 
+                    else { document.getElementById('login-screen').classList.add('hidden'); document.getElementById('profile-modal').classList.remove('hidden'); }
+                } catch(e) {
+                    console.error("User Load Error:", e);
+                    // ここでエラーが出る場合は、Firestoreのセキュリティルールかインデックスの問題
+                    alert("データの読み込みに失敗しました。F12コンソールを確認してください。");
                 }
             } else {
                 document.getElementById('login-screen').classList.remove('hidden');
@@ -245,176 +143,149 @@
             }
         });
 
-        // --- ★ サボりペナルティ (降格処理) ---
-        async function checkDailyPenalty() {
-            const now = new Date();
-            const lastLogin = myProfile.lastLogin ? myProfile.lastLogin.toDate() : now;
-            const diffHours = Math.abs(now - lastLogin) / 36e5;
-
-            // 24時間以上ログインしていない場合
-            if (diffHours > 24 && myProfile.xp > 0) {
-                const penalty = Math.floor(myProfile.xp * 0.1) + 5; // 10% + 5XP 没収
-                await updateDoc(doc(db, "users", currentUser.uid), { 
-                    xp: increment(-penalty),
-                    lastLogin: serverTimestamp() 
-                });
-                myProfile.xp = Math.max(0, myProfile.xp - penalty);
-                document.getElementById('demote-alert').innerText = `⚠ 放置ペナルティ: -${penalty} XP`;
-                document.getElementById('demote-alert').classList.remove('hidden');
-            } else {
-                await updateDoc(doc(db, "users", currentUser.uid), { lastLogin: serverTimestamp() });
-            }
-        }
-
         function initApp() {
             document.getElementById('login-screen').classList.add('hidden');
             document.getElementById('app-screen').classList.remove('hidden');
             document.getElementById('profile-modal').classList.add('hidden');
             
-            if(myProfile.theme) document.body.className = `theme-${myProfile.theme}`;
             updateProfileUI();
             loadTimeline();
             loadUserList();
         }
 
-        // --- ★ レベル＆リーグUI更新 ---
         function updateProfileUI() {
-            document.getElementById('header-icon').src = myProfile.icon;
-            document.getElementById('input-icon').src = myProfile.icon;
-            document.getElementById('profile-big-icon').src = myProfile.icon;
-            
-            // リーグ判定
-            const xp = myProfile.xp || 0;
-            let currentLeague = LEAGUES[0];
-            let nextLeague = LEAGUES[1];
-            
-            for(let i=0; i<LEAGUES.length; i++) {
-                if(xp >= LEAGUES[i].min) {
-                    currentLeague = LEAGUES[i];
-                    nextLeague = LEAGUES[i+1] || null;
-                }
-            }
-
-            // 名前色適用
-            const nameEl = document.getElementById('profile-name');
-            nameEl.innerText = myProfile.name;
-            nameEl.className = `text-2xl font-black mb-1 ${currentLeague.class}`;
-
-            document.getElementById('league-name').innerText = currentLeague.name;
-            document.getElementById('current-league-display').innerText = `${currentLeague.name} LEAGUE`;
+            // アイコンがない場合の対策
+            const icon = myProfile.icon || "https://api.dicebear.com/7.x/notionists/svg?seed=guest";
+            document.getElementById('header-icon').src = icon;
+            document.getElementById('profile-big-icon').src = icon;
+            document.getElementById('profile-name').innerText = myProfile.name || "No Name";
             document.getElementById('profile-uid').innerText = "@" + currentUser.uid.slice(0,8);
-
-            // XPバー計算 (次のリーグまで)
-            let progress = 100;
-            let max = "MAX";
-            if (nextLeague) {
-                const range = nextLeague.min - currentLeague.min;
-                const current = xp - currentLeague.min;
-                progress = (current / range) * 100;
-                max = nextLeague.min;
-                document.getElementById('xp-text').innerText = `${xp} / ${max} XP`;
-            } else {
-                document.getElementById('xp-text').innerText = `${xp} XP (MAX)`;
-            }
-
-            document.getElementById('xp-bar').style.width = `${progress}%`;
-            document.getElementById('header-xp-bar').style.width = `${progress}%`;
-        }
-
-        async function addXP(amount) {
-            const ref = doc(db, "users", currentUser.uid);
-            await updateDoc(ref, { xp: increment(amount) });
-            if(!myProfile.xp) myProfile.xp = 0;
-            myProfile.xp += amount;
-            updateProfileUI();
-        }
-
-        // --- ★ 着せ替え機能 ---
-        window.openThemeModal = () => {
+            
+            // リーグ表示
             const xp = myProfile.xp || 0;
-            // レベル制限ロック
-            if(xp >= 200) document.getElementById('theme-btn-dark').classList.remove('locked');
-            if(xp >= 500) document.getElementById('theme-btn-sakura').classList.remove('locked');
-            if(xp >= 1000) document.getElementById('theme-btn-hacker').classList.remove('locked');
-            document.getElementById('theme-modal').classList.remove('hidden');
+            let league = "Unranked";
+            if(xp >= 50) league = "Bronze";
+            if(xp >= 200) league = "Silver";
+            if(xp >= 500) league = "Gold";
+            document.getElementById('league-name').innerText = league;
+        }
+
+        document.getElementById('save-profile-btn').onclick = async () => {
+            const name = document.getElementById('edit-name-input').value;
+            const icon = `https://api.dicebear.com/7.x/notionists/svg?seed=${Math.random()}`;
+            if(!name) return;
+            await setDoc(doc(db, "users", currentUser.uid), { name, icon, xp: 0, updatedAt: serverTimestamp() }, { merge: true });
+            myProfile = { name, icon, xp: 0 };
+            initApp();
         };
 
-        window.setTheme = async (themeName) => {
-            document.body.className = `theme-${themeName}`;
-            await updateDoc(doc(db, "users", currentUser.uid), { theme: themeName });
-            myProfile.theme = themeName;
-            document.getElementById('theme-modal').classList.add('hidden');
-        };
+        // --- ★ 頑丈なタイムライン読み込み ---
+        function loadTimeline() {
+            // エラーが出にくいよう、orderByだけにする（whereを外す）
+            const q = query(collection(db, "logs"), orderBy("createdAt", "desc"), limit(50));
+            
+            onSnapshot(q, (snap) => {
+                const container = document.getElementById('timeline');
+                container.innerHTML = "";
+                
+                snap.docs.forEach((doc) => {
+                    try {
+                        // データが壊れていてもアプリを止めない「try-catch」ブロック
+                        const d = doc.data();
+                        
+                        // 必須データのチェック
+                        const name = d.authorName || "Unknown";
+                        const text = d.text || "";
+                        const icon = d.authorIcon || "https://api.dicebear.com/7.x/notionists/svg?seed=error";
+                        
+                        // 時間の処理（ここが一番エラーになりやすい）
+                        let timeStr = "...";
+                        if (d.createdAt && typeof d.createdAt.toDate === 'function') {
+                            timeStr = timeAgo(d.createdAt.toDate());
+                        }
+
+                        const div = document.createElement('div');
+                        div.className = "p-4 flex gap-3 border-b border-gray-100";
+                        div.innerHTML = `
+                            <img src="${icon}" class="w-10 h-10 rounded-full bg-gray-200 object-cover">
+                            <div class="flex-1">
+                                <div class="flex justify-between">
+                                    <span class="font-bold text-sm text-gray-800">${name}</span>
+                                    <span class="text-xs text-gray-400">${timeStr}</span>
+                                </div>
+                                <p class="text-sm mt-1 whitespace-pre-wrap">${text}</p>
+                            </div>`;
+                        container.appendChild(div);
+                    } catch (err) {
+                        console.warn("Skipped broken post:", doc.id, err);
+                        // 壊れた投稿は無視して次へ進む
+                    }
+                });
+            }, (error) => {
+                // ここでエラーが出たら、インデックスがない証拠
+                console.error("Snapshot Error:", error);
+                if(error.message.includes("index")) {
+                    alert("インデックスが必要です！PCでF12キーを押して、コンソールのリンクをクリックしてください！");
+                }
+            });
+        }
 
         // --- 投稿 ---
         document.getElementById('post-btn').onclick = async () => {
-            const text = document.getElementById('post-text').value; if(!text.trim())return;
+            const text = document.getElementById('post-text').value; 
+            if(!text.trim()) return;
             const exp = new Date(); exp.setDate(exp.getDate() + 90);
             
-            // リーグ情報を投稿に含める（名前色用）
-            const xp = myProfile.xp || 0;
-            let leagueClass = "text-slate-800";
-            for(let l of LEAGUES) if(xp >= l.min) leagueClass = l.class;
-
             await addDoc(collection(db, "logs"), {
-                text, uid: currentUser.uid, authorName: myProfile.name, authorIcon: myProfile.icon,
-                leagueClass: leagueClass, // クラスを保存
-                createdAt: serverTimestamp(), expireAt: exp, likes: []
+                text, 
+                uid: currentUser.uid, 
+                authorName: myProfile.name || "No Name", 
+                authorIcon: myProfile.icon || "",
+                createdAt: serverTimestamp(), 
+                expireAt: exp, 
+                likes: []
             });
-            await addXP(15); 
+            
+            // XP加算
+            await updateDoc(doc(db, "users", currentUser.uid), { xp: increment(15) });
             document.getElementById('post-text').value = "";
         };
 
-        function createPostEl(id, d) {
-            const isMine = d.uid === currentUser.uid;
-            const isLiked = d.likes && d.likes.includes(currentUser.uid);
-            // 保存されたリーグクラス、なければデフォルト
-            const nameClass = d.leagueClass || "text-slate-800";
-
-            const div = document.createElement('div');
-            div.className = "p-4 flex gap-3 hover:bg-white/5 transition border-b border-gray-100/10";
-            div.innerHTML = `
-                <img src="${d.authorIcon}" class="w-10 h-10 rounded-full bg-gray-200 object-cover">
-                <div class="flex-1 min-w-0">
-                    <div class="flex items-baseline justify-between">
-                        <span class="text-sm ${nameClass}">${d.authorName}</span>
-                        <div class="flex items-center gap-2">
-                            <span class="text-[10px] opacity-50">${d.createdAt ? timeAgo(d.createdAt.toDate()) : '...'}</span>
-                            ${isMine ? `<button onclick="deletePost('${id}')" class="opacity-30 hover:opacity-100 hover:text-red-500"><span class="material-icons-round text-sm">delete</span></button>` : ''}
-                        </div>
-                    </div>
-                    <p class="text-sm opacity-90 whitespace-pre-wrap mt-1">${d.text}</p>
-                    <div class="flex gap-4 mt-2">
-                        <button onclick="toggleLike('${id}', ${JSON.stringify(d.likes||[])})" class="flex items-center gap-1 text-xs ${isLiked?'text-pink-500':'opacity-40 hover:opacity-100'} transition active:scale-125">
-                            <span class="material-icons-round text-sm">${isLiked?'favorite':'favorite_border'}</span> ${d.likes?d.likes.length:0}
-                        </button>
-                    </div>
-                </div>`;
-            return div;
+        // --- その他の関数 ---
+        async function loadUserList() {
+            const list = document.getElementById('tab-users'); // id修正
+            if(!list) return;
+            const q = query(collection(db, "users"), limit(30), orderBy("xp", "desc"));
+            onSnapshot(q, (snap) => {
+                list.innerHTML = "";
+                snap.forEach(doc => {
+                    const d = doc.data();
+                    list.innerHTML += `<div onclick="openChat('${doc.id}','${d.name}')" class="p-3 border rounded-xl flex items-center gap-3 cursor-pointer"><img src="${d.icon}" class="w-10 h-10 rounded-full"><div class="font-bold text-sm">${d.name} <span class="text-xs text-yellow-500">${d.xp||0} XP</span></div></div>`;
+                });
+            });
         }
-        
-        // (省略された共通関数群：変更なし部分は短縮)
-        function loadTimeline(){ const q=query(collection(db,"logs"),orderBy("createdAt","desc"),limit(50)); onSnapshot(q,(s)=>{document.getElementById('timeline').innerHTML="";s.docs.forEach((d,i)=>{if(i>0&&i%5===0)injectAd(document.getElementById('timeline'));document.getElementById('timeline').appendChild(createPostEl(d.id,d.data()))})}); const mq=query(collection(db,"logs"),where("uid","==",currentUser.uid),orderBy("createdAt","desc"),limit(20)); onSnapshot(mq,(s)=>{document.getElementById('my-timeline').innerHTML="";s.docs.forEach(d=>document.getElementById('my-timeline').appendChild(createPostEl(d.id,d.data())))})}
-        async function loadUserList(){ const q=query(collection(db,"users"),limit(30),orderBy("xp","desc")); const s=await import("https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js").then(m=>m.getDocs(q)); const l=document.getElementById('user-list'); l.innerHTML=""; s.forEach(doc=>{if(doc.id===currentUser.uid)return;const d=doc.data();l.innerHTML+=`<div onclick="openChat('${doc.id}','${d.name}')" class="p-3 bg-card border border-gray-100/10 rounded-xl flex items-center gap-3 cursor-pointer hover:scale-95 transition"><img src="${d.icon}" class="w-10 h-10 rounded-full"><div class="flex-1"><div class="font-bold text-sm">${d.name}</div><div class="text-[10px] opacity-60">${d.xp||0} XP</div></div></div>`})}
-        
-        window.toggleLike=async(id,likes)=>{const r=doc(db,"logs",id);if(likes&&likes.includes(currentUser.uid))await updateDoc(r,{likes:arrayRemove(currentUser.uid)});else{await updateDoc(r,{likes:arrayUnion(currentUser.uid)});await addXP(2)}};
-        window.deletePost=async(id)=>{if(confirm("削除？"))await deleteDoc(doc(db,"logs",id))};
-        window.openChat=(u,n)=>{currentChatUser=u;document.getElementById('chat-target-name').innerText=n;switchTab('chat');loadMessages(u)};
-        function loadMessages(t){const c=[currentUser.uid,t].sort().join("_"); onSnapshot(query(collection(db,"chats",c,"messages"),orderBy("createdAt","asc"),limit(50)),(s)=>{const d=document.getElementById('chat-messages');d.innerHTML="";s.forEach(o=>{const v=o.data();const m=v.senderId===currentUser.uid;d.innerHTML+=`<div class="flex ${m?'justify-end':'justify-start'}"><div class="max-w-[75%] p-3 rounded-2xl text-sm ${m?'bg-accent text-white rounded-br-none':'bg-gray-100 dark:bg-gray-800 rounded-bl-none'}">${v.text}</div></div>`});d.scrollTop=d.scrollHeight})}
-        document.getElementById('chat-send-btn').onclick=async()=>{const t=document.getElementById('chat-input').value;if(!t.trim())return;const e=new Date();e.setDate(e.getDate()+90);await addDoc(collection(db,"chats",[currentUser.uid,currentChatUser].sort().join("_"),"messages"),{text:t,senderId:currentUser.uid,createdAt:serverTimestamp(),expireAt:e});document.getElementById('chat-input').value=""};
-        
-        function timeAgo(d){const s=Math.floor((new Date()-d)/1000);if(s<60)return"今";const m=Math.floor(s/60);if(m<60)return m+"分前";const h=Math.floor(m/60);if(h<24)return h+"時間前";return Math.floor(h/24)+"日前"}
-        function injectAd(c){const a=document.createElement('div');a.className="p-4 text-center opacity-50 text-[10px]";a.innerHTML='SPONSORED<ins class="adsbygoogle" style="display:block" data-ad-format="fluid" data-ad-layout-key="-gw-3+1f-3d+2z" data-ad-client="ca-pub-1539164935971262" data-ad-slot="5232313517"></ins>';c.appendChild(a);(window.adsbygoogle=window.adsbygoogle||[]).push({})}
-        
-        window.openProfileEditor=()=>{document.getElementById('profile-modal').classList.remove('hidden');if(myProfile){document.getElementById('edit-name-input').value=myProfile.name;document.getElementById('edit-icon-url').value=myProfile.icon;document.getElementById('edit-preview-icon').src=myProfile.icon}else generateRandomIcon()};
-        function generateRandomIcon(){const u=`https://api.dicebear.com/7.x/notionists/svg?seed=${Math.random().toString(36).substring(7)}`;document.getElementById('edit-icon-url').value=u;document.getElementById('edit-preview-icon').src=u}
-        document.getElementById('random-icon-btn').onclick=generateRandomIcon;
-        document.getElementById('save-profile-btn').onclick=async()=>{const n=document.getElementById('edit-name-input').value,i=document.getElementById('edit-icon-url').value;if(!n)return;await setDoc(doc(db,"users",currentUser.uid),{name:n,icon:i,updatedAt:serverTimestamp()},{merge:true});myProfile.name=n;myProfile.icon=i;initApp()};
-        window.createRipple=(e)=>{const c=document.createElement("div");c.classList.add("ripple");c.style.left=`${e.clientX-10}px`;c.style.top=`${e.clientY-10}px`;document.body.appendChild(c);setTimeout(()=>c.remove(),600)};
-        window.switchTab=(t)=>{['home','users','chat','profile'].forEach(x=>document.getElementById(`tab-${x}`).classList.add('hidden'));document.getElementById(`tab-${t}`).classList.remove('hidden');document.querySelectorAll('.nav-btn').forEach(b=>b.classList.add('opacity-40'));const a=document.querySelector(`.nav-btn[data-target="${t}"]`);if(a)a.classList.remove('opacity-40')};
+
+        window.openChat = (u,n) => { currentChatUser = u; document.getElementById('chat-target-name').innerText = n; switchTab('chat'); loadMessages(u); };
+        function loadMessages(t) {
+            const c = [currentUser.uid, t].sort().join("_");
+            onSnapshot(query(collection(db, "chats", c, "messages"), orderBy("createdAt", "asc"), limit(50)), (s) => {
+                const d = document.getElementById('chat-messages'); d.innerHTML = "";
+                s.forEach(o => {
+                    const v = o.data();
+                    const m = v.senderId === currentUser.uid;
+                    d.innerHTML += `<div class="flex ${m?'justify-end':'justify-start'}"><div class="max-w-[75%] p-3 rounded-2xl text-sm ${m?'bg-blue-600 text-white':'bg-gray-100'}">${v.text}</div></div>`;
+                });
+                d.scrollTop = d.scrollHeight;
+            });
+        }
+        document.getElementById('chat-send-btn').onclick = async () => {
+            const t = document.getElementById('chat-input').value; if(!t.trim()) return;
+            await addDoc(collection(db, "chats", [currentUser.uid, currentChatUser].sort().join("_"), "messages"), { text: t, senderId: currentUser.uid, createdAt: serverTimestamp() });
+            document.getElementById('chat-input').value = "";
+        };
+
+        function timeAgo(d) { const s = Math.floor((new Date()-d)/1000); if(s<60)return"今"; const m=Math.floor(s/60); if(m<60)return m+"分前"; return Math.floor(m/60)+"時間前"; }
+        window.switchTab = (t) => { ['home','users','chat','profile'].forEach(x => document.getElementById(`tab-${x}`).classList.add('hidden')); document.getElementById(`tab-${t}`).classList.remove('hidden'); };
     </script>
-    <style>
-        @keyframes shimmer { 0% {transform: translateX(-100%)} 100% {transform: translateX(100%)} }
-    </style>
 </body>
 </html>
