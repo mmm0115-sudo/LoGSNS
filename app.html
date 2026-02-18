@@ -1,404 +1,71 @@
-<!DOCTYPE html>
-<html lang="ja">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>LoG Beta 5.3</title>
-    
-    <link rel="manifest" href="manifest.json">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1539164935971262" crossorigin="anonymous"></script>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&family=Noto+Sans+JP:wght@400;500;700;900&display=swap" rel="stylesheet">
+能: テキストだけで盛り上がれる最強の機能。
 
-    <style>
-        :root { --primary: #000000; --bg: #ffffff; --text: #0f1419; --border: #eff3f4; }
-        body { background-color: var(--bg); color: var(--text); font-family: 'Inter', 'Noto Sans JP', sans-serif; overflow-x: hidden; -webkit-tap-highlight-color: transparent; }
-        .hidden { display: none !important; }
-        
-        .btn-black { background: #0f1419; color: white; border-radius: 9999px; padding: 6px 16px; font-weight: 700; font-size: 0.9rem; transition: 0.2s; }
-        .btn-black:disabled { opacity: 0.5; }
-        
-        .nav-item { color: #536471; padding: 10px; transition: 0.2s; }
-        .nav-active { color: #0f1419; }
+【Beta 7】 ゲーミフィケーション深化（中毒性の強化）
 
-        .quote-box { border: 1px solid var(--border); border-radius: 12px; padding: 12px; margin-top: 12px; font-size: 0.95rem; color: var(--text); }
-        .like-active { color: #f91880 !important; }
-        .like-anim { animation: heartPop 0.2s ease-out; }
-        @keyframes heartPop { 0%{transform:scale(1);} 50%{transform:scale(1.3);} 100%{transform:scale(1);} }
+ランク機能をもっと面白くし、毎日ログインしないと損する仕組みを作ります。
 
-        /* ランク色定義 */
-        .rank-bronze { color: #cd7f32; }
-        .rank-silver { color: #708090; }
-        .rank-gold { color: #d4af37; font-weight: 900; }
-        .rank-diamond { color: #00bfff; font-weight: 900; }
-        .rank-obsidian { background: linear-gradient(90deg, #ff0000, #000000); -webkit-background-clip: text; color: transparent; font-weight: 900; }
+ログインボーナス演出: 1日1回、派手な演出でXPを付与。
 
-        .modal-overlay { background: rgba(0,0,0,0.4); backdrop-filter: blur(2px); }
-    </style>
-</head>
-<body>
+実績バッジシステム: 「初投稿」「100いいね達成」「皆勤賞」などのバッジをプロフィールに飾れるようにする。
 
-    <div id="login-screen" class="min-h-screen flex flex-col items-center justify-center p-8 bg-white">
-        <div class="mb-12 text-center">
-            <h1 class="text-5xl font-black tracking-tighter mb-2">LoG</h1>
-            <span class="text-xs font-bold text-gray-400 tracking-widest">BETA 5.3</span>
-        </div>
-        <div class="w-full max-w-xs space-y-4">
-            <button id="google-login-btn" class="w-full border border-gray-300 py-2.5 rounded-full font-bold flex justify-center items-center gap-2 hover:bg-gray-50 transition">
-                <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" class="w-5 h-5"> Googleで続ける
-            </button>
-            <div class="flex items-center gap-3 text-xs text-gray-300 my-4"><div class="h-px bg-gray-200 flex-1"></div>または<div class="h-px bg-gray-200 flex-1"></div></div>
-            <input id="auth-email" type="email" placeholder="メールアドレス" class="w-full border border-gray-300 rounded-md p-3 outline-none">
-            <input id="auth-password" type="password" placeholder="パスワード" class="w-full border border-gray-300 rounded-md p-3 outline-none">
-            <button id="email-login-btn" class="w-full bg-black text-white py-3 rounded-full font-bold">ログイン</button>
-            <button id="email-signup-btn" class="w-full border border-gray-300 text-black py-3 rounded-full font-bold">アカウント作成</button>
-        </div>
-    </div>
+ランキングボード: 上位10人のユーザーを張り出す。
 
-    <div id="app-screen" class="hidden max-w-xl mx-auto min-h-screen bg-white shadow-xl relative pb-16 border-x border-gray-50">
-        
-        <header class="sticky top-0 bg-white/90 backdrop-blur-md z-30 border-b border-gray-100 px-4 py-3 flex justify-between items-center cursor-pointer" onclick="window.scrollTo(0,0)">
-            <img id="header-icon" src="" class="w-8 h-8 rounded-full object-cover" onclick="switchTab('profile')">
-            <div class="text-xl font-black">LoG</div>
-            <div class="w-8"></div>
-        </header>
+【Beta 8】 パーソナライズ（自分だけのLoG）
 
-        <div id="tab-home" class="pb-24">
-            <div class="p-4 border-b border-gray-100 flex gap-3">
-                <img id="input-icon" src="" class="w-10 h-10 rounded-full bg-gray-100 object-cover">
-                <div class="flex-1">
-                    <textarea id="post-text" rows="2" placeholder="いまどうしてる？ (+15 XP)" class="w-full text-lg resize-none mb-2 focus:outline-none placeholder-gray-400"></textarea>
-                    
-                    <div id="quote-preview" class="hidden mb-3 p-3 rounded-xl border border-gray-200 text-sm text-gray-500 relative">
-                        <button onclick="cancelQuote()" class="absolute top-1 right-2 text-lg text-gray-400">×</button>
-                        <div class="font-bold text-black mb-1" id="quote-target-name"></div>
-                        <div class="truncate" id="quote-target-text"></div>
-                    </div>
+ユーザーが愛着を持てるようにします。
 
-                    <div class="flex justify-between items-center pt-2 border-t border-gray-100">
-                        <span id="xp-indicator" class="text-xs font-bold text-blue-500 opacity-0 transition">Next Level: <span id="next-xp">...</span></span>
-                        <button id="post-btn" class="btn-black">ポストする</button>
-                    </div>
-                </div>
-            </div>
-            <div id="timeline"></div>
-        </div>
+ダークモード切替: 「設定」で白/黒を選べるようにする（今はOS設定依存か白固定なので）。
 
-        <div id="tab-explore" class="hidden">
-            <div class="p-3 border-b border-gray-100 font-bold text-lg px-4 flex justify-between items-center">
-                <span>ユーザー & ランク</span>
-                <span class="text-xs bg-gray-100 px-2 py-1 rounded">XP順</span>
-            </div>
-            <div id="user-list" class="divide-y divide-gray-50"></div>
-        </div>
+プロフィール充実: 自己紹介文（Bio）、リンク、固定ポスト（Pinned Post）の実装。
 
-        <div id="tab-chat" class="hidden h-[calc(100vh-130px)] flex flex-col">
-            <div class="p-3 border-b flex items-center gap-4 sticky top-14 bg-white z-10 px-4">
-                <button onclick="switchTab('explore')"><span class="material-icons-round text-2xl">arrow_back</span></button>
-                <span id="chat-target-name" class="font-bold text-lg"></span>
-            </div>
-            <div id="chat-messages" class="flex-1 overflow-y-auto p-4 space-y-2 bg-white"></div>
-            <div class="p-3 border-t bg-white flex gap-2 items-center">
-                <input id="chat-input" type="text" class="flex-1 bg-gray-100 rounded-full px-4 py-2 text-sm outline-none" placeholder="メッセージ...">
-                <button id="chat-send-btn" class="text-blue-500 p-2"><span class="material-icons-round">send</span></button>
-            </div>
-        </div>
+【Beta 9】 安全性と管理（荒らし対策・設定）
 
-        <div id="tab-profile" class="hidden">
-            <div id="demote-alert" class="hidden bg-red-500 text-white text-xs font-bold p-2 text-center">⚠ 放置ペナルティが発生しました (-XP)</div>
-            <div class="h-32 bg-gray-200 w-full relative"></div>
-            <div class="px-4 relative mb-4">
-                <img id="profile-big-icon" src="" class="w-20 h-20 rounded-full border-4 border-white absolute -top-10 bg-white object-cover">
-                <div class="flex justify-end pt-3 gap-2">
-                    <button onclick="openProfileEditor()" class="border border-gray-300 font-bold text-sm px-4 py-1.5 rounded-full hover:bg-gray-50">編集</button>
-                    <button onclick="signOutApp()" class="border border-red-200 text-red-500 font-bold text-sm px-4 py-1.5 rounded-full hover:bg-red-50">ログアウト</button>
-                </div>
-                <div class="mt-3">
-                    <h2 id="profile-name" class="text-xl font-black leading-tight"></h2>
-                    <p id="profile-league" class="text-xs font-bold uppercase tracking-widest text-blue-500 mt-1 mb-1">Unranked</p>
-                    
-                    <div class="w-full bg-gray-100 rounded-full h-2.5 mt-2 overflow-hidden">
-                        <div id="xp-bar" class="bg-black h-2.5 rounded-full" style="width: 0%"></div>
-                    </div>
-                    <div class="flex justify-between text-xs text-gray-400 mt-1">
-                        <span id="current-xp">0 XP</span>
-                        <span id="next-level-xp">100 XP</span>
-                    </div>
-                </div>
-            </div>
-            <div id="my-timeline" class="divide-y divide-gray-50 border-t border-gray-100 mt-4"></div>
-        </div>
+ストアに出したり、友達以外に広めるなら必須の機能です。
 
-        <nav class="fixed bottom-0 w-full max-w-xl bg-white border-t border-gray-100 flex justify-around py-3 z-40 pb-5">
-            <button onclick="switchTab('home')" class="nav-item nav-active" data-target="home"><span class="material-icons-round text-3xl">home</span></button>
-            <button onclick="switchTab('explore')" class="nav-item" data-target="explore"><span class="material-icons-round text-3xl">emoji_events</span></button>
-            <button onclick="switchTab('profile')" class="nav-item" data-target="profile"><span class="material-icons-round text-3xl">person</span></button>
-        </nav>
-    </div>
+ブロック / ミュート機能: 嫌なユーザーを見えなくする。
 
-    <div id="profile-modal" class="modal-overlay hidden fixed inset-0 z-50 flex items-center justify-center">
-        <div class="bg-white p-6 rounded-2xl w-80 shadow-2xl">
-            <h2 class="text-xl font-bold mb-6">アカウント設定</h2>
-            <input id="edit-name-input" type="text" class="w-full border border-gray-300 rounded p-3 mb-4 font-bold outline-none" placeholder="名前">
-            <button id="save-profile-btn" class="w-full bg-black text-white font-bold py-3 rounded-full">保存</button>
-        </div>
-    </div>
+通報ボタン: 不適切な投稿を管理者に知らせる。
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-        import { getFirestore, collection, addDoc, query, orderBy, limit, onSnapshot, serverTimestamp, doc, getDoc, setDoc, updateDoc, arrayUnion, arrayRemove, deleteDoc, increment } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+アカウント削除 / 名前変更: 設定画面を作る。
 
-        const firebaseConfig = {
-            apiKey: "AIzaSyCA4NQzxcz2gh8uaw3LKrKl_NEnE_fMybs",
-            authDomain: "lo-g-8a620.firebaseapp.com",
-            projectId: "lo-g-8a620",
-            storageBucket: "lo-g-8a620.firebasestorage.app",
-            messagingSenderId: "780857099698",
-            appId: "1:780857099698:web:b6cb359114da98ab3e50ab"
-        };
+【v1.0】 正式リリース（完成）
 
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
-        
-        let currentUser = null, myProfile = null;
-        let quoteData = null; 
-        let currentChatUser = null;
+高速化チューニング: コードを整理して爆速にする。
 
-        // ★ ランク定義
-        const LEAGUES = [
-            { name: "Unranked", min: 0, class: "text-gray-900" },
-            { name: "Bronze", min: 50, class: "rank-bronze" },
-            { name: "Silver", min: 200, class: "rank-silver" },
-            { name: "Gold", min: 500, class: "rank-gold" },
-            { name: "Diamond", min: 1000, class: "rank-diamond" },
-            { name: "Obsidian", min: 2000, class: "rank-obsidian" }
-        ];
+SEO完全対応: Google検索でトップを狙うためのメタタグ設定。
 
-        const authErr = (e) => alert(e.message);
-        document.getElementById('google-login-btn').onclick = () => signInWithPopup(auth, new GoogleAuthProvider()).catch(authErr);
-        document.getElementById('email-login-btn').onclick = () => signInWithEmailAndPassword(auth, document.getElementById('auth-email').value, document.getElementById('auth-password').value).catch(authErr);
-        document.getElementById('email-signup-btn').onclick = () => createUserWithEmailAndPassword(auth, document.getElementById('auth-email').value, document.getElementById('auth-password').value).catch(authErr);
-        window.signOutApp = () => signOut(auth);
+OGP画像生成: LINEやTwitterでシェアされた時に、かっこいい画像が出るようにする。
 
-        onAuthStateChanged(auth, async (user) => {
-            if (user) {
-                currentUser = user;
-                try {
-                    const userDoc = await getDoc(doc(db, "users", user.uid));
-                    if (userDoc.exists()) { 
-                        myProfile = userDoc.data(); 
-                        await checkDailyPenalty(); // ★サボりチェック
-                        initApp(); 
-                    } else { 
-                        document.getElementById('login-screen').classList.add('hidden'); 
-                        document.getElementById('profile-modal').classList.remove('hidden'); 
-                    }
-                } catch(e) { console.error(e); }
-            } else {
-                document.getElementById('login-screen').classList.remove('hidden');
-                document.getElementById('app-screen').classList.add('hidden');
-            }
-        });
+💡 あった方がいいな？と思う機能リスト（提案）
 
-        // ★ サボりペナルティ
-        async function checkDailyPenalty() {
-            const now = new Date();
-            const lastLogin = myProfile.lastLogin ? myProfile.lastLogin.toDate() : now;
-            const diffHours = Math.abs(now - lastLogin) / 36e5;
+ハルトくんの「テキスト特化」「ランクシステム」という強みを活かすなら、以下の機能がおすすめです。**「どれから作りたいか」**教えてください。
 
-            if (diffHours > 24 && myProfile.xp > 0) {
-                const penalty = Math.floor(myProfile.xp * 0.1) + 5;
-                await updateDoc(doc(db, "users", currentUser.uid), { 
-                    xp: increment(-penalty),
-                    lastLogin: serverTimestamp() 
-                });
-                myProfile.xp = Math.max(0, myProfile.xp - penalty);
-                document.getElementById('demote-alert').innerText = `⚠ 放置ペナルティ: -${penalty} XP`;
-                document.getElementById('demote-alert').classList.remove('hidden');
-            } else {
-                await updateDoc(doc(db, "users", currentUser.uid), { lastLogin: serverTimestamp() });
-            }
-        }
+📊 アンケート機能 (Polls)
 
-        function initApp() {
-            document.getElementById('login-screen').classList.add('hidden');
-            document.getElementById('app-screen').classList.remove('hidden');
-            document.getElementById('profile-modal').classList.add('hidden');
-            updateProfileUI();
-            loadTimeline();
-            loadUserList();
-        }
+内容: X(Twitter)にあるような投票機能。「きのこ vs たけのこ」「今日の晩御飯なにがいい？」など、テキストだけで盛り上がれます。
 
-        // ★ XP/ランク UI更新
-        function updateProfileUI() {
-            const icon = myProfile.icon || `https://api.dicebear.com/7.x/notionists/svg?seed=${currentUser.uid}`;
-            document.getElementById('header-icon').src = icon;
-            document.getElementById('input-icon').src = icon;
-            document.getElementById('profile-big-icon').src = icon;
-            
-            const xp = myProfile.xp || 0;
-            let league = LEAGUES[0];
-            let nextLeague = LEAGUES[1];
+難易度: ★★★☆☆ (データベースの設計が少し難しいが、面白い)
 
-            for(let i=0; i<LEAGUES.length; i++) {
-                if(xp >= LEAGUES[i].min) {
-                    league = LEAGUES[i];
-                    nextLeague = LEAGUES[i+1] || null;
-                }
-            }
+🌙 ダークモード手動スイッチ
 
-            // 名前色反映
-            const nameEl = document.getElementById('profile-name');
-            nameEl.innerText = myProfile.name || "No Name";
-            nameEl.className = `text-xl font-black leading-tight ${league.class}`;
+内容: 画面のどこかに「月/太陽」のスイッチを置いて、瞬時に色テーマを変えられるようにする。エンジニアっぽくてカッコいい。
 
-            document.getElementById('profile-league').innerText = `${league.name} LEAGUE`;
-            document.getElementById('current-xp').innerText = `${xp} XP`;
-            
-            let progress = 100;
-            if (nextLeague) {
-                const range = nextLeague.min - league.min;
-                const current = xp - league.min;
-                progress = (current / range) * 100;
-                document.getElementById('next-level-xp').innerText = `Next: ${nextLeague.min} XP`;
-                document.getElementById('next-xp').innerText = `${nextLeague.min - xp} XP`;
-            } else {
-                document.getElementById('next-level-xp').innerText = "MAX RANK";
-                document.getElementById('next-xp').innerText = "MAX";
-            }
-            document.getElementById('xp-bar').style.width = `${progress}%`;
-        }
+難易度: ★★☆☆☆ (CSS変数を切り替えるだけ)
 
-        async function addXP(amount) {
-            const ref = doc(db, "users", currentUser.uid);
-            await updateDoc(ref, { xp: increment(amount) });
-            if(!myProfile.xp) myProfile.xp = 0;
-            myProfile.xp += amount;
-            updateProfileUI();
-        }
+🔔 通知センター (In-App Notifications)
 
-        // --- タイムライン ---
-        function loadTimeline() {
-            const q = query(collection(db, "logs"), orderBy("createdAt", "desc"), limit(50));
-            onSnapshot(q, (snap) => {
-                const container = document.getElementById('timeline');
-                container.innerHTML = "";
-                snap.docs.forEach((doc) => {
-                    try {
-                        const d = doc.data();
-                        const isMine = d.uid === currentUser.uid;
-                        const isLiked = d.likes && d.likes.includes(currentUser.uid);
-                        
-                        // ★ ランク色を再現 (保存されたクラスがあれば使う)
-                        const nameClass = d.leagueClass || "text-gray-900";
+内容: 「誰がいいねしたか」「誰が返信したか」が一覧で見れる画面（タブ）。今は「いいね数」しか分からないので、承認欲求を満たすために必須。
 
-                        const div = document.createElement('div');
-                        div.className = "p-4 border-b border-gray-50 flex gap-3 cursor-pointer hover:bg-gray-50 transition";
-                        div.innerHTML = `
-                            <img src="${d.authorIcon}" class="w-10 h-10 rounded-full bg-gray-200 object-cover flex-shrink-0">
-                            <div class="flex-1 min-w-0">
-                                <div class="flex justify-between items-baseline">
-                                    <div class="flex items-center gap-1 overflow-hidden">
-                                        <span class="font-bold text-[15px] truncate ${nameClass}">${d.authorName}</span>
-                                        <span class="text-gray-500 text-sm truncate">@${d.uid.slice(0,8)}</span>
-                                        <span class="text-gray-500 text-sm">· ${timeAgo(d.createdAt ? d.createdAt.toDate() : new Date())}</span>
-                                    </div>
-                                    ${isMine ? `<button onclick="deletePost('${doc.id}')" class="text-gray-300 hover:text-red-500"><span class="material-icons-round text-lg">more_horiz</span></button>` : ''}
-                                </div>
-                                <p class="text-[15px] text-gray-900 leading-relaxed mt-0.5 whitespace-pre-wrap">${d.text}</p>
-                                ${d.quote ? `<div class="quote-box"><div class="font-bold text-sm mb-1">${d.quote.name}</div><div class="truncate">${d.quote.text}</div></div>` : ''}
+難易度: ★★★★☆ (データの保存と読み出しが増える)
 
-                                <div class="flex justify-between mt-3 max-w-xs text-gray-500">
-                                    <button onclick="window.setQuote('${d.text}', '${d.authorName}')" class="flex items-center gap-2 group hover:text-green-500 transition">
-                                        <span class="material-icons-round text-[18px] group-hover:bg-green-50 rounded-full p-1">cached</span>
-                                    </button>
-                                    <button onclick="event.stopPropagation(); toggleLike('${doc.id}', ${JSON.stringify(d.likes||[])}) " class="flex items-center gap-2 group ${isLiked ? 'like-active' : 'hover:text-pink-500'}">
-                                        <span class="material-icons-round text-[18px] group-hover:bg-pink-50 rounded-full p-1 ${isLiked ? 'like-anim' : ''}">${isLiked ? 'favorite' : 'favorite_border'}</span>
-                                        <span class="text-xs">${d.likes ? d.likes.length : ''}</span>
-                                    </button>
-                                </div>
-                            </div>
-                        `;
-                        container.appendChild(div);
-                    } catch(e) {}
-                });
-            });
-            // プロフィール用
-            const myQ = query(collection(db, "logs"), orderBy("createdAt", "desc"), limit(20));
-            onSnapshot(myQ, (s) => {
-                const c = document.getElementById('my-timeline'); c.innerHTML = "";
-                s.docs.forEach(doc => { if(doc.data().uid === currentUser.uid) { 
-                    const d = doc.data(); 
-                    c.innerHTML += `<div class="p-4 border-b border-gray-50"><p class="text-sm">${d.text}</p><div class="text-xs text-gray-400 mt-1">${timeAgo(d.createdAt?d.createdAt.toDate():new Date())}</div></div>`;
-                }});
-            });
-        }
+📌 固定ポスト (Pinned Post)
 
-        // --- 機能群 ---
-        window.setQuote = (text, name) => { quoteData = { text, name }; document.getElementById('quote-preview').classList.remove('hidden'); document.getElementById('quote-target-name').innerText = name; document.getElementById('quote-target-text').innerText = text; document.getElementById('post-text').focus(); };
-        window.cancelQuote = () => { quoteData = null; document.getElementById('quote-preview').classList.add('hidden'); };
+内容: 自分のプロフィールのてっぺんに、自信作のポストを1つだけ固定できる機能。自己紹介代わりに使える。
 
-        document.getElementById('post-btn').onclick = async () => {
-            const text = document.getElementById('post-text').value; if(!text.trim()) return;
-            const exp = new Date(); exp.setDate(exp.getDate() + 90);
-            
-            // ★ ランク色を投稿に保存
-            const leagueClass = document.getElementById('profile-name').className.replace('text-xl font-black leading-tight ', '');
+難易度: ★★☆☆☆ (比較的簡単)
 
-            const data = { 
-                text, uid: currentUser.uid, authorName: myProfile.name, authorIcon: myProfile.icon, 
-                leagueClass: leagueClass, // ★色保存
-                createdAt: serverTimestamp(), expireAt: exp, likes: [] 
-            };
-            if(quoteData) data.quote = quoteData;
-            await addDoc(collection(db, "logs"), data);
-            await addXP(15); // ★XPゲット
-            document.getElementById('post-text').value = "";
-            cancelQuote();
-        };
+🏆 連続ログイン記録 (Login Streak)
 
-        // --- ユーザーリスト (ランク表示) ---
-        async function loadUserList() {
-            const list = document.getElementById('user-list');
-            // ★XP順に表示
-            onSnapshot(query(collection(db, "users"), orderBy("xp", "desc"), limit(50)), (snap) => {
-                list.innerHTML = "";
-                snap.forEach(doc => {
-                    if (doc.id === currentUser.uid) return;
-                    const d = doc.data();
-                    list.innerHTML += `<div onclick="openChat('${doc.id}','${d.name}')" class="p-4 flex items-center gap-3 hover:bg-gray-50 cursor-pointer"><img src="${d.icon}" class="w-10 h-10 rounded-full object-cover"><div class="flex-1"><div class="font-bold text-gray-900 text-sm">${d.name} <span class="text-xs text-blue-500 bg-blue-50 px-1 rounded ml-1">${d.xp||0} XP</span></div><div class="text-gray-500 text-xs">@${doc.id.slice(0,8)}</div></div><span class="material-icons-round text-gray-300">navigate_next</span></div>`;
-                });
-            });
-        }
+内容: 「🔥 5日連続ログイン中！」のように表示し、途切れたら0に戻る。Duolingoのような中毒性を生む。
 
-        // --- チャット ---
-        window.openChat = (u,n) => { currentChatUser = u; document.getElementById('chat-target-name').innerText = n; switchTab('chat'); loadMessages(u); };
-        function loadMessages(t) {
-            onSnapshot(query(collection(db, "chats", [currentUser.uid, t].sort().join("_"), "messages"), orderBy("createdAt", "asc"), limit(50)), (s) => {
-                const d = document.getElementById('chat-messages'); d.innerHTML = "";
-                s.forEach(o => { const v = o.data(); const m = v.senderId === currentUser.uid; d.innerHTML += `<div class="flex ${m?'justify-end':'justify-start'}"><div class="max-w-[80%] px-4 py-2 rounded-2xl text-[15px] ${m?'bg-blue-500 text-white':'bg-gray-100 text-gray-900'}">${v.text}</div></div>`; });
-                d.scrollTop = d.scrollHeight;
-            });
-        }
-        document.getElementById('chat-send-btn').onclick = async () => { const t = document.getElementById('chat-input').value; if(!t.trim()) return; await addDoc(collection(db, "chats", [currentUser.uid, currentChatUser].sort().join("_"), "messages"), { text: t, senderId: currentUser.uid, createdAt: serverTimestamp() }); document.getElementById('chat-input').value = ""; };
-
-        // --- 共通 ---
-        window.toggleLike = async (id, likes) => { 
-            const ref = doc(db, "logs", id); 
-            if(likes && likes.includes(currentUser.uid)) await updateDoc(ref, { likes: arrayRemove(currentUser.uid) }); 
-            else { await updateDoc(ref, { likes: arrayUnion(currentUser.uid) }); await addXP(2); } // ★XPゲット
-        };
-        window.deletePost = async (id) => { if(confirm("削除しますか？")) await deleteDoc(doc(db, "logs", id)); };
-        function timeAgo(d) { const s = Math.floor((new Date()-d)/1000); if(s<60)return"1m"; const m=Math.floor(s/60); if(m<60)return m+"m"; const h=Math.floor(m/60); if(h<24)return h+"h"; return Math.floor(h/24)+"d"; }
-
-        document.getElementById('save-profile-btn').onclick = async () => { const name = document.getElementById('edit-name-input').value; if(!name) return; await setDoc(doc(db, "users", currentUser.uid), { name, icon: `https://api.dicebear.com/7.x/notionists/svg?seed=${currentUser.uid}`, updatedAt: serverTimestamp(), xp: 0 }, { merge: true }); location.reload(); };
-        window.openProfileEditor = () => document.getElementById('profile-modal').classList.remove('hidden');
-        window.switchTab = (t) => { ['home','explore','chat','profile'].forEach(x => document.getElementById(`tab-${x}`).classList.add('hidden')); document.getElementById(`tab-${t}`).classList.remove('hidden'); document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('nav-active')); const b = document.querySelector(`.nav-item[data-target="${t}"]`); if(b) b.classList.add('nav-active'); };
-    </script>
-</body>
-</html>
+難易度: ★★★☆☆ (日付計算のロジックが必要)
