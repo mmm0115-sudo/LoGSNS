@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>LoG v1.1</title>
+    <title>LoG v1.2</title>
     
     <link rel="manifest" href="manifest.json">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -29,8 +29,7 @@
 
         .btn-primary { background: var(--text); color: var(--bg); border-radius: 99px; padding: 6px 16px; font-weight: 700; font-size: 0.85rem; transition: 0.2s; }
         .btn-ghost { color: var(--subtext); padding: 8px; border-radius: 50%; }
-        .btn-ghost:hover { background: rgba(128,128,128,0.1); color: var(--accent); }
-        .btn-follow { border: 1px solid var(--border); color: var(--text); padding: 4px 12px; border-radius: 99px; font-size: 0.75rem; font-weight: bold; }
+        .btn-follow { border: 1px solid var(--border); color: var(--text); padding: 6px 16px; border-radius: 99px; font-size: 0.85rem; font-weight: bold; }
         .btn-follow.following { background: var(--text); color: var(--bg); border-color: var(--text); }
 
         .nav-item { color: var(--subtext); padding: 12px; position: relative; }
@@ -38,9 +37,6 @@
         .nav-badge { position: absolute; top: 8px; right: 8px; width: 8px; height: 8px; background: var(--danger); border-radius: 50%; display: none; }
 
         .post-card { border-bottom: 1px solid var(--border); padding: 16px; }
-        .tab-active { border-bottom: 2px solid var(--text); color: var(--text); }
-        .tab-inactive { color: var(--subtext); }
-
         .poll-container { border: 1px solid var(--border); border-radius: 12px; margin-top: 10px; overflow: hidden; }
         .poll-option { padding: 8px 12px; position: relative; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); }
         .poll-fill { position: absolute; left: 0; top: 0; height: 100%; background: var(--accent); opacity: 0.15; }
@@ -51,6 +47,13 @@
         
         .like-active { color: #f91880 !important; }
         .modal-overlay { background: rgba(0,0,0,0.7); backdrop-filter: blur(5px); }
+
+        /* ミッション用スタイル */
+        .mission-card { background: var(--bg); border: 1px solid var(--border); border-radius: 12px; padding: 12px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; }
+        .mission-progress { height: 6px; background: var(--border); border-radius: 3px; overflow: hidden; width: 100px; }
+        .mission-bar { height: 100%; background: var(--success); transition: width 0.3s; }
+        .mission-completed { color: var(--subtext); opacity: 0.7; }
+        .mission-check { color: var(--success); font-weight: bold; }
     </style>
 </head>
 <body>
@@ -58,7 +61,7 @@
     <!-- Login -->
     <div id="login-screen" class="min-h-screen flex flex-col items-center justify-center p-8 bg-white dark:bg-black transition-colors">
         <h1 class="text-7xl font-black tracking-tighter mb-4 text-black dark:text-white">LoG</h1>
-        <div class="inline-block bg-black dark:bg-white text-white dark:text-black px-4 py-1 rounded-full text-xs font-bold tracking-[0.3em] mb-12">v1.1 FIX</div>
+        <div class="inline-block bg-black dark:bg-white text-white dark:text-black px-4 py-1 rounded-full text-xs font-bold tracking-[0.3em] mb-12">v1.2 MISSION</div>
         <div class="w-full max-w-sm space-y-4">
             <button id="google-login-btn" class="w-full border border-gray-300 dark:border-gray-700 py-3 rounded-full font-bold flex justify-center items-center gap-3 hover:bg-gray-50 dark:hover:bg-gray-900 transition">
                 <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" class="w-5 h-5"> Google
@@ -144,9 +147,18 @@
                 </div>
                 <h2 id="profile-name" class="text-2xl font-black leading-tight"></h2>
                 <p id="profile-uid" class="text-sm text-[var(--subtext)] font-mono">@user</p>
+                
                 <div class="flex items-center gap-4 mt-3">
                     <div class="flex items-center gap-1"><span class="font-bold" id="profile-xp">0</span> <span class="text-xs text-[var(--subtext)]">XP</span></div>
                     <div class="flex items-center gap-1"><span class="font-bold" id="profile-rank">Unranked</span></div>
+                </div>
+
+                <!-- ミッションエリア -->
+                <div class="mt-6 mb-2">
+                    <div class="text-xs font-bold text-[var(--subtext)] mb-2 uppercase tracking-widest">Daily Missions</div>
+                    <div id="mission-list">
+                        <!-- JSで生成 -->
+                    </div>
                 </div>
             </div>
             
@@ -166,7 +178,10 @@
             <div class="px-4 py-6">
                 <div class="flex justify-between items-start mb-4">
                     <img id="other-icon" src="" class="w-20 h-20 rounded-full border-4 border-[var(--bg)] object-cover shadow-sm">
-                    <button id="other-follow-btn" class="btn-primary">フォロー</button>
+                    <div class="flex gap-2">
+                        <button id="other-dm-btn" class="btn-primary bg-transparent text-[var(--text)] border border-[var(--border)]"><span class="material-icons-round text-lg">mail</span></button>
+                        <button id="other-follow-btn" class="btn-primary">フォロー</button>
+                    </div>
                 </div>
                 <h2 id="other-name" class="text-2xl font-black leading-tight"></h2>
                 <p id="other-uid" class="text-sm text-[var(--subtext)] font-mono"></p>
@@ -177,6 +192,19 @@
             </div>
             <div class="border-b border-[var(--border)] font-bold px-4 py-2 text-sm">ポスト</div>
             <div id="other-timeline" class="divide-y divide-[var(--border)]"></div>
+        </div>
+
+        <!-- C. Chat -->
+        <div id="tab-chat" class="hidden h-[calc(100vh-130px)] flex flex-col">
+            <div class="p-3 border-b border-[var(--border)] flex items-center gap-4 sticky top-14 bg-[var(--bg)] z-10 px-4">
+                <button onclick="history.back()"><span class="material-icons-round text-2xl">arrow_back</span></button>
+                <span id="chat-target-name" class="font-bold text-lg"></span>
+            </div>
+            <div id="chat-messages" class="flex-1 overflow-y-auto p-4 space-y-2 bg-[var(--bg)]"></div>
+            <div class="p-3 border-t border-[var(--border)] bg-[var(--bg)] flex gap-2 items-center">
+                <input id="chat-input" type="text" class="flex-1 bg-[var(--border)]/50 rounded-full px-4 py-2 text-sm outline-none focus:bg-[var(--bg)] focus:ring-2 focus:ring-blue-500 transition" placeholder="メッセージを作成">
+                <button id="chat-send-btn" class="text-blue-500 p-2 font-bold"><span class="material-icons-round">send</span></button>
+            </div>
         </div>
 
         <!-- Navigation -->
@@ -219,9 +247,15 @@
         const db = getFirestore(app);
 
         let currentUser=null, myProfile=null, quoteData=null, isPoll=false;
-        let currentProfileTab = 'posts';
+        let currentProfileTab = 'posts', currentChatUser=null;
 
-        // Auth
+        // ★ ミッション定義
+        const MISSIONS = {
+            login: { label: "ログインボーナス", target: 1, xp: 50 },
+            like: { label: "3回いいねする", target: 3, xp: 30 },
+            post: { label: "1回ポストする", target: 1, xp: 20 }
+        };
+
         const authErr = (e) => alert(e.message);
         document.getElementById('google-login-btn').onclick = () => signInWithPopup(auth, new GoogleAuthProvider()).catch(authErr);
         window.emailAuth = (t) => {
@@ -236,8 +270,9 @@
                 const d = await getDoc(doc(db,"users",u.uid));
                 if(d.exists()){ 
                     myProfile = d.data();
-                    if(!myProfile.following) myProfile.following = []; // Follow init
-                    checkStreak();
+                    if(!myProfile.following) myProfile.following = [];
+                    await checkStreak();
+                    await checkMissions('login'); // ログインミッションチェック
                     initApp(); 
                 } else {
                     document.getElementById('login-screen').classList.add('hidden');
@@ -249,6 +284,7 @@
             }
         });
 
+        // --- ミッション & ストリーク ---
         async function checkStreak() {
             const now = new Date();
             const last = myProfile.lastLogin ? myProfile.lastLogin.toDate() : new Date(0);
@@ -258,6 +294,40 @@
                 await updateDoc(doc(db,"users",currentUser.uid), { lastLogin: serverTimestamp(), streak });
                 myProfile.streak = streak;
             }
+        }
+
+        async function checkMissions(actionType) {
+            const today = new Date().toISOString().split('T')[0];
+            let missions = myProfile.missions || {};
+            
+            // 日付が変わっていたらリセット
+            if (missions.date !== today) {
+                missions = { date: today, login: 0, like: 0, post: 0, claimed: [] };
+            }
+
+            // カウントアップ
+            if (actionType && missions[actionType] !== undefined) {
+                missions[actionType]++;
+            }
+
+            // 達成チェック & XP付与
+            let xpToAdd = 0;
+            for (const key in MISSIONS) {
+                if (missions[key] >= MISSIONS[key].target && !missions.claimed.includes(key)) {
+                    xpToAdd += MISSIONS[key].xp;
+                    missions.claimed.push(key);
+                    alert(`🎉 ミッション達成: ${MISSIONS[key].label} (+${MISSIONS[key].xp} XP)`);
+                }
+            }
+
+            // 保存
+            const updates = { missions: missions };
+            if (xpToAdd > 0) updates.xp = increment(xpToAdd);
+            
+            await updateDoc(doc(db, "users", currentUser.uid), updates);
+            myProfile.missions = missions;
+            if (xpToAdd > 0) myProfile.xp = (myProfile.xp || 0) + xpToAdd;
+            updateMyProfileUI(); // UI更新
         }
 
         function initApp() {
@@ -283,6 +353,27 @@
             document.getElementById('profile-xp').innerText = myProfile.xp || 0;
             document.getElementById('profile-rank').innerText = getRank(myProfile.xp).name;
             document.getElementById('profile-rank').className = `font-bold text-lg ${getRank(myProfile.xp).class}`;
+
+            // ミッションUI描画
+            const mList = document.getElementById('mission-list');
+            mList.innerHTML = "";
+            const mData = myProfile.missions || { login:0, like:0, post:0, claimed:[] };
+            
+            for (const key in MISSIONS) {
+                const m = MISSIONS[key];
+                const current = Math.min(mData[key] || 0, m.target);
+                const isDone = mData.claimed && mData.claimed.includes(key);
+                const pct = (current / m.target) * 100;
+                
+                mList.innerHTML += `
+                    <div class="mission-card">
+                        <div class="flex-1">
+                            <div class="text-sm font-bold ${isDone?'mission-completed':''}">${m.label} <span class="text-xs text-[var(--accent)]">(+${m.xp}XP)</span></div>
+                            <div class="mission-progress mt-1"><div class="mission-bar" style="width:${pct}%"></div></div>
+                        </div>
+                        <div class="text-xs font-bold ${isDone?'mission-check':'text-[var(--subtext)]'}">${isDone ? 'COMPLETED' : `${current}/${m.target}`}</div>
+                    </div>`;
+            }
         }
 
         function getRank(xp) {
@@ -295,7 +386,7 @@
             return {name:"Unranked", class:""};
         }
 
-        // --- View Other Profile ---
+        // --- Other Profile & DM ---
         window.viewUser = async (uid) => {
             if(uid === currentUser.uid) { switchTab('profile'); return; }
             const d = await getDoc(doc(db, "users", uid));
@@ -308,12 +399,15 @@
             document.getElementById('other-xp').innerText = u.xp || 0;
             document.getElementById('other-rank').innerText = getRank(u.xp).name;
             
-            // Follow Button
+            // Follow Btn
             const btn = document.getElementById('other-follow-btn');
             const isFollowing = myProfile.following && myProfile.following.includes(uid);
             btn.innerText = isFollowing ? "フォロー中" : "フォローする";
             btn.className = isFollowing ? "btn-follow following" : "btn-primary";
             btn.onclick = () => toggleFollow(uid, btn);
+
+            // ★ DM Button Logic
+            document.getElementById('other-dm-btn').onclick = () => openChat(uid, u.name);
 
             // Other Timeline
             const q = query(collection(db,"logs"), where("uid","==",uid), orderBy("createdAt","desc"), limit(20));
@@ -355,7 +449,7 @@
             if(quoteData) data.quote = quoteData;
 
             await addDoc(collection(db,"logs"), data);
-            await updateDoc(doc(db,"users",currentUser.uid), { xp: increment(15) });
+            await checkMissions('post'); // ★ ミッションチェック
             
             document.getElementById('post-text').value="";
             if(isPoll) togglePoll();
@@ -369,11 +463,9 @@
                 c.innerHTML = "";
                 snap.forEach(d => c.innerHTML += buildPostHTML(d.id, d.data()));
             });
-            // Init My Profile Timeline
             loadMyPosts();
         }
 
-        // --- Profile Tabs (Posts / Likes) ---
         window.switchProfileSubTab = (type) => {
             currentProfileTab = type;
             document.getElementById('tab-btn-posts').className = type==='posts' ? "flex-1 text-center py-3 font-bold border-b-2 border-[var(--text)] cursor-pointer" : "flex-1 text-center py-3 font-bold text-[var(--subtext)] cursor-pointer";
@@ -391,8 +483,6 @@
         }
 
         function loadMyLikes() {
-            // Note: Composite index required for complex query. Using simple filter for now.
-            // Ideally: where("likes", "array-contains", currentUser.uid)
             onSnapshot(query(collection(db,"logs"), where("likes", "array-contains", currentUser.uid), limit(20)), (s) => {
                 const c = document.getElementById('my-timeline'); c.innerHTML = "";
                 if(s.empty) c.innerHTML = "<div class='p-4 text-center text-sm text-[var(--subtext)]'>いいねした投稿はありません</div>";
@@ -411,8 +501,6 @@
                 });
                 pollUI += `</div>`;
             }
-
-            // Click avatar/name to view profile
             const profileClick = `event.stopPropagation(); viewUser('${d.uid}')`;
 
             return `
@@ -447,7 +535,10 @@
         window.like = async (id, to) => {
             const r = doc(db,"logs",id); const d=(await getDoc(r)).data();
             if(d.likes.includes(currentUser.uid)) await updateDoc(r,{likes:arrayRemove(currentUser.uid)});
-            else { await updateDoc(r,{likes:arrayUnion(currentUser.uid)}); await updateDoc(doc(db,"users",currentUser.uid),{xp:increment(2)}); }
+            else { 
+                await updateDoc(r,{likes:arrayUnion(currentUser.uid)}); 
+                await checkMissions('like'); // ★ ミッションチェック
+            }
         };
         window.setQuote = (t,n) => { quoteData={text:t, name:n}; document.getElementById('quote-preview').classList.remove('hidden'); document.getElementById('quote-target-name').innerText=n; document.getElementById('quote-target-text').innerText=t; };
         window.cancelQuote = () => { quoteData=null; document.getElementById('quote-preview').classList.add('hidden'); };
@@ -459,7 +550,6 @@
                 s.forEach(d => {
                     const u = d.data();
                     const isFollowing = myProfile.following && myProfile.following.includes(d.id);
-                    // Add Follow button
                     let followBtn = "";
                     if(d.id !== currentUser.uid) {
                         followBtn = `<button id="btn-${d.id}" onclick="event.stopPropagation();toggleFollow('${d.id}', this)" class="btn-follow ${isFollowing?'following':''}">${isFollowing?'フォロー中':'フォロー'}</button>`;
@@ -475,10 +565,7 @@
         }
 
         function loadNotifications() {
-            // Note: Simple query. For production, create a separate 'notifications' collection.
-            // Using a mock for UI demo or querying based on logs can be complex.
-            // Here we assume a notifications collection exists (Beta 6 feature).
-            // For now, leaving empty or simple logic.
+            // Beta 6以降で実装予定
         }
         
         window.searchUsers = () => {
@@ -487,12 +574,47 @@
             items.forEach(i => i.style.display = i.innerText.toLowerCase().includes(v) ? 'flex' : 'none');
         };
 
+        // --- Chat Logic ---
+        window.openChat = (uid, name) => {
+            currentChatUser = uid; 
+            document.getElementById('chat-target-name').innerText = name; 
+            switchTab('chat'); 
+            loadMessages(uid); 
+        };
+        function loadMessages(targetUid) {
+            const chatId = [currentUser.uid, targetUid].sort().join("_");
+            const q = query(collection(db, "chats", chatId, "messages"), orderBy("createdAt", "asc"), limit(50));
+            onSnapshot(q, (snap) => {
+                const div = document.getElementById('chat-messages');
+                div.innerHTML = "";
+                snap.forEach(doc => {
+                    const d = doc.data();
+                    const isMe = d.senderId === currentUser.uid;
+                    const bubble = document.createElement('div');
+                    bubble.className = `flex ${isMe ? 'justify-end' : 'justify-start'}`;
+                    bubble.innerHTML = `<div class="max-w-[70%] px-4 py-2 rounded-2xl text-[15px] ${isMe ? 'bg-blue-500 text-white rounded-br-sm' : 'bg-gray-100 text-black rounded-bl-sm'}">${d.text}</div>`;
+                    div.appendChild(bubble);
+                });
+                div.scrollTop = div.scrollHeight;
+            });
+        }
+        document.getElementById('chat-send-btn').onclick = async () => {
+            const text = document.getElementById('chat-input').value;
+            if(!text.trim() || !currentChatUser) return;
+            const chatId = [currentUser.uid, currentChatUser].sort().join("_");
+            const exp = new Date(); exp.setDate(exp.getDate() + 90);
+            await addDoc(collection(db, "chats", chatId, "messages"), { 
+                text, senderId: currentUser.uid, createdAt: serverTimestamp(), expireAt: exp 
+            });
+            document.getElementById('chat-input').value = "";
+        };
+
         // --- Common ---
         window.saveProfile = async () => { const n=document.getElementById('edit-name-input').value; if(!n)return; await setDoc(doc(db,"users",currentUser.uid),{name:n,icon:`https://api.dicebear.com/7.x/notionists/svg?seed=${currentUser.uid}`,xp:0,streak:1},{merge:true}); location.reload(); };
         window.toggleDarkMode = () => { document.body.classList.toggle('dark'); localStorage.setItem('theme',document.body.classList.contains('dark')?'dark':'light'); };
         window.openSettings = () => document.getElementById('settings-modal').classList.remove('hidden');
         window.signOutApp = () => signOut(auth);
-        window.switchTab = (t) => { ['home','explore','notif','profile','other-profile'].forEach(x => document.getElementById(`tab-${x}`).classList.add('hidden')); document.getElementById(`tab-${t}`).classList.remove('hidden'); document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('nav-active')); const b = document.querySelector(`.nav-item[data-target="${t}"]`); if(b) b.classList.add('nav-active'); };
+        window.switchTab = (t) => { ['home','explore','notif','profile','other-profile','chat'].forEach(x => document.getElementById(`tab-${x}`).classList.add('hidden')); document.getElementById(`tab-${t}`).classList.remove('hidden'); document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('nav-active')); const b = document.querySelector(`.nav-item[data-target="${t}"]`); if(b) b.classList.add('nav-active'); };
     </script>
 </body>
 </html>
