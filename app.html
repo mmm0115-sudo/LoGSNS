@@ -3,18 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>LoG v1.5</title>
+    <title>LoG Final</title>
     
+    <!-- PWA Config -->
     <link rel="manifest" href="manifest.json">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="theme-color" content="#ffffff">
+    <meta name="description" content="LoG: 90日で消えるログ、ランクシステム、漂流ログなどを搭載した次世代テキストSNS。">
     
+    <!-- Google AdSense -->
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1539164935971262" crossorigin="anonymous"></script>
+    
+    <!-- Libraries -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&family=Noto+Sans+JP:wght@400;500;700;900&display=swap" rel="stylesheet">
 
     <style>
+        /* テーマ変数 */
         :root { 
             --bg: #ffffff; --text: #0f1419; --border: #eff3f4; --card: #ffffff; 
             --subtext: #536471; --accent: #1d9bf0; --danger: #f4212e; --success: #00ba7c;
@@ -27,53 +33,57 @@
         body { background-color: var(--bg); color: var(--text); font-family: 'Inter', 'Noto Sans JP', sans-serif; overflow-x: hidden; -webkit-tap-highlight-color: transparent; transition: background 0.3s, color 0.3s; }
         .hidden { display: none !important; }
 
+        /* UIパーツ */
         .btn-primary { background: var(--text); color: var(--bg); border-radius: 99px; padding: 6px 16px; font-weight: 700; font-size: 0.85rem; transition: 0.2s; }
         .btn-ghost { color: var(--subtext); padding: 8px; border-radius: 50%; }
         .btn-ghost:hover { background: rgba(128,128,128,0.1); color: var(--accent); }
-        .btn-follow { border: 1px solid var(--border); color: var(--text); padding: 6px 16px; border-radius: 99px; font-size: 0.85rem; font-weight: bold; }
+        .btn-follow { border: 1px solid var(--border); color: var(--text); padding: 6px 16px; border-radius: 99px; font-size: 0.8rem; font-weight: bold; }
         .btn-follow.following { background: var(--text); color: var(--bg); border-color: var(--text); }
 
-        .nav-item { color: var(--subtext); padding: 12px; position: relative; }
-        .nav-active { color: var(--text); }
+        .nav-item { color: var(--subtext); padding: 10px; position: relative; transition: 0.2s; }
+        .nav-active { color: var(--text); transform: scale(1.1); }
         .nav-badge { position: absolute; top: 8px; right: 8px; width: 8px; height: 8px; background: var(--danger); border-radius: 50%; display: none; }
 
-        .post-card { border-bottom: 1px solid var(--border); padding: 16px; }
-        .tab-active { border-bottom: 2px solid var(--text); color: var(--text); }
-        .tab-inactive { color: var(--subtext); }
-
+        /* ポスト & アンケート */
+        .post-card { border-bottom: 1px solid var(--border); padding: 16px; cursor: pointer; transition: background 0.1s; }
+        .post-card:active { background: rgba(128,128,128,0.05); }
         .poll-container { border: 1px solid var(--border); border-radius: 12px; margin-top: 10px; overflow: hidden; }
-        .poll-option { padding: 8px 12px; position: relative; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); }
-        .poll-fill { position: absolute; left: 0; top: 0; height: 100%; background: var(--accent); opacity: 0.15; }
+        .poll-option { padding: 8px 12px; position: relative; display: flex; justify-content: space-between; align-items: center; cursor: pointer; border-bottom: 1px solid var(--border); }
+        .poll-fill { position: absolute; left: 0; top: 0; height: 100%; background: var(--accent); opacity: 0.15; transition: width 0.5s ease; }
         
+        /* ランク & 称号 */
         .rank-bronze { color: #cd7f32; } .rank-silver { color: #8a9ca8; } .rank-gold { color: #d4af37; font-weight: 900; }
         .rank-diamond { background: linear-gradient(90deg, #00c6ff, #0072ff); -webkit-background-clip: text; color: transparent; font-weight: 900; }
         .rank-obsidian { background: linear-gradient(90deg, #ff0000, #460000); -webkit-background-clip: text; color: transparent; font-weight: 900; }
-        
-        .title-badge { background: linear-gradient(45deg, #FFD700, #FFA500); color: #fff; padding: 2px 6px; border-radius: 4px; font-size: 0.6rem; font-weight: 900; margin-left: 4px; display: inline-block; vertical-align: middle; text-shadow: 0 1px 1px rgba(0,0,0,0.1); }
+        .title-badge { background: linear-gradient(45deg, #FFD700, #FFA500); color: #fff; padding: 2px 6px; border-radius: 4px; font-size: 0.6rem; font-weight: 900; margin-left: 4px; text-shadow: 0 1px 1px rgba(0,0,0,0.1); display: inline-block; vertical-align: middle; }
 
-        .like-active { color: #f91880 !important; }
+        /* アニメーション */
+        .like-anim { animation: pop 0.3s cubic-bezier(0.17, 0.89, 0.32, 1.49); color: #f91880 !important; }
+        @keyframes pop { 0%{transform:scale(1);} 50%{transform:scale(1.4);} 100%{transform:scale(1);} }
+        .bottle-anim { animation: float 3s ease-in-out infinite; }
+        @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-10px)} }
+
+        /* その他 */
         .modal-overlay { background: rgba(0,0,0,0.7); backdrop-filter: blur(5px); }
-
-        /* ミッション用スタイル */
         .mission-card { background: var(--bg); border: 1px solid var(--border); border-radius: 12px; padding: 12px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; }
-        .mission-progress { height: 6px; background: var(--border); border-radius: 3px; overflow: hidden; width: 100px; }
+        .mission-progress { height: 6px; background: var(--border); border-radius: 3px; overflow: hidden; width: 80px; }
         .mission-bar { height: 100%; background: var(--success); transition: width 0.3s; }
-        .mission-completed { color: var(--subtext); opacity: 0.7; }
-        .mission-check { color: var(--success); font-weight: bold; }
-        
-        /* リンクカーソル */
-        .cursor-pointer { cursor: pointer; }
+        .toast { position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%) translateY(20px); background: rgba(0,0,0,0.8); color: white; padding: 10px 20px; border-radius: 50px; font-size: 0.85rem; font-weight: bold; opacity: 0; transition: 0.3s; pointer-events: none; z-index: 100; white-space: nowrap; }
+        .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
     </style>
 </head>
 <body>
 
-    <!-- Login -->
+    <!-- Toast Notification -->
+    <div id="toast" class="toast"></div>
+
+    <!-- ■ Login Screen ■ -->
     <div id="login-screen" class="min-h-screen flex flex-col items-center justify-center p-8 bg-white dark:bg-black transition-colors">
         <h1 class="text-7xl font-black tracking-tighter mb-4 text-black dark:text-white">LoG</h1>
-        <div class="inline-block bg-black dark:bg-white text-white dark:text-black px-4 py-1 rounded-full text-xs font-bold tracking-[0.3em] mb-12">v1.5 TITLE</div>
+        <div class="inline-block bg-black dark:bg-white text-white dark:text-black px-4 py-1 rounded-full text-xs font-bold tracking-[0.3em] mb-12">FINAL EDITION</div>
         <div class="w-full max-w-sm space-y-4">
             <button id="google-login-btn" class="w-full border border-gray-300 dark:border-gray-700 py-3 rounded-full font-bold flex justify-center items-center gap-3 hover:bg-gray-50 dark:hover:bg-gray-900 transition">
-                <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" class="w-5 h-5"> Google
+                <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" class="w-5 h-5"> Googleで開始
             </button>
             <div id="email-form" class="space-y-3 pt-4 border-t border-gray-100 dark:border-gray-800">
                 <input id="auth-email" type="email" placeholder="Email" class="w-full bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-lg p-3 outline-none">
@@ -86,7 +96,7 @@
         </div>
     </div>
 
-    <!-- App -->
+    <!-- ■ Main App ■ -->
     <div id="app-screen" class="hidden max-w-xl mx-auto min-h-screen bg-[var(--bg)] shadow-2xl relative pb-20 border-x border-[var(--border)]">
         
         <!-- Header -->
@@ -99,7 +109,7 @@
             </div>
         </header>
 
-        <!-- A. HOME -->
+        <!-- A. HOME (Timeline) -->
         <div id="tab-home" class="pb-24">
             <div class="p-4 border-b border-[var(--border)]">
                 <div class="flex gap-3">
@@ -107,11 +117,11 @@
                     <div class="flex-1">
                         <textarea id="post-text" rows="2" placeholder="いまどうしてる？" class="w-full text-lg resize-none bg-transparent focus:outline-none placeholder-[var(--subtext)]"></textarea>
                         
+                        <!-- アンケート & 引用UI -->
                         <div id="poll-creator" class="hidden mb-3 space-y-2 p-3 border border-[var(--border)] rounded-xl bg-[var(--bg)]">
                             <input id="poll-1" type="text" placeholder="選択肢 1" class="w-full bg-[var(--border)]/30 rounded p-2 text-sm outline-none">
                             <input id="poll-2" type="text" placeholder="選択肢 2" class="w-full bg-[var(--border)]/30 rounded p-2 text-sm outline-none">
                         </div>
-
                         <div id="quote-preview" class="hidden mb-3 p-3 rounded-xl border border-[var(--border)] text-sm relative">
                             <button onclick="cancelQuote()" class="absolute top-1 right-2 text-[var(--subtext)]">×</button>
                             <div class="font-bold mb-1" id="quote-target-name"></div>
@@ -130,7 +140,7 @@
             <div id="timeline"></div>
         </div>
 
-        <!-- B. EXPLORE -->
+        <!-- B. EXPLORE (Rank & Search) -->
         <div id="tab-explore" class="hidden">
             <div class="p-3 border-b border-[var(--border)] sticky top-14 bg-[var(--bg)] z-30">
                 <div class="bg-[var(--border)]/50 rounded-full px-4 py-2 flex items-center text-[var(--subtext)]">
@@ -138,16 +148,42 @@
                     <input id="search-input" type="text" placeholder="ユーザー検索" class="bg-transparent w-full outline-none text-sm" onkeyup="searchUsers()">
                 </div>
             </div>
+            <div class="p-2 border-b border-[var(--border)] bg-[var(--border)]/10 text-xs font-bold text-[var(--subtext)] text-center tracking-widest uppercase">
+                XP Ranking
+            </div>
             <div id="explore-list" class="divide-y divide-[var(--border)]"></div>
         </div>
 
-        <!-- C. NOTIF -->
+        <!-- C. BOTTLE (漂流ログ) -->
+        <div id="tab-bottle" class="hidden text-center p-6 bg-[var(--bg)] min-h-[80vh] flex flex-col justify-center items-center">
+            <span class="material-icons-round text-6xl text-blue-400 bottle-anim mb-4">sailing</span>
+            <h2 class="text-2xl font-black mb-2">漂流ログ</h2>
+            <p class="text-sm text-[var(--subtext)] mb-8">誰かの言葉を拾い、自分の言葉を流す。</p>
+            <div class="space-y-4 w-full max-w-xs">
+                <button onclick="pickupBottle()" class="w-full py-4 bg-gradient-to-r from-blue-500 to-cyan-400 text-white font-bold rounded-2xl shadow-lg hover:scale-105 transition transform">
+                    <span class="material-icons-round align-middle mr-2">waves</span> ログを拾う
+                </button>
+                <button onclick="openBottleModal()" class="w-full py-4 border-2 border-[var(--border)] font-bold rounded-2xl hover:bg-[var(--border)] transition">
+                    <span class="material-icons-round align-middle mr-2">edit</span> ログを流す
+                </button>
+            </div>
+            <div id="bottle-result" class="hidden mt-8 p-6 bg-[var(--card)] border border-[var(--border)] rounded-2xl shadow-sm text-left w-full relative">
+                <span class="absolute -top-3 left-4 bg-[var(--bg)] px-2 text-xs font-bold text-blue-500">漂着物</span>
+                <p id="bottle-text" class="text-lg font-medium mb-4"></p>
+                <div class="flex justify-between items-center text-xs text-[var(--subtext)]">
+                    <span id="bottle-author">名無しの漂流者</span>
+                    <span id="bottle-date"></span>
+                </div>
+            </div>
+        </div>
+
+        <!-- D. NOTIF -->
         <div id="tab-notif" class="hidden">
             <div class="p-3 border-b border-[var(--border)] font-bold text-lg px-4">通知</div>
             <div id="notif-list" class="divide-y divide-[var(--border)]"></div>
         </div>
 
-        <!-- D. PROFILE (Self) -->
+        <!-- E. PROFILE (Self) -->
         <div id="tab-profile" class="hidden">
             <div class="px-4 py-6">
                 <div class="flex justify-between items-start mb-4">
@@ -165,15 +201,27 @@
                     <div class="flex items-center gap-1"><span class="font-bold" id="profile-rank">Unranked</span></div>
                 </div>
 
-                <!-- ミッションエリア -->
-                <div class="mt-6 mb-2">
-                    <div class="text-xs font-bold text-[var(--subtext)] mb-2 uppercase tracking-widest">Daily Missions</div>
-                    <div id="mission-list">
-                        <!-- JSで生成 -->
+                <!-- 称号ガチャ & ミッション -->
+                <div class="grid grid-cols-2 gap-3 mt-6 mb-4">
+                    <div onclick="spinGacha()" class="p-3 border border-[var(--border)] rounded-xl text-center cursor-pointer hover:bg-[var(--border)]/50 transition">
+                        <div class="text-xs text-orange-500 font-bold mb-1">称号ガチャ</div>
+                        <div class="text-xs text-[var(--subtext)]">50 XP</div>
+                    </div>
+                    <div class="p-3 border border-[var(--border)] rounded-xl">
+                        <div class="text-xs font-bold text-[var(--subtext)] mb-2 uppercase">Daily Missions</div>
+                        <div id="mission-list" class="space-y-2"></div>
                     </div>
                 </div>
             </div>
             
+            <!-- 固定ポスト -->
+            <div id="pinned-area" class="hidden border-b border-[var(--border)] bg-[var(--border)]/10">
+                <div class="px-4 py-2 text-xs font-bold text-[var(--subtext)] flex items-center gap-1">
+                    <span class="material-icons-round text-xs">push_pin</span> 固定されたポスト
+                </div>
+                <div id="pinned-content"></div>
+            </div>
+
             <div class="flex border-b border-[var(--border)] mt-2 sticky top-14 bg-[var(--bg)] z-20">
                 <div onclick="switchProfileSubTab('posts')" id="tab-btn-posts" class="flex-1 text-center py-3 font-bold border-b-2 border-[var(--text)] cursor-pointer">ポスト</div>
                 <div onclick="switchProfileSubTab('likes')" id="tab-btn-likes" class="flex-1 text-center py-3 font-bold text-[var(--subtext)] cursor-pointer">いいね</div>
@@ -181,7 +229,7 @@
             <div id="my-timeline" class="divide-y divide-[var(--border)]"></div>
         </div>
 
-        <!-- E. OTHER PROFILE (他人のプロフィール) -->
+        <!-- F. OTHER PROFILE -->
         <div id="tab-other-profile" class="hidden">
             <div class="p-3 border-b border-[var(--border)] flex items-center gap-4 sticky top-14 bg-[var(--bg)] z-30">
                 <button onclick="history.back()" class="text-[var(--text)]"><span class="material-icons-round">arrow_back</span></button>
@@ -209,7 +257,7 @@
             <div id="other-timeline" class="divide-y divide-[var(--border)]"></div>
         </div>
 
-        <!-- C. Chat -->
+        <!-- C. Chat (DM) -->
         <div id="tab-chat" class="hidden h-[calc(100vh-130px)] flex flex-col">
             <div class="p-3 border-b border-[var(--border)] flex items-center gap-4 sticky top-14 bg-[var(--bg)] z-10 px-4">
                 <button onclick="history.back()"><span class="material-icons-round text-2xl">arrow_back</span></button>
@@ -226,6 +274,7 @@
         <nav class="fixed bottom-0 w-full max-w-xl bg-[var(--nav-bg)] border-t border-[var(--border)] flex justify-around py-3 z-50 backdrop-blur pb-6">
             <button onclick="switchTab('home')" class="nav-item nav-active" data-target="home"><span class="material-icons-round text-3xl">home</span></button>
             <button onclick="switchTab('explore')" class="nav-item" data-target="explore"><span class="material-icons-round text-3xl">search</span></button>
+            <button onclick="switchTab('bottle')" class="nav-item" data-target="bottle"><span class="material-icons-round text-3xl">sailing</span></button>
             <button onclick="switchTab('notif')" class="nav-item" data-target="notif">
                 <span class="material-icons-round text-3xl">notifications</span>
                 <div id="nav-badge" class="nav-badge"></div>
@@ -235,6 +284,17 @@
     </div>
 
     <!-- Modals -->
+    <div id="bottle-modal" class="modal-overlay hidden fixed inset-0 z-50 flex items-center justify-center">
+        <div class="bg-[var(--card)] p-6 rounded-2xl w-80 shadow-2xl border border-[var(--border)] text-center">
+            <h2 class="text-lg font-bold mb-2">手紙を流す</h2>
+            <textarea id="bottle-input" rows="4" class="w-full bg-[var(--border)]/30 rounded-xl p-3 mb-4 text-sm outline-none resize-none" placeholder="ここになにか書いて..."></textarea>
+            <div class="flex gap-2">
+                <button onclick="document.getElementById('bottle-modal').classList.add('hidden')" class="flex-1 py-3 text-sm font-bold text-[var(--subtext)]">やめる</button>
+                <button onclick="sendBottle()" class="flex-1 btn-primary py-3">海に流す</button>
+            </div>
+        </div>
+    </div>
+
     <div id="profile-modal" class="modal-overlay hidden fixed inset-0 z-50 flex items-center justify-center">
         <div class="bg-[var(--card)] p-6 rounded-2xl w-80 shadow-2xl border border-[var(--border)]">
             <h2 class="text-xl font-bold mb-4">初期設定</h2>
@@ -264,14 +324,18 @@
         let currentUser=null, myProfile=null, quoteData=null, isPoll=false;
         let currentProfileTab = 'posts', currentChatUser=null;
 
-        // ★ ミッション定義
         const MISSIONS = {
-            login: { label: "ログインボーナス", target: 1, xp: 50 },
-            like: { label: "3回いいねする", target: 3, xp: 30 },
-            post: { label: "1回ポストする", target: 1, xp: 20 }
+            login: { label: "ログイン", target: 1, xp: 50 },
+            like: { label: "3回いいね", target: 3, xp: 30 },
+            post: { label: "1回ポスト", target: 1, xp: 20 }
         };
+        const TITLES = ["見習い", "住人", "詩人", "哲学", "虚無", "猫", "神", "富豪", "ニート", "将軍", "伝説", "歩行者", "空気", "勇者"];
 
-        const authErr = (e) => alert(e.message);
+        // Utils
+        const showToast = (m) => { const t=document.getElementById('toast'); t.innerText=m; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),3000); };
+        const authErr = (e) => showToast("Error: " + e.message);
+        
+        // Auth
         document.getElementById('google-login-btn').onclick = () => signInWithPopup(auth, new GoogleAuthProvider()).catch(authErr);
         window.emailAuth = (t) => {
             const e=document.getElementById('auth-email').value, p=document.getElementById('auth-password').value;
@@ -287,7 +351,7 @@
                     myProfile = d.data();
                     if(!myProfile.following) myProfile.following = [];
                     await checkStreak();
-                    await checkMissions('login'); // ログインミッションチェック
+                    await checkMissions('login');
                     initApp(); 
                 } else {
                     document.getElementById('login-screen').classList.add('hidden');
@@ -299,7 +363,7 @@
             }
         });
 
-        // --- ミッション & ストリーク ---
+        // App Logic
         async function checkStreak() {
             const now = new Date();
             const last = myProfile.lastLogin ? myProfile.lastLogin.toDate() : new Date(0);
@@ -311,38 +375,28 @@
             }
         }
 
-        async function checkMissions(actionType) {
+        async function checkMissions(type) {
             const today = new Date().toISOString().split('T')[0];
             let missions = myProfile.missions || {};
+            if (missions.date !== today) missions = { date: today, login: 0, like: 0, post: 0, claimed: [] };
+            if (type && missions[type] !== undefined) missions[type]++;
             
-            // 日付が変わっていたらリセット
-            if (missions.date !== today) {
-                missions = { date: today, login: 0, like: 0, post: 0, claimed: [] };
-            }
-
-            // カウントアップ
-            if (actionType && missions[actionType] !== undefined) {
-                missions[actionType]++;
-            }
-
-            // 達成チェック & XP付与
-            let xpToAdd = 0;
-            for (const key in MISSIONS) {
-                if (missions[key] >= MISSIONS[key].target && !missions.claimed.includes(key)) {
-                    xpToAdd += MISSIONS[key].xp;
-                    missions.claimed.push(key);
-                    alert(`🎉 ミッション達成: ${MISSIONS[key].label} (+${MISSIONS[key].xp} XP)`);
+            let xpAdd = 0;
+            for (const k in MISSIONS) {
+                if (missions[k] >= MISSIONS[k].target && !missions.claimed.includes(k)) {
+                    xpAdd += MISSIONS[k].xp;
+                    missions.claimed.push(k);
+                    showToast(`達成: ${MISSIONS[k].label} (+${MISSIONS[k].xp}XP)`);
                 }
             }
-
-            // 保存
-            const updates = { missions: missions };
-            if (xpToAdd > 0) updates.xp = increment(xpToAdd);
-            
-            await updateDoc(doc(db, "users", currentUser.uid), updates);
+            if (xpAdd > 0) {
+                await updateDoc(doc(db, "users", currentUser.uid), { missions, xp: increment(xpAdd) });
+                myProfile.xp = (myProfile.xp||0) + xpAdd;
+            } else {
+                await updateDoc(doc(db, "users", currentUser.uid), { missions });
+            }
             myProfile.missions = missions;
-            if (xpToAdd > 0) myProfile.xp = (myProfile.xp || 0) + xpToAdd;
-            updateMyProfileUI(); // UI更新
+            updateMyProfileUI();
         }
 
         function initApp() {
@@ -350,11 +404,10 @@
             document.getElementById('app-screen').classList.remove('hidden');
             document.getElementById('profile-modal').classList.add('hidden');
             if(localStorage.getItem('theme')==='dark') document.body.classList.add('dark');
-            
             updateMyProfileUI();
             loadTimeline();
             loadNotifications();
-            loadExplore();
+            loadRanking();
         }
 
         function updateMyProfileUI() {
@@ -369,30 +422,27 @@
             document.getElementById('profile-rank').innerText = getRank(myProfile.xp).name;
             document.getElementById('profile-rank').className = `font-bold text-lg ${getRank(myProfile.xp).class}`;
             
-            if(myProfile.title) {
-                const tEl = document.getElementById('profile-title');
-                tEl.innerText = myProfile.title; tEl.classList.remove('hidden');
-            }
-
-            // ミッションUI描画
-            const mList = document.getElementById('mission-list');
-            mList.innerHTML = "";
-            const mData = myProfile.missions || { login:0, like:0, post:0, claimed:[] };
+            const tEl = document.getElementById('profile-title');
+            if(myProfile.title) { tEl.innerText = myProfile.title; tEl.classList.remove('hidden'); }
             
-            for (const key in MISSIONS) {
-                const m = MISSIONS[key];
-                const current = Math.min(mData[key] || 0, m.target);
-                const isDone = mData.claimed && mData.claimed.includes(key);
-                const pct = (current / m.target) * 100;
-                
-                mList.innerHTML += `
-                    <div class="mission-card">
-                        <div class="flex-1">
-                            <div class="text-sm font-bold ${isDone?'mission-completed':''}">${m.label} <span class="text-xs text-[var(--accent)]">(+${m.xp}XP)</span></div>
-                            <div class="mission-progress mt-1"><div class="mission-bar" style="width:${pct}%"></div></div>
-                        </div>
-                        <div class="text-xs font-bold ${isDone?'mission-check':'text-[var(--subtext)]'}">${isDone ? 'COMPLETED' : `${current}/${m.target}`}</div>
-                    </div>`;
+            if(myProfile.pinnedId) loadPinned(myProfile.pinnedId);
+
+            // Mission UI
+            const mList = document.getElementById('mission-list'); mList.innerHTML = "";
+            const mData = myProfile.missions || { login:0, like:0, post:0, claimed:[] };
+            for (const k in MISSIONS) {
+                const m = MISSIONS[k];
+                const cur = Math.min(mData[k] || 0, m.target);
+                const pct = (cur / m.target) * 100;
+                mList.innerHTML += `<div class="bg-[var(--border)]/20 rounded p-2 text-xs"><div class="flex justify-between mb-1"><span>${m.label}</span><span>${cur}/${m.target}</span></div><div class="h-1.5 bg-[var(--border)] rounded-full overflow-hidden"><div class="h-full bg-[var(--success)] transition-all" style="width:${pct}%"></div></div></div>`;
+            }
+        }
+
+        async function loadPinned(id) {
+            const d = await getDoc(doc(db,"logs",id));
+            if(d.exists()) {
+                document.getElementById('pinned-area').classList.remove('hidden');
+                document.getElementById('pinned-content').innerHTML = buildPostHTML(d.id, d.data(), true);
             }
         }
 
@@ -406,7 +456,7 @@
             return {name:"Unranked", class:""};
         }
 
-        // --- Other Profile & DM ---
+        // --- Other Profile ---
         window.viewUser = async (uid) => {
             if(uid === currentUser.uid) { switchTab('profile'); return; }
             const d = await getDoc(doc(db, "users", uid));
@@ -419,30 +469,22 @@
             document.getElementById('other-xp').innerText = u.xp || 0;
             document.getElementById('other-rank').innerText = getRank(u.xp).name;
             
-            if(u.title) {
-                const tEl = document.getElementById('other-title');
-                tEl.innerText = u.title; tEl.classList.remove('hidden');
-            } else {
-                document.getElementById('other-title').classList.add('hidden');
-            }
+            const tEl = document.getElementById('other-title');
+            if(u.title) { tEl.innerText = u.title; tEl.classList.remove('hidden'); } else tEl.classList.add('hidden');
             
-            // Follow Btn
             const btn = document.getElementById('other-follow-btn');
             const isFollowing = myProfile.following && myProfile.following.includes(uid);
             btn.innerText = isFollowing ? "フォロー中" : "フォローする";
             btn.className = isFollowing ? "btn-follow following" : "btn-primary";
             btn.onclick = () => toggleFollow(uid, btn);
 
-            // ★ DM Button Logic
             document.getElementById('other-dm-btn').onclick = () => openChat(uid, u.name);
 
-            // Other Timeline
             const q = query(collection(db,"logs"), where("uid","==",uid), orderBy("createdAt","desc"), limit(20));
             onSnapshot(q, (s) => {
                 document.getElementById('other-timeline').innerHTML = "";
                 s.forEach(doc => document.getElementById('other-timeline').innerHTML += buildPostHTML(doc.id, doc.data()));
             });
-
             switchTab('other-profile');
         };
 
@@ -459,33 +501,26 @@
                 myProfile.following.push(uid);
                 btn.innerText = "フォロー中";
                 btn.className = "btn-follow following";
+                
+                await addDoc(collection(db,"notif"), {
+                    to: uid, from: myProfile.name, type: 'follow', read: false, createdAt: serverTimestamp()
+                });
             }
         };
 
-        // --- Timeline & Post ---
+        // --- Post & Timeline ---
         window.togglePoll = () => { isPoll=!isPoll; document.getElementById('poll-creator').classList.toggle('hidden'); };
         document.getElementById('post-btn').onclick = async () => {
-            const text = document.getElementById('post-text').value;
-            const p1 = document.getElementById('poll-1').value;
-            const p2 = document.getElementById('poll-2').value;
+            const text = document.getElementById('post-text').value; const p1 = document.getElementById('poll-1').value; const p2 = document.getElementById('poll-2').value;
             if(!text.trim() && !p1) return;
             
             const exp = new Date(); exp.setDate(exp.getDate() + 90);
-            const data = { 
-                text, 
-                uid: currentUser.uid, 
-                authorName: myProfile.name, 
-                authorIcon: myProfile.icon, 
-                authorTitle: myProfile.title || "", // 称号保存
-                createdAt: serverTimestamp(), 
-                expireAt: exp, 
-                likes: [] 
-            };
+            const data = { text, uid: currentUser.uid, authorName: myProfile.name, authorIcon: myProfile.icon, authorTitle: myProfile.title||"", createdAt: serverTimestamp(), expireAt: exp, likes: [] };
             if(isPoll && p1 && p2) data.poll = { total:0, options: [{id:0, txt:p1, votes:[]}, {id:1, txt:p2, votes:[]}] };
             if(quoteData) data.quote = quoteData;
 
             await addDoc(collection(db,"logs"), data);
-            await checkMissions('post'); // ★ ミッションチェック
+            await checkMissions('post');
             
             document.getElementById('post-text').value="";
             if(isPoll) togglePoll();
@@ -495,8 +530,7 @@
 
         function loadTimeline() {
             onSnapshot(query(collection(db,"logs"), orderBy("createdAt","desc"), limit(50)), (snap) => {
-                const c = document.getElementById('timeline');
-                c.innerHTML = "";
+                const c = document.getElementById('timeline'); c.innerHTML = "";
                 snap.forEach(d => c.innerHTML += buildPostHTML(d.id, d.data()));
             });
             loadMyPosts();
@@ -506,9 +540,7 @@
             currentProfileTab = type;
             document.getElementById('tab-btn-posts').className = type==='posts' ? "flex-1 text-center py-3 font-bold border-b-2 border-[var(--text)] cursor-pointer" : "flex-1 text-center py-3 font-bold text-[var(--subtext)] cursor-pointer";
             document.getElementById('tab-btn-likes').className = type==='likes' ? "flex-1 text-center py-3 font-bold border-b-2 border-[var(--text)] cursor-pointer" : "flex-1 text-center py-3 font-bold text-[var(--subtext)] cursor-pointer";
-            
-            if(type === 'posts') loadMyPosts();
-            else loadMyLikes();
+            if(type === 'posts') loadMyPosts(); else loadMyLikes();
         };
 
         function loadMyPosts() {
@@ -517,17 +549,17 @@
                 s.forEach(d => c.innerHTML += buildPostHTML(d.id, d.data()));
             });
         }
-
         function loadMyLikes() {
             onSnapshot(query(collection(db,"logs"), where("likes", "array-contains", currentUser.uid), limit(20)), (s) => {
                 const c = document.getElementById('my-timeline'); c.innerHTML = "";
-                if(s.empty) c.innerHTML = "<div class='p-4 text-center text-sm text-[var(--subtext)]'>いいねした投稿はありません</div>";
+                if(s.empty) c.innerHTML = "<div class='p-4 text-center text-sm text-[var(--subtext)]'>いいねなし</div>";
                 s.forEach(d => c.innerHTML += buildPostHTML(d.id, d.data()));
             });
         }
 
-        function buildPostHTML(id, d) {
+        function buildPostHTML(id, d, isPin=false) {
             const isLiked = d.likes && d.likes.includes(currentUser.uid);
+            const isMine = d.uid === currentUser.uid;
             let pollUI = "";
             if(d.poll) {
                 pollUI = `<div class="poll-container">`;
@@ -549,11 +581,11 @@
                                 ${d.authorTitle ? `<span class="title-badge">${d.authorTitle}</span>` : ''}
                                 <span class="text-[var(--subtext)] text-sm truncate">@${d.uid.slice(0,8)}</span>
                             </div>
+                            ${isMine && !isPin ? `<div class="relative group"><button class="text-[var(--subtext)]">•••</button><div class="hidden group-hover:block absolute right-0 bg-[var(--card)] border border-[var(--border)] shadow-lg rounded p-1 z-10 w-24"><button onclick="pin('${id}')" class="w-full text-left text-xs p-2 hover:bg-[var(--border)]">固定</button><button onclick="del('${id}')" class="w-full text-left text-xs p-2 text-[var(--danger)] hover:bg-[var(--border)]">削除</button></div></div>` : ''}
                         </div>
                         <p class="text-[15px] mt-1 whitespace-pre-wrap leading-relaxed">${d.text}</p>
                         ${pollUI}
                         ${d.quote ? `<div class="p-3 mt-2 rounded-xl border border-[var(--border)] text-sm"><div class="font-bold">${d.quote.name}</div><div class="text-[var(--subtext)] truncate">${d.quote.text}</div></div>` : ''}
-                        
                         <div class="flex justify-between mt-3 max-w-xs text-[var(--subtext)]">
                             <button onclick="event.stopPropagation();setQuote('${d.text}','${d.authorName}')" class="btn-ghost"><span class="material-icons-round text-lg">cached</span></button>
                             <button onclick="event.stopPropagation();like('${id}','${d.uid}')" class="btn-ghost ${isLiked?'like-active like-anim':''}"><span class="material-icons-round text-lg">${isLiked?'favorite':'favorite_border'}</span> <span class="text-xs ml-1">${d.likes?d.likes.length:0}</span></button>
@@ -566,7 +598,7 @@
         window.vote = async (id, idx) => {
             const r = doc(db,"logs",id); const d=(await getDoc(r)).data();
             let voted=false; d.poll.options.forEach(o=>{if(o.votes.includes(currentUser.uid))voted=true});
-            if(voted) return alert("投票済み");
+            if(voted) return showToast("投票済み");
             d.poll.options[idx].votes.push(currentUser.uid); d.poll.total++; await updateDoc(r,{poll:d.poll});
         };
         window.like = async (id, to) => {
@@ -574,89 +606,97 @@
             if(d.likes.includes(currentUser.uid)) await updateDoc(r,{likes:arrayRemove(currentUser.uid)});
             else { 
                 await updateDoc(r,{likes:arrayUnion(currentUser.uid)}); 
-                await checkMissions('like'); // ★ ミッションチェック
+                await checkMissions('like');
+                if(to !== currentUser.uid) await addDoc(collection(db,"notif"), { to, from: myProfile.name, type: 'like', read: false, createdAt: serverTimestamp() });
             }
         };
         window.setQuote = (t,n) => { quoteData={text:t, name:n}; document.getElementById('quote-preview').classList.remove('hidden'); document.getElementById('quote-target-name').innerText=n; document.getElementById('quote-target-text').innerText=t; };
         window.cancelQuote = () => { quoteData=null; document.getElementById('quote-preview').classList.add('hidden'); };
+        window.pin = async (id) => { await updateDoc(doc(db,"users",currentUser.uid), {pinnedId: id}); showToast("固定しました"); location.reload(); };
+        window.del = async (id) => { if(confirm("削除？")) await deleteDoc(doc(db,"logs",id)); };
 
         // --- Explore & Notif ---
-        function loadExplore() {
+        function loadRanking() {
             onSnapshot(query(collection(db,"users"), orderBy("xp","desc"), limit(20)), (s) => {
                 const l = document.getElementById('explore-list'); l.innerHTML = "";
                 let i = 1;
                 s.forEach(d => {
                     const u = d.data();
-                    let rankClass = "";
-                    if(i===1) rankClass="text-yellow-500 font-black";
-                    else if(i===2) rankClass="text-gray-400 font-bold";
-                    else if(i===3) rankClass="text-orange-500 font-bold";
-                    
-                    l.innerHTML += `
-                        <div class="p-4 flex items-center gap-3 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-900" onclick="viewUser('${d.id}')">
-                            <span class="w-6 text-center ${rankClass}">${i}</span>
-                            <img src="${u.icon}" class="w-10 h-10 rounded-full">
-                            <div class="flex-1">
-                                <div class="font-bold text-sm">${u.name}</div>
-                                <div class="text-xs text-[var(--subtext)]">${u.xp||0} XP</div>
-                            </div>
-                        </div>`;
-                    i++;
+                    let rankClass = ""; if(i===1) rankClass="text-yellow-500 font-black";
+                    l.innerHTML += `<div class="p-4 flex items-center gap-3 cursor-pointer hover:bg-[var(--border)]/20" onclick="viewUser('${d.id}')"><span class="w-6 text-center ${rankClass}">${i}</span><img src="${u.icon}" class="w-10 h-10 rounded-full"><div class="flex-1"><div class="font-bold text-sm">${u.name}</div><div class="text-xs text-[var(--subtext)]">${u.xp||0} XP</div></div></div>`; i++;
                 });
             });
         }
-
         function loadNotifications() {
-            // Beta 6以降で実装予定
+            onSnapshot(query(collection(db,"notif"), where("to","==",currentUser.uid), orderBy("createdAt","desc"), limit(20)), (s) => {
+                const l = document.getElementById('notif-list'); l.innerHTML = "";
+                const b = document.getElementById('nav-badge');
+                let unread = false;
+                if(s.empty) l.innerHTML = `<div class="p-8 text-center text-sm text-[var(--subtext)]">通知なし</div>`;
+                s.forEach(d => {
+                    const n = d.data();
+                    if(!n.read) unread = true;
+                    l.innerHTML += `<div class="p-4 flex gap-3 ${!n.read?'bg-[var(--accent)]/10':''}"><span class="material-icons-round text-[var(--accent)]">${n.type==='like'?'favorite':(n.type==='follow'?'person_add':'reply')}</span><div class="text-sm"><span class="font-bold">${n.from}</span>さんが${n.type==='like'?'いいね':(n.type==='follow'?'フォロー':'反応')}しました</div></div>`;
+                    if(!n.read) updateDoc(doc(db,"notif",d.id),{read:true});
+                });
+                b.style.display = unread ? 'block' : 'none';
+            });
         }
-        
         window.searchUsers = () => {
             const v = document.getElementById('search-input').value.toLowerCase();
             const items = document.querySelectorAll('#explore-list > div');
             items.forEach(i => i.style.display = i.innerText.toLowerCase().includes(v) ? 'flex' : 'none');
         };
 
-        // --- Chat Logic ---
-        window.openChat = (uid, name) => {
-            currentChatUser = uid; 
-            document.getElementById('chat-target-name').innerText = name; 
-            switchTab('chat'); 
-            loadMessages(uid); 
+        // --- Bottle ---
+        window.openBottleModal = () => document.getElementById('bottle-modal').classList.remove('hidden');
+        window.sendBottle = async () => {
+            const text = document.getElementById('bottle-input').value; if(!text.trim()) return;
+            const exp = new Date(); exp.setDate(exp.getDate() + 30);
+            await addDoc(collection(db, "bottles"), { text, senderUid: currentUser.uid, createdAt: serverTimestamp(), expireAt: exp, status: 'unread' });
+            await updateDoc(doc(db,"users",currentUser.uid), { xp: increment(20) });
+            showToast("手紙を海に流しました"); document.getElementById('bottle-input').value = ""; document.getElementById('bottle-modal').classList.add('hidden');
         };
-        function loadMessages(targetUid) {
-            const chatId = [currentUser.uid, targetUid].sort().join("_");
-            const q = query(collection(db, "chats", chatId, "messages"), orderBy("createdAt", "asc"), limit(50));
-            onSnapshot(q, (snap) => {
-                const div = document.getElementById('chat-messages');
-                div.innerHTML = "";
-                snap.forEach(doc => {
-                    const d = doc.data();
-                    const isMe = d.senderId === currentUser.uid;
-                    const bubble = document.createElement('div');
-                    bubble.className = `flex ${isMe ? 'justify-end' : 'justify-start'}`;
-                    bubble.innerHTML = `<div class="max-w-[70%] px-4 py-2 rounded-2xl text-[15px] ${isMe ? 'bg-blue-500 text-white rounded-br-sm' : 'bg-gray-100 text-black rounded-bl-sm'}">${d.text}</div>`;
-                    div.appendChild(bubble);
-                });
-                div.scrollTop = div.scrollHeight;
+        window.pickupBottle = async () => {
+            const q = query(collection(db, "bottles"), where("status", "==", "unread"), orderBy("createdAt", "desc"), limit(20));
+            const snap = await getDocs(q);
+            const others = snap.docs.filter(d => d.data().senderUid !== currentUser.uid);
+            if(others.length === 0) return showToast("漂着物なし");
+            const randomDoc = others[Math.floor(Math.random() * others.length)];
+            const d = randomDoc.data();
+            document.getElementById('bottle-result').classList.remove('hidden');
+            document.getElementById('bottle-text').innerText = d.text;
+            document.getElementById('bottle-date').innerText = new Date(d.createdAt.toDate()).toLocaleDateString();
+            await updateDoc(doc(db, "bottles", randomDoc.id), { status: 'read' });
+        };
+
+        // --- Gacha ---
+        window.spinGacha = async () => {
+            if((myProfile.xp || 0) < 50) return showToast("XP不足 (50必要)");
+            if(!confirm("50 XP消費しますか？")) return;
+            const newTitle = TITLES[Math.floor(Math.random() * TITLES.length)];
+            await updateDoc(doc(db, "users", currentUser.uid), { xp: increment(-50), title: newTitle });
+            myProfile.xp -= 50; myProfile.title = newTitle; updateMyProfileUI();
+            showToast(`称号GET: [${newTitle}]`);
+        };
+
+        // --- Chat ---
+        window.openChat = (uid, name) => { currentChatUser = uid; document.getElementById('chat-target-name').innerText = name; switchTab('chat'); loadMessages(uid); };
+        function loadMessages(t) {
+            onSnapshot(query(collection(db, "chats", [currentUser.uid, t].sort().join("_"), "messages"), orderBy("createdAt", "asc"), limit(50)), (s) => {
+                const d = document.getElementById('chat-messages'); d.innerHTML = "";
+                s.forEach(o => { const v = o.data(); const m = v.senderId === currentUser.uid; d.innerHTML += `<div class="flex ${m?'justify-end':'justify-start'}"><div class="max-w-[70%] px-4 py-2 rounded-2xl text-[15px] ${m?'bg-blue-500 text-white rounded-br-sm':'bg-gray-100 text-black rounded-bl-sm'}">${v.text}</div></div>`; });
+                d.scrollTop = d.scrollHeight;
             });
         }
-        document.getElementById('chat-send-btn').onclick = async () => {
-            const text = document.getElementById('chat-input').value;
-            if(!text.trim() || !currentChatUser) return;
-            const chatId = [currentUser.uid, currentChatUser].sort().join("_");
-            const exp = new Date(); exp.setDate(exp.getDate() + 90);
-            await addDoc(collection(db, "chats", chatId, "messages"), { 
-                text, senderId: currentUser.uid, createdAt: serverTimestamp(), expireAt: exp 
-            });
-            document.getElementById('chat-input').value = "";
-        };
+        document.getElementById('chat-send-btn').onclick = async () => { const t = document.getElementById('chat-input').value; if(!t.trim()) return; await addDoc(collection(db, "chats", [currentUser.uid, currentChatUser].sort().join("_"), "messages"), { text: t, senderId: currentUser.uid, createdAt: serverTimestamp(), expireAt: new Date(Date.now() + 90*24*60*60*1000) }); document.getElementById('chat-input').value = ""; };
 
         // --- Common ---
         window.saveProfile = async () => { const n=document.getElementById('edit-name-input').value; if(!n)return; await setDoc(doc(db,"users",currentUser.uid),{name:n,icon:`https://api.dicebear.com/7.x/notionists/svg?seed=${currentUser.uid}`,xp:0},{merge:true}); location.reload(); };
         window.toggleDarkMode = () => { document.body.classList.toggle('dark'); localStorage.setItem('theme',document.body.classList.contains('dark')?'dark':'light'); };
         window.openSettings = () => document.getElementById('settings-modal').classList.remove('hidden');
         window.signOutApp = () => signOut(auth);
-        window.switchTab = (t) => { ['home','explore','notif','profile','other-profile','chat'].forEach(x => document.getElementById(`tab-${x}`).classList.add('hidden')); document.getElementById(`tab-${t}`).classList.remove('hidden'); document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('nav-active')); const b = document.querySelector(`.nav-item[data-target="${t}"]`); if(b) b.classList.add('nav-active'); if(t==='notif') document.getElementById('nav-badge').style.display='none'; };
+        window.switchTab = (t) => { ['home','explore','bottle','notif','profile','other-profile','chat'].forEach(x => document.getElementById(`tab-${x}`).classList.add('hidden')); document.getElementById(`tab-${t}`).classList.remove('hidden'); document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('nav-active')); const b = document.querySelector(`.nav-item[data-target="${t}"]`); if(b) b.classList.add('nav-active'); if(t==='notif') document.getElementById('nav-badge').style.display='none'; };
     </script>
 </body>
 </html>
