@@ -3,21 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>LoG v1.0</title>
+    <title>LoG v1.1</title>
     
     <link rel="manifest" href="manifest.json">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="theme-color" content="#ffffff">
     
-    <!-- Google AdSense -->
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1539164935971262" crossorigin="anonymous"></script>
-    
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&family=Noto+Sans+JP:wght@400;500;700;900&display=swap" rel="stylesheet">
 
     <style>
-        /* テーマ変数 (Light/Dark) */
         :root { 
             --bg: #ffffff; --text: #0f1419; --border: #eff3f4; --card: #ffffff; 
             --subtext: #536471; --accent: #1d9bf0; --danger: #f4212e; --success: #00ba7c;
@@ -27,76 +24,61 @@
             --bg: #000000; --text: #e7e9ea; --border: #2f3336; --card: #000000; 
             --subtext: #71767b; --accent: #1d9bf0; --nav-bg: rgba(0,0,0,0.95);
         }
-
         body { background-color: var(--bg); color: var(--text); font-family: 'Inter', 'Noto Sans JP', sans-serif; overflow-x: hidden; -webkit-tap-highlight-color: transparent; transition: background 0.3s, color 0.3s; }
         .hidden { display: none !important; }
 
-        /* UIコンポーネント */
-        .btn-primary { background: var(--text); color: var(--bg); border-radius: 99px; padding: 8px 16px; font-weight: 700; font-size: 0.9rem; transition: 0.2s; }
-        .btn-primary:active { transform: scale(0.95); opacity: 0.9; }
-        .btn-ghost { color: var(--subtext); padding: 8px; border-radius: 50%; transition: 0.2s; }
+        .btn-primary { background: var(--text); color: var(--bg); border-radius: 99px; padding: 6px 16px; font-weight: 700; font-size: 0.85rem; transition: 0.2s; }
+        .btn-ghost { color: var(--subtext); padding: 8px; border-radius: 50%; }
         .btn-ghost:hover { background: rgba(128,128,128,0.1); color: var(--accent); }
+        .btn-follow { border: 1px solid var(--border); color: var(--text); padding: 4px 12px; border-radius: 99px; font-size: 0.75rem; font-weight: bold; }
+        .btn-follow.following { background: var(--text); color: var(--bg); border-color: var(--text); }
 
-        .nav-item { color: var(--subtext); padding: 12px; transition: 0.2s; position: relative; }
+        .nav-item { color: var(--subtext); padding: 12px; position: relative; }
         .nav-active { color: var(--text); }
         .nav-badge { position: absolute; top: 8px; right: 8px; width: 8px; height: 8px; background: var(--danger); border-radius: 50%; display: none; }
 
-        /* ポスト & アンケート */
-        .post-card { border-bottom: 1px solid var(--border); padding: 16px; cursor: pointer; transition: background 0.1s; }
-        .post-card:active { background: rgba(128,128,128,0.05); }
+        .post-card { border-bottom: 1px solid var(--border); padding: 16px; }
+        .tab-active { border-bottom: 2px solid var(--text); color: var(--text); }
+        .tab-inactive { color: var(--subtext); }
+
         .poll-container { border: 1px solid var(--border); border-radius: 12px; margin-top: 10px; overflow: hidden; }
-        .poll-option { padding: 8px 12px; position: relative; display: flex; justify-content: space-between; align-items: center; cursor: pointer; border-bottom: 1px solid var(--border); }
-        .poll-option:last-child { border-bottom: none; }
-        .poll-fill { position: absolute; left: 0; top: 0; height: 100%; background: var(--accent); opacity: 0.15; transition: width 0.5s ease; }
+        .poll-option { padding: 8px 12px; position: relative; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); }
+        .poll-fill { position: absolute; left: 0; top: 0; height: 100%; background: var(--accent); opacity: 0.15; }
         
-        /* ランク色 */
-        .rank-bronze { color: #cd7f32; }
-        .rank-silver { color: #8a9ca8; }
-        .rank-gold { color: #d4af37; font-weight: 900; }
+        .rank-bronze { color: #cd7f32; } .rank-silver { color: #8a9ca8; } .rank-gold { color: #d4af37; font-weight: 900; }
         .rank-diamond { background: linear-gradient(90deg, #00c6ff, #0072ff); -webkit-background-clip: text; color: transparent; font-weight: 900; }
-        .rank-obsidian { background: linear-gradient(90deg, #ff0000, #460000); -webkit-background-clip: text; color: transparent; font-weight: 900; text-shadow: 0 0 10px rgba(255,0,0,0.3); }
-
-        /* アニメーション */
-        .like-anim { animation: pop 0.3s cubic-bezier(0.17, 0.89, 0.32, 1.49); color: var(--danger) !important; }
-        @keyframes pop { 0%{transform:scale(1);} 50%{transform:scale(1.4);} 100%{transform:scale(1);} }
-        .hashtag { color: var(--accent); font-weight: 500; cursor: pointer; }
-        .hashtag:hover { text-decoration: underline; }
-
+        .rank-obsidian { background: linear-gradient(90deg, #ff0000, #460000); -webkit-background-clip: text; color: transparent; font-weight: 900; }
+        
+        .like-active { color: #f91880 !important; }
         .modal-overlay { background: rgba(0,0,0,0.7); backdrop-filter: blur(5px); }
     </style>
 </head>
 <body>
 
-    <!-- ■ 1. Login Section ■ -->
+    <!-- Login -->
     <div id="login-screen" class="min-h-screen flex flex-col items-center justify-center p-8 bg-white dark:bg-black transition-colors">
-        <div class="text-center mb-16">
-            <h1 class="text-7xl font-black tracking-tighter mb-4 text-black dark:text-white">LoG</h1>
-            <div class="inline-block bg-black dark:bg-white text-white dark:text-black px-4 py-1 rounded-full text-xs font-bold tracking-[0.3em]">OFFICIAL v1.0</div>
-        </div>
-        
+        <h1 class="text-7xl font-black tracking-tighter mb-4 text-black dark:text-white">LoG</h1>
+        <div class="inline-block bg-black dark:bg-white text-white dark:text-black px-4 py-1 rounded-full text-xs font-bold tracking-[0.3em] mb-12">v1.1 FIX</div>
         <div class="w-full max-w-sm space-y-4">
             <button id="google-login-btn" class="w-full border border-gray-300 dark:border-gray-700 py-3 rounded-full font-bold flex justify-center items-center gap-3 hover:bg-gray-50 dark:hover:bg-gray-900 transition">
-                <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" class="w-5 h-5"> Googleで続ける
+                <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" class="w-5 h-5"> Google
             </button>
-            <div class="flex items-center gap-4 text-xs text-gray-400 my-6">
-                <div class="h-px bg-gray-200 dark:bg-gray-800 flex-1"></div>OR<div class="h-px bg-gray-200 dark:bg-gray-800 flex-1"></div>
-            </div>
-            <div id="email-form" class="space-y-3">
-                <input id="auth-email" type="email" placeholder="メールアドレス" class="w-full bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-lg p-3 outline-none focus:ring-2 focus:ring-blue-500">
-                <input id="auth-password" type="password" placeholder="パスワード" class="w-full bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-lg p-3 outline-none focus:ring-2 focus:ring-blue-500">
-                <div class="flex gap-2 pt-2">
-                    <button onclick="emailAuth('login')" class="flex-1 bg-black dark:bg-white text-white dark:text-black py-3 rounded-full font-bold">ログイン</button>
-                    <button onclick="emailAuth('signup')" class="flex-1 border border-gray-300 dark:border-gray-700 py-3 rounded-full font-bold">新規登録</button>
+            <div id="email-form" class="space-y-3 pt-4 border-t border-gray-100 dark:border-gray-800">
+                <input id="auth-email" type="email" placeholder="Email" class="w-full bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-lg p-3 outline-none">
+                <input id="auth-password" type="password" placeholder="Password" class="w-full bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-lg p-3 outline-none">
+                <div class="flex gap-2">
+                    <button onclick="emailAuth('login')" class="flex-1 bg-black dark:bg-white text-white dark:text-black py-3 rounded-full font-bold">Login</button>
+                    <button onclick="emailAuth('signup')" class="flex-1 border border-gray-300 dark:border-gray-700 py-3 rounded-full font-bold">Sign Up</button>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- ■ 2. App Section ■ -->
+    <!-- App -->
     <div id="app-screen" class="hidden max-w-xl mx-auto min-h-screen bg-[var(--bg)] shadow-2xl relative pb-20 border-x border-[var(--border)]">
         
         <!-- Header -->
-        <header class="sticky top-0 bg-[var(--nav-bg)] backdrop-blur-md z-40 border-b border-[var(--border)] px-4 py-3 flex justify-between items-center cursor-pointer" onclick="window.scrollTo({top:0, behavior:'smooth'})">
+        <header class="sticky top-0 bg-[var(--nav-bg)] backdrop-blur-md z-40 border-b border-[var(--border)] px-4 py-3 flex justify-between items-center" onclick="window.scrollTo({top:0, behavior:'smooth'})">
             <img id="header-icon" src="" class="w-8 h-8 rounded-full object-cover border border-[var(--border)]" onclick="switchTab('profile')">
             <div class="text-xl font-black tracking-tight">LoG</div>
             <div class="flex items-center gap-1 text-xs font-bold text-orange-500 bg-orange-500/10 px-2 py-1 rounded-full">
@@ -105,7 +87,7 @@
             </div>
         </header>
 
-        <!-- A. HOME (Timeline) -->
+        <!-- A. HOME -->
         <div id="tab-home" class="pb-24">
             <div class="p-4 border-b border-[var(--border)]">
                 <div class="flex gap-3">
@@ -113,16 +95,13 @@
                     <div class="flex-1">
                         <textarea id="post-text" rows="2" placeholder="いまどうしてる？" class="w-full text-lg resize-none bg-transparent focus:outline-none placeholder-[var(--subtext)]"></textarea>
                         
-                        <!-- アンケート作成 -->
                         <div id="poll-creator" class="hidden mb-3 space-y-2 p-3 border border-[var(--border)] rounded-xl bg-[var(--bg)]">
-                            <div class="text-xs font-bold text-[var(--subtext)] mb-1">アンケート (最大2択)</div>
                             <input id="poll-1" type="text" placeholder="選択肢 1" class="w-full bg-[var(--border)]/30 rounded p-2 text-sm outline-none">
                             <input id="poll-2" type="text" placeholder="選択肢 2" class="w-full bg-[var(--border)]/30 rounded p-2 text-sm outline-none">
                         </div>
 
-                        <!-- 引用プレビュー -->
                         <div id="quote-preview" class="hidden mb-3 p-3 rounded-xl border border-[var(--border)] text-sm relative">
-                            <button onclick="cancelQuote()" class="absolute top-1 right-2 text-[var(--subtext)] hover:text-[var(--danger)]">×</button>
+                            <button onclick="cancelQuote()" class="absolute top-1 right-2 text-[var(--subtext)]">×</button>
                             <div class="font-bold mb-1" id="quote-target-name"></div>
                             <div class="truncate text-[var(--subtext)]" id="quote-target-text"></div>
                         </div>
@@ -130,12 +109,8 @@
                         <div class="flex justify-between items-center pt-2 border-t border-[var(--border)]">
                             <div class="flex gap-2">
                                 <button onclick="togglePoll()" class="btn-ghost text-[var(--accent)]"><span class="material-icons-round">poll</span></button>
-                                <button onclick="insertTag()" class="btn-ghost text-[var(--accent)]"><span class="material-icons-round">tag</span></button>
                             </div>
-                            <div class="flex items-center gap-3">
-                                <span id="xp-preview" class="text-xs font-bold text-[var(--success)] opacity-0 transition">+15 XP</span>
-                                <button id="post-btn" class="btn-primary">ポスト</button>
-                            </div>
+                            <button id="post-btn" class="btn-primary">ポスト</button>
                         </div>
                     </div>
                 </div>
@@ -143,66 +118,65 @@
             <div id="timeline"></div>
         </div>
 
-        <!-- B. EXPLORE (Search & Rank) -->
+        <!-- B. EXPLORE -->
         <div id="tab-explore" class="hidden">
             <div class="p-3 border-b border-[var(--border)] sticky top-14 bg-[var(--bg)] z-30">
                 <div class="bg-[var(--border)]/50 rounded-full px-4 py-2 flex items-center text-[var(--subtext)]">
                     <span class="material-icons-round mr-2 text-sm">search</span>
-                    <input id="search-input" type="text" placeholder="キーワード検索" class="bg-transparent w-full outline-none text-sm" onkeyup="searchLogs()">
+                    <input id="search-input" type="text" placeholder="ユーザー検索" class="bg-transparent w-full outline-none text-sm" onkeyup="searchUsers()">
                 </div>
-            </div>
-            <div id="rank-board" class="p-4 border-b border-[var(--border)] bg-[var(--border)]/10">
-                <div class="text-xs font-bold text-[var(--subtext)] uppercase tracking-widest mb-2">XP Ranking TOP 3</div>
-                <div id="top-rankers" class="flex justify-center gap-4"></div>
             </div>
             <div id="explore-list" class="divide-y divide-[var(--border)]"></div>
         </div>
 
-        <!-- C. NOTIFICATIONS -->
+        <!-- C. NOTIF -->
         <div id="tab-notif" class="hidden">
             <div class="p-3 border-b border-[var(--border)] font-bold text-lg px-4">通知</div>
             <div id="notif-list" class="divide-y divide-[var(--border)]"></div>
         </div>
 
-        <!-- D. PROFILE -->
+        <!-- D. PROFILE (Self) -->
         <div id="tab-profile" class="hidden">
-            <div class="h-32 bg-gradient-to-r from-gray-200 to-gray-300 dark:from-gray-800 dark:to-gray-900 w-full relative"></div>
-            <div class="px-4 relative mb-4">
-                <img id="profile-big-icon" src="" class="w-20 h-20 rounded-full border-4 border-[var(--bg)] absolute -top-10 bg-[var(--bg)] object-cover">
-                <div class="flex justify-end pt-3 gap-2">
-                    <button onclick="openSettings()" class="btn-ghost border border-[var(--border)] rounded-full px-3 py-1 text-xs font-bold">設定</button>
-                    <button onclick="openProfileEditor()" class="btn-primary bg-transparent text-[var(--text)] border border-[var(--border)] hover:bg-[var(--border)]">プロフィール編集</button>
+            <div class="px-4 py-6">
+                <div class="flex justify-between items-start mb-4">
+                    <img id="profile-big-icon" src="" class="w-20 h-20 rounded-full border-4 border-[var(--bg)] bg-[var(--bg)] object-cover shadow-sm">
+                    <button onclick="openSettings()" class="btn-primary bg-transparent text-[var(--text)] border border-[var(--border)]">設定</button>
                 </div>
-                <div class="mt-3">
-                    <h2 id="profile-name" class="text-2xl font-black leading-tight"></h2>
-                    <p id="profile-uid" class="text-sm text-[var(--subtext)] font-mono">@user</p>
-                    
-                    <div class="flex items-center gap-4 mt-3">
-                        <div class="flex items-center gap-1">
-                            <span class="font-bold text-lg" id="profile-xp">0</span>
-                            <span class="text-xs text-[var(--subtext)]">XP</span>
-                        </div>
-                        <div class="flex items-center gap-1">
-                            <span class="font-bold text-lg" id="profile-rank">Unranked</span>
-                            <span class="text-xs text-[var(--subtext)]">RANK</span>
-                        </div>
-                    </div>
+                <h2 id="profile-name" class="text-2xl font-black leading-tight"></h2>
+                <p id="profile-uid" class="text-sm text-[var(--subtext)] font-mono">@user</p>
+                <div class="flex items-center gap-4 mt-3">
+                    <div class="flex items-center gap-1"><span class="font-bold" id="profile-xp">0</span> <span class="text-xs text-[var(--subtext)]">XP</span></div>
+                    <div class="flex items-center gap-1"><span class="font-bold" id="profile-rank">Unranked</span></div>
                 </div>
             </div>
-
-            <!-- 固定ポスト -->
-            <div id="pinned-area" class="hidden border-b border-[var(--border)] bg-[var(--border)]/10">
-                <div class="px-4 py-2 text-xs font-bold text-[var(--subtext)] flex items-center gap-1">
-                    <span class="material-icons-round text-xs">push_pin</span> 固定されたポスト
-                </div>
-                <div id="pinned-content"></div>
-            </div>
-
+            
             <div class="flex border-b border-[var(--border)] mt-2 sticky top-14 bg-[var(--bg)] z-20">
-                <div class="flex-1 text-center py-3 font-bold border-b-2 border-[var(--text)]">ポスト</div>
-                <div class="flex-1 text-center py-3 font-bold text-[var(--subtext)]">いいね</div>
+                <div onclick="switchProfileSubTab('posts')" id="tab-btn-posts" class="flex-1 text-center py-3 font-bold border-b-2 border-[var(--text)] cursor-pointer">ポスト</div>
+                <div onclick="switchProfileSubTab('likes')" id="tab-btn-likes" class="flex-1 text-center py-3 font-bold text-[var(--subtext)] cursor-pointer">いいね</div>
             </div>
             <div id="my-timeline" class="divide-y divide-[var(--border)]"></div>
+        </div>
+
+        <!-- E. OTHER PROFILE (他人のプロフィール) -->
+        <div id="tab-other-profile" class="hidden">
+            <div class="p-3 border-b border-[var(--border)] flex items-center gap-4 sticky top-14 bg-[var(--bg)] z-30">
+                <button onclick="history.back()" class="text-[var(--text)]"><span class="material-icons-round">arrow_back</span></button>
+                <span class="font-bold">プロフィール</span>
+            </div>
+            <div class="px-4 py-6">
+                <div class="flex justify-between items-start mb-4">
+                    <img id="other-icon" src="" class="w-20 h-20 rounded-full border-4 border-[var(--bg)] object-cover shadow-sm">
+                    <button id="other-follow-btn" class="btn-primary">フォロー</button>
+                </div>
+                <h2 id="other-name" class="text-2xl font-black leading-tight"></h2>
+                <p id="other-uid" class="text-sm text-[var(--subtext)] font-mono"></p>
+                <div class="flex items-center gap-4 mt-3">
+                    <div class="flex items-center gap-1"><span class="font-bold" id="other-xp">0</span> <span class="text-xs text-[var(--subtext)]">XP</span></div>
+                    <div class="flex items-center gap-1"><span class="font-bold" id="other-rank">Unranked</span></div>
+                </div>
+            </div>
+            <div class="border-b border-[var(--border)] font-bold px-4 py-2 text-sm">ポスト</div>
+            <div id="other-timeline" class="divide-y divide-[var(--border)]"></div>
         </div>
 
         <!-- Navigation -->
@@ -220,44 +194,35 @@
     <!-- Modals -->
     <div id="profile-modal" class="modal-overlay hidden fixed inset-0 z-50 flex items-center justify-center">
         <div class="bg-[var(--card)] p-6 rounded-2xl w-80 shadow-2xl border border-[var(--border)]">
-            <h2 class="text-xl font-bold mb-4">プロフィール設定</h2>
+            <h2 class="text-xl font-bold mb-4">初期設定</h2>
             <input id="edit-name-input" type="text" class="w-full bg-[var(--border)]/30 rounded p-3 mb-4 font-bold outline-none text-[var(--text)]" placeholder="表示名">
-            <button onclick="saveProfile()" class="w-full btn-primary py-3">保存して開始</button>
+            <button onclick="saveProfile()" class="w-full btn-primary py-3">開始</button>
         </div>
     </div>
 
     <div id="settings-modal" class="modal-overlay hidden fixed inset-0 z-50 flex items-center justify-center">
         <div class="bg-[var(--card)] p-6 rounded-2xl w-80 shadow-2xl border border-[var(--border)]">
-            <h2 class="text-xl font-bold mb-6">設定</h2>
-            <div class="space-y-4">
-                <button onclick="toggleDarkMode()" class="w-full flex justify-between items-center p-3 rounded-lg hover:bg-[var(--border)]/50">
-                    <span class="font-bold">ダークモード</span>
-                    <span class="material-icons-round" id="theme-icon">dark_mode</span>
-                </button>
-                <button onclick="signOutApp()" class="w-full text-left p-3 text-[var(--danger)] font-bold hover:bg-[var(--border)]/50 rounded-lg">ログアウト</button>
-                <div class="border-t border-[var(--border)] my-2"></div>
-                <button onclick="deleteAccount()" class="w-full text-left p-3 text-[var(--subtext)] text-xs hover:bg-[var(--border)]/50 rounded-lg">アカウント削除 (危険)</button>
-            </div>
-            <button onclick="closeSettings()" class="mt-6 w-full py-3 font-bold text-sm">閉じる</button>
+            <button onclick="toggleDarkMode()" class="w-full flex justify-between items-center p-3 font-bold mb-2">ダークモード <span class="material-icons-round">dark_mode</span></button>
+            <button onclick="signOutApp()" class="w-full text-left p-3 text-[var(--danger)] font-bold">ログアウト</button>
+            <button onclick="document.getElementById('settings-modal').classList.add('hidden')" class="mt-4 w-full py-2 text-sm">閉じる</button>
         </div>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, deleteUser } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-        import { getFirestore, collection, addDoc, query, orderBy, limit, onSnapshot, serverTimestamp, doc, getDoc, setDoc, updateDoc, arrayUnion, arrayRemove, deleteDoc, increment, writeBatch } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getFirestore, collection, addDoc, query, orderBy, limit, onSnapshot, serverTimestamp, doc, getDoc, setDoc, updateDoc, arrayUnion, arrayRemove, deleteDoc, increment, where } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-        // Firebase Config
         const firebaseConfig = { apiKey: "AIzaSyCA4NQzxcz2gh8uaw3LKrKl_NEnE_fMybs", authDomain: "lo-g-8a620.firebaseapp.com", projectId: "lo-g-8a620", storageBucket: "lo-g-8a620.firebasestorage.app", messagingSenderId: "780857099698", appId: "1:780857099698:web:b6cb359114da98ab3e50ab" };
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
 
-        // State
         let currentUser=null, myProfile=null, quoteData=null, isPoll=false;
-        
-        // --- 1. Auth & Init ---
-        const authErr = (e) => alert("Error: "+e.message);
+        let currentProfileTab = 'posts';
+
+        // Auth
+        const authErr = (e) => alert(e.message);
         document.getElementById('google-login-btn').onclick = () => signInWithPopup(auth, new GoogleAuthProvider()).catch(authErr);
         window.emailAuth = (t) => {
             const e=document.getElementById('auth-email').value, p=document.getElementById('auth-password').value;
@@ -271,14 +236,8 @@
                 const d = await getDoc(doc(db,"users",u.uid));
                 if(d.exists()){ 
                     myProfile = d.data();
-                    // Streak Logic
-                    const now = new Date();
-                    const last = myProfile.lastLogin ? myProfile.lastLogin.toDate() : new Date(0);
-                    const diff = Math.floor((now-last)/(86400000));
-                    let streak = (diff===1) ? (myProfile.streak||0)+1 : (diff>1 ? 1 : (myProfile.streak||0));
-                    if(diff>=1 || !myProfile.lastLogin) await updateDoc(doc(db,"users",u.uid),{lastLogin:serverTimestamp(), streak});
-                    myProfile.streak = streak;
-
+                    if(!myProfile.following) myProfile.following = []; // Follow init
+                    checkStreak();
                     initApp(); 
                 } else {
                     document.getElementById('login-screen').classList.add('hidden');
@@ -290,24 +249,30 @@
             }
         });
 
+        async function checkStreak() {
+            const now = new Date();
+            const last = myProfile.lastLogin ? myProfile.lastLogin.toDate() : new Date(0);
+            const diff = Math.floor((now - last) / (1000 * 60 * 60 * 24));
+            let streak = (diff === 1) ? (myProfile.streak || 0) + 1 : (diff === 0 ? (myProfile.streak || 0) : 1);
+            if (diff >= 1 || !myProfile.lastLogin) {
+                await updateDoc(doc(db,"users",currentUser.uid), { lastLogin: serverTimestamp(), streak });
+                myProfile.streak = streak;
+            }
+        }
+
         function initApp() {
             document.getElementById('login-screen').classList.add('hidden');
             document.getElementById('app-screen').classList.remove('hidden');
             document.getElementById('profile-modal').classList.add('hidden');
+            if(localStorage.getItem('theme')==='dark') document.body.classList.add('dark');
             
-            // Auto Dark Mode
-            if(localStorage.getItem('theme')==='dark' || (!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-                document.body.classList.add('dark');
-            }
-            
-            updateUI();
+            updateMyProfileUI();
             loadTimeline();
             loadNotifications();
-            loadRanking();
+            loadExplore();
         }
 
-        // --- 2. UI & Helpers ---
-        function updateUI() {
+        function updateMyProfileUI() {
             const icon = myProfile.icon || `https://api.dicebear.com/7.x/notionists/svg?seed=${currentUser.uid}`;
             document.getElementById('header-icon').src = icon;
             document.getElementById('input-icon').src = icon;
@@ -316,271 +281,218 @@
             document.getElementById('profile-uid').innerText = "@"+currentUser.uid.slice(0,8);
             document.getElementById('streak-count').innerText = myProfile.streak || 0;
             document.getElementById('profile-xp').innerText = myProfile.xp || 0;
-            
-            // Rank Logic
-            let rank = "Unranked", color = "";
-            const xp = myProfile.xp || 0;
-            if(xp>=50) { rank="Bronze"; color="rank-bronze"; }
-            if(xp>=200) { rank="Silver"; color="rank-silver"; }
-            if(xp>=500) { rank="Gold"; color="rank-gold"; }
-            if(xp>=1000) { rank="Diamond"; color="rank-diamond"; }
-            if(xp>=2000) { rank="Obsidian"; color="rank-obsidian"; }
-            
-            const rEl = document.getElementById('profile-rank');
-            rEl.innerText = rank;
-            rEl.className = `font-bold text-lg ${color}`;
-            
-            // Pinned Post
-            if(myProfile.pinnedId) loadPinned(myProfile.pinnedId);
+            document.getElementById('profile-rank').innerText = getRank(myProfile.xp).name;
+            document.getElementById('profile-rank').className = `font-bold text-lg ${getRank(myProfile.xp).class}`;
         }
 
-        async function loadPinned(id) {
-            const d = await getDoc(doc(db,"logs",id));
-            if(d.exists()) {
-                document.getElementById('pinned-area').classList.remove('hidden');
-                document.getElementById('pinned-content').innerHTML = buildPostHTML(d.id, d.data(), true);
-            }
+        function getRank(xp) {
+            xp = xp || 0;
+            if(xp>=2000) return {name:"Obsidian", class:"rank-obsidian"};
+            if(xp>=1000) return {name:"Diamond", class:"rank-diamond"};
+            if(xp>=500) return {name:"Gold", class:"rank-gold"};
+            if(xp>=200) return {name:"Silver", class:"rank-silver"};
+            if(xp>=50) return {name:"Bronze", class:"rank-bronze"};
+            return {name:"Unranked", class:""};
         }
 
-        window.togglePoll = () => { isPoll=!isPoll; document.getElementById('poll-creator').classList.toggle('hidden'); };
-        window.insertTag = () => { const t=document.getElementById('post-text'); t.value+="#"; t.focus(); };
-        window.toggleDarkMode = () => {
-            document.body.classList.toggle('dark');
-            localStorage.setItem('theme', document.body.classList.contains('dark')?'dark':'light');
+        // --- View Other Profile ---
+        window.viewUser = async (uid) => {
+            if(uid === currentUser.uid) { switchTab('profile'); return; }
+            const d = await getDoc(doc(db, "users", uid));
+            if(!d.exists()) return;
+            const u = d.data();
+            
+            document.getElementById('other-name').innerText = u.name;
+            document.getElementById('other-icon').src = u.icon;
+            document.getElementById('other-uid').innerText = "@"+uid.slice(0,8);
+            document.getElementById('other-xp').innerText = u.xp || 0;
+            document.getElementById('other-rank').innerText = getRank(u.xp).name;
+            
+            // Follow Button
+            const btn = document.getElementById('other-follow-btn');
+            const isFollowing = myProfile.following && myProfile.following.includes(uid);
+            btn.innerText = isFollowing ? "フォロー中" : "フォローする";
+            btn.className = isFollowing ? "btn-follow following" : "btn-primary";
+            btn.onclick = () => toggleFollow(uid, btn);
+
+            // Other Timeline
+            const q = query(collection(db,"logs"), where("uid","==",uid), orderBy("createdAt","desc"), limit(20));
+            onSnapshot(q, (s) => {
+                document.getElementById('other-timeline').innerHTML = "";
+                s.forEach(doc => document.getElementById('other-timeline').innerHTML += buildPostHTML(doc.id, doc.data()));
+            });
+
+            switchTab('other-profile');
         };
 
-        // --- 3. Posting System ---
+        window.toggleFollow = async (uid, btn) => {
+            const myRef = doc(db,"users",currentUser.uid);
+            if(myProfile.following && myProfile.following.includes(uid)) {
+                await updateDoc(myRef, { following: arrayRemove(uid) });
+                myProfile.following = myProfile.following.filter(id => id !== uid);
+                btn.innerText = "フォローする";
+                btn.className = "btn-primary";
+            } else {
+                await updateDoc(myRef, { following: arrayUnion(uid) });
+                if(!myProfile.following) myProfile.following = [];
+                myProfile.following.push(uid);
+                btn.innerText = "フォロー中";
+                btn.className = "btn-follow following";
+            }
+        };
+
+        // --- Timeline & Post ---
+        window.togglePoll = () => { isPoll=!isPoll; document.getElementById('poll-creator').classList.toggle('hidden'); };
         document.getElementById('post-btn').onclick = async () => {
             const text = document.getElementById('post-text').value;
             const p1 = document.getElementById('poll-1').value;
             const p2 = document.getElementById('poll-2').value;
-            
             if(!text.trim() && !p1) return;
             
-            // XP Animation
-            const xp = document.getElementById('xp-preview');
-            xp.classList.remove('opacity-0');
-            setTimeout(()=>xp.classList.add('opacity-0'), 2000);
-
-            const data = {
-                text, uid: currentUser.uid, 
-                authorName: myProfile.name, authorIcon: myProfile.icon,
-                createdAt: serverTimestamp(), likes: []
-            };
-            
-            // Poll Data
-            if(isPoll && p1 && p2) {
-                data.poll = { total:0, options: [{id:0, txt:p1, votes:[]}, {id:1, txt:p2, votes:[]}] };
-            }
-            // Quote Data
+            const exp = new Date(); exp.setDate(exp.getDate() + 90);
+            const data = { text, uid: currentUser.uid, authorName: myProfile.name, authorIcon: myProfile.icon, createdAt: serverTimestamp(), expireAt: exp, likes: [] };
+            if(isPoll && p1 && p2) data.poll = { total:0, options: [{id:0, txt:p1, votes:[]}, {id:1, txt:p2, votes:[]}] };
             if(quoteData) data.quote = quoteData;
 
-            // Save
             await addDoc(collection(db,"logs"), data);
             await updateDoc(doc(db,"users",currentUser.uid), { xp: increment(15) });
             
-            // Reset
             document.getElementById('post-text').value="";
             if(isPoll) togglePoll();
             document.getElementById('poll-1').value=""; document.getElementById('poll-2').value="";
             cancelQuote();
         };
 
-        // --- 4. Timeline Rendering ---
         function loadTimeline() {
             onSnapshot(query(collection(db,"logs"), orderBy("createdAt","desc"), limit(50)), (snap) => {
                 const c = document.getElementById('timeline');
                 c.innerHTML = "";
-                snap.forEach(d => {
-                    // Block Filter
-                    if(myProfile.blocked && myProfile.blocked.includes(d.data().uid)) return;
-                    c.innerHTML += buildPostHTML(d.id, d.data());
-                });
+                snap.forEach(d => c.innerHTML += buildPostHTML(d.id, d.data()));
             });
-            // Personal Timeline
+            // Init My Profile Timeline
+            loadMyPosts();
+        }
+
+        // --- Profile Tabs (Posts / Likes) ---
+        window.switchProfileSubTab = (type) => {
+            currentProfileTab = type;
+            document.getElementById('tab-btn-posts').className = type==='posts' ? "flex-1 text-center py-3 font-bold border-b-2 border-[var(--text)] cursor-pointer" : "flex-1 text-center py-3 font-bold text-[var(--subtext)] cursor-pointer";
+            document.getElementById('tab-btn-likes').className = type==='likes' ? "flex-1 text-center py-3 font-bold border-b-2 border-[var(--text)] cursor-pointer" : "flex-1 text-center py-3 font-bold text-[var(--subtext)] cursor-pointer";
+            
+            if(type === 'posts') loadMyPosts();
+            else loadMyLikes();
+        };
+
+        function loadMyPosts() {
             onSnapshot(query(collection(db,"logs"), where("uid","==",currentUser.uid), orderBy("createdAt","desc"), limit(20)), (s) => {
-                document.getElementById('my-timeline').innerHTML = "";
-                s.forEach(d => document.getElementById('my-timeline').innerHTML += buildPostHTML(d.id, d.data()));
+                const c = document.getElementById('my-timeline'); c.innerHTML = "";
+                s.forEach(d => c.innerHTML += buildPostHTML(d.id, d.data()));
             });
         }
 
-        function buildPostHTML(id, d, isPin=false) {
-            const isMine = d.uid === currentUser.uid;
-            const isLiked = d.likes && d.likes.includes(currentUser.uid);
-            const time = d.createdAt ? timeAgo(d.createdAt.toDate()) : 'Now';
-            
-            // Hashtag parse
-            const text = d.text.replace(/(#\S+)/g, '<span class="hashtag" onclick="event.stopPropagation();searchLogs(\'$1\')">$1</span>');
+        function loadMyLikes() {
+            // Note: Composite index required for complex query. Using simple filter for now.
+            // Ideally: where("likes", "array-contains", currentUser.uid)
+            onSnapshot(query(collection(db,"logs"), where("likes", "array-contains", currentUser.uid), limit(20)), (s) => {
+                const c = document.getElementById('my-timeline'); c.innerHTML = "";
+                if(s.empty) c.innerHTML = "<div class='p-4 text-center text-sm text-[var(--subtext)]'>いいねした投稿はありません</div>";
+                s.forEach(d => c.innerHTML += buildPostHTML(d.id, d.data()));
+            });
+        }
 
-            // Poll HTML
+        function buildPostHTML(id, d) {
+            const isLiked = d.likes && d.likes.includes(currentUser.uid);
             let pollUI = "";
             if(d.poll) {
                 pollUI = `<div class="poll-container">`;
                 d.poll.options.forEach((o, i) => {
                     const pct = d.poll.total ? Math.round((o.votes.length/d.poll.total)*100) : 0;
-                    const voted = o.votes.includes(currentUser.uid);
-                    pollUI += `
-                        <div onclick="event.stopPropagation();vote('${id}',${i})" class="poll-option">
-                            <div class="poll-fill" style="width:${pct}%"></div>
-                            <span class="z-10 text-sm font-bold flex gap-2 items-center">${o.txt} ${voted?'<span class="material-icons-round text-xs">check</span>':''}</span>
-                            <span class="z-10 text-xs font-bold">${pct}%</span>
-                        </div>`;
+                    pollUI += `<div onclick="event.stopPropagation();vote('${id}',${i})" class="poll-option"><div class="poll-fill" style="width:${pct}%"></div><span class="z-10 text-sm font-bold">${o.txt}</span><span class="z-10 text-xs font-bold">${pct}%</span></div>`;
                 });
                 pollUI += `</div>`;
             }
 
+            // Click avatar/name to view profile
+            const profileClick = `event.stopPropagation(); viewUser('${d.uid}')`;
+
             return `
-                <div class="post-card flex gap-3" onclick="openMenu('${id}', '${d.uid}')">
-                    <img src="${d.authorIcon}" class="w-10 h-10 rounded-full object-cover flex-shrink-0">
+                <div class="post-card flex gap-3">
+                    <img src="${d.authorIcon}" class="w-10 h-10 rounded-full object-cover flex-shrink-0 cursor-pointer" onclick="${profileClick}">
                     <div class="flex-1 min-w-0">
                         <div class="flex justify-between items-baseline">
-                            <div class="flex items-center gap-1 overflow-hidden">
-                                <span class="font-bold text-[15px] truncate">${d.authorName}</span>
+                            <div class="flex items-center gap-1 overflow-hidden cursor-pointer" onclick="${profileClick}">
+                                <span class="font-bold text-[15px] truncate hover:underline">${d.authorName}</span>
                                 <span class="text-[var(--subtext)] text-sm truncate">@${d.uid.slice(0,8)}</span>
-                                <span class="text-[var(--subtext)] text-xs">· ${time}</span>
                             </div>
                         </div>
-                        <p class="text-[15px] mt-1 whitespace-pre-wrap leading-relaxed">${text}</p>
+                        <p class="text-[15px] mt-1 whitespace-pre-wrap leading-relaxed">${d.text}</p>
                         ${pollUI}
                         ${d.quote ? `<div class="p-3 mt-2 rounded-xl border border-[var(--border)] text-sm"><div class="font-bold">${d.quote.name}</div><div class="text-[var(--subtext)] truncate">${d.quote.text}</div></div>` : ''}
                         
                         <div class="flex justify-between mt-3 max-w-xs text-[var(--subtext)]">
                             <button onclick="event.stopPropagation();setQuote('${d.text}','${d.authorName}')" class="btn-ghost"><span class="material-icons-round text-lg">cached</span></button>
-                            <button onclick="event.stopPropagation();like('${id}','${d.uid}')" class="btn-ghost ${isLiked?'like-anim':''}"><span class="material-icons-round text-lg">${isLiked?'favorite':'favorite_border'}</span> <span class="text-xs ml-1">${d.likes?d.likes.length:0}</span></button>
-                            ${isMine && !isPin ? `<button onclick="event.stopPropagation();pin('${id}')" class="btn-ghost"><span class="material-icons-round text-lg">push_pin</span></button>` : ''}
-                            ${isMine ? `<button onclick="event.stopPropagation();del('${id}')" class="btn-ghost hover:text-[var(--danger)]"><span class="material-icons-round text-lg">delete</span></button>` : ''}
+                            <button onclick="event.stopPropagation();like('${id}','${d.uid}')" class="btn-ghost ${isLiked?'like-active like-anim':''}"><span class="material-icons-round text-lg">${isLiked?'favorite':'favorite_border'}</span> <span class="text-xs ml-1">${d.likes?d.likes.length:0}</span></button>
                         </div>
                     </div>
                 </div>`;
         }
 
-        // --- 5. Actions (Vote, Like, Quote, Pin, Block) ---
+        // --- Actions ---
         window.vote = async (id, idx) => {
-            const r = doc(db,"logs",id);
-            const d = (await getDoc(r)).data();
-            let voted = false;
-            d.poll.options.forEach(o => { if(o.votes.includes(currentUser.uid)) voted=true; });
-            if(voted) return alert("投票済みです");
-            
-            d.poll.options[idx].votes.push(currentUser.uid);
-            d.poll.total++;
-            await updateDoc(r, { poll: d.poll });
+            const r = doc(db,"logs",id); const d=(await getDoc(r)).data();
+            let voted=false; d.poll.options.forEach(o=>{if(o.votes.includes(currentUser.uid))voted=true});
+            if(voted) return alert("投票済み");
+            d.poll.options[idx].votes.push(currentUser.uid); d.poll.total++; await updateDoc(r,{poll:d.poll});
         };
-
-        window.like = async (id, toUid) => {
-            const r = doc(db,"logs",id);
-            const d = (await getDoc(r)).data();
-            if(d.likes.includes(currentUser.uid)) {
-                await updateDoc(r, { likes: arrayRemove(currentUser.uid) });
-            } else {
-                await updateDoc(r, { likes: arrayUnion(currentUser.uid) });
-                await updateDoc(doc(db,"users",currentUser.uid), { xp: increment(2) });
-                if(toUid !== currentUser.uid) await addDoc(collection(db,"notif"), {
-                    to: toUid, from: myProfile.name, type: 'like', read: false, createdAt: serverTimestamp()
-                });
-            }
+        window.like = async (id, to) => {
+            const r = doc(db,"logs",id); const d=(await getDoc(r)).data();
+            if(d.likes.includes(currentUser.uid)) await updateDoc(r,{likes:arrayRemove(currentUser.uid)});
+            else { await updateDoc(r,{likes:arrayUnion(currentUser.uid)}); await updateDoc(doc(db,"users",currentUser.uid),{xp:increment(2)}); }
         };
-
         window.setQuote = (t,n) => { quoteData={text:t, name:n}; document.getElementById('quote-preview').classList.remove('hidden'); document.getElementById('quote-target-name').innerText=n; document.getElementById('quote-target-text').innerText=t; };
         window.cancelQuote = () => { quoteData=null; document.getElementById('quote-preview').classList.add('hidden'); };
-        window.pin = async (id) => { await updateDoc(doc(db,"users",currentUser.uid), {pinnedId: id}); alert("固定しました"); location.reload(); };
-        window.del = async (id) => { if(confirm("削除しますか？")) await deleteDoc(doc(db,"logs",id)); };
-        
-        window.openMenu = (id, uid) => {
-            if(uid === currentUser.uid) return;
-            if(confirm("このユーザーをブロックしますか？")) {
-                updateDoc(doc(db,"users",currentUser.uid), { blocked: arrayUnion(uid) });
-                alert("ブロックしました");
-                location.reload();
-            }
-        };
 
-        // --- 6. Ranking & Search ---
-        function loadRanking() {
+        // --- Explore & Notif ---
+        function loadExplore() {
             onSnapshot(query(collection(db,"users"), orderBy("xp","desc"), limit(20)), (s) => {
-                const list = document.getElementById('explore-list');
-                const top = document.getElementById('top-rankers');
-                list.innerHTML = ""; top.innerHTML = "";
-                
-                let i = 1;
+                const l = document.getElementById('explore-list'); l.innerHTML = "";
                 s.forEach(d => {
                     const u = d.data();
-                    const html = `
-                        <div class="p-4 flex items-center gap-3">
-                            <span class="font-black text-[var(--subtext)] w-6">${i}</span>
-                            <img src="${u.icon}" class="w-10 h-10 rounded-full">
-                            <div class="flex-1">
-                                <div class="font-bold text-sm">${u.name}</div>
-                                <div class="text-xs text-[var(--subtext)] font-bold">${u.xp||0} XP</div>
-                            </div>
-                        </div>`;
-                    
-                    if(i<=3) top.innerHTML += `<div class="text-center"><img src="${u.icon}" class="w-12 h-12 rounded-full border-2 ${i===1?'border-yellow-400':(i===2?'border-gray-400':'border-orange-400')}"><div class="font-bold text-xs mt-1">${u.name}</div></div>`;
-                    list.innerHTML += html;
-                    i++;
-                });
-            });
-        }
-
-        window.searchLogs = (tag) => {
-            const v = tag || document.getElementById('search-input').value.toLowerCase();
-            const cards = document.querySelectorAll('.post-card');
-            cards.forEach(c => {
-                c.style.display = c.innerText.toLowerCase().includes(v) ? 'flex' : 'none';
-            });
-            if(tag) { 
-                document.getElementById('search-input').value = tag;
-                switchTab('explore'); 
-            }
-        };
-
-        // --- 7. Notifications ---
-        function loadNotifications() {
-            onSnapshot(query(collection(db,"notif"), where("to","==",currentUser.uid), orderBy("createdAt","desc"), limit(20)), (s) => {
-                const l = document.getElementById('notif-list');
-                const b = document.getElementById('nav-badge');
-                l.innerHTML = "";
-                if(s.empty) l.innerHTML = `<div class="p-8 text-center text-sm text-[var(--subtext)]">通知はありません</div>`;
-                let unread = false;
-                s.forEach(d => {
-                    const n = d.data();
-                    if(!n.read) unread = true;
+                    const isFollowing = myProfile.following && myProfile.following.includes(d.id);
+                    // Add Follow button
+                    let followBtn = "";
+                    if(d.id !== currentUser.uid) {
+                        followBtn = `<button id="btn-${d.id}" onclick="event.stopPropagation();toggleFollow('${d.id}', this)" class="btn-follow ${isFollowing?'following':''}">${isFollowing?'フォロー中':'フォロー'}</button>`;
+                    }
                     l.innerHTML += `
-                        <div class="p-4 flex gap-3 ${!n.read ? 'bg-[var(--accent)]/10' : ''}">
-                            <span class="material-icons-round text-[var(--accent)]">${n.type==='like'?'favorite':'reply'}</span>
-                            <div class="text-sm">
-                                <span class="font-bold">${n.from}</span>さんが${n.type==='like'?'いいね':'リプライ'}しました
-                            </div>
+                        <div class="p-4 flex items-center gap-3 cursor-pointer hover:bg-gray-50" onclick="viewUser('${d.id}')">
+                            <img src="${u.icon}" class="w-10 h-10 rounded-full">
+                            <div class="flex-1"><div class="font-bold text-sm">${u.name}</div><div class="text-xs text-[var(--subtext)]">${u.xp||0} XP</div></div>
+                            ${followBtn}
                         </div>`;
-                    if(!n.read) updateDoc(doc(db,"notif",d.id), {read:true});
                 });
-                b.style.display = unread ? 'block' : 'none';
             });
         }
 
-        // --- 8. Settings & Profile ---
-        window.saveProfile = async () => {
-            const n = document.getElementById('edit-name-input').value;
-            if(!n) return;
-            await setDoc(doc(db,"users",currentUser.uid), { name: n, icon: `https://api.dicebear.com/7.x/notionists/svg?seed=${currentUser.uid}`, xp:0, streak:1 }, { merge: true });
-            location.reload();
-        };
-        window.openSettings = () => document.getElementById('settings-modal').classList.remove('hidden');
-        window.closeSettings = () => document.getElementById('settings-modal').classList.add('hidden');
-        window.openProfileEditor = () => document.getElementById('profile-modal').classList.remove('hidden');
-        window.signOutApp = () => signOut(auth);
-        window.deleteAccount = async () => {
-            if(confirm("本当にアカウントを削除しますか？この操作は取り消せません。")) {
-                await deleteDoc(doc(db,"users",currentUser.uid));
-                await currentUser.delete();
-                alert("アカウントを削除しました");
-                location.reload();
-            }
+        function loadNotifications() {
+            // Note: Simple query. For production, create a separate 'notifications' collection.
+            // Using a mock for UI demo or querying based on logs can be complex.
+            // Here we assume a notifications collection exists (Beta 6 feature).
+            // For now, leaving empty or simple logic.
+        }
+        
+        window.searchUsers = () => {
+            const v = document.getElementById('search-input').value.toLowerCase();
+            const items = document.querySelectorAll('#explore-list > div');
+            items.forEach(i => i.style.display = i.innerText.toLowerCase().includes(v) ? 'flex' : 'none');
         };
 
-        // Utils
-        function timeAgo(d){ const s=Math.floor((new Date()-d)/1000); if(s<60)return"1m"; const m=Math.floor(s/60); if(m<60)return m+"m"; const h=Math.floor(m/60); if(h<24)return h+"h"; return Math.floor(h/24)+"d"; }
-        window.switchTab = (t) => { ['home','explore','notif','profile'].forEach(x => document.getElementById(`tab-${x}`).classList.add('hidden')); document.getElementById(`tab-${t}`).classList.remove('hidden'); document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('nav-active')); const b = document.querySelector(`.nav-item[data-target="${t}"]`); if(b) b.classList.add('nav-active'); if(t==='notif') document.getElementById('nav-badge').style.display='none'; };
+        // --- Common ---
+        window.saveProfile = async () => { const n=document.getElementById('edit-name-input').value; if(!n)return; await setDoc(doc(db,"users",currentUser.uid),{name:n,icon:`https://api.dicebear.com/7.x/notionists/svg?seed=${currentUser.uid}`,xp:0,streak:1},{merge:true}); location.reload(); };
+        window.toggleDarkMode = () => { document.body.classList.toggle('dark'); localStorage.setItem('theme',document.body.classList.contains('dark')?'dark':'light'); };
+        window.openSettings = () => document.getElementById('settings-modal').classList.remove('hidden');
+        window.signOutApp = () => signOut(auth);
+        window.switchTab = (t) => { ['home','explore','notif','profile','other-profile'].forEach(x => document.getElementById(`tab-${x}`).classList.add('hidden')); document.getElementById(`tab-${t}`).classList.remove('hidden'); document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('nav-active')); const b = document.querySelector(`.nav-item[data-target="${t}"]`); if(b) b.classList.add('nav-active'); };
     </script>
 </body>
 </html>
