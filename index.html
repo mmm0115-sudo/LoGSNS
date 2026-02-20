@@ -3,144 +3,283 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LoG | 90日で消える、テキスト限定のミニマルSNS</title>
-    <meta name="description" content="LoG（ログ）は、滋賀県の中学生エンジニアが開発した、テキストコミュニケーションに特化した次世代SNSです。投稿は90日で自動消去され、デジタルタトゥーのリスクから解放されます。">
+    <title>LoG | The Minimal Ecosystem</title>
+    <meta name="description" content="LoG（ログ）は、滋賀県の中学生エンジニアが開発した、テキストコミュニケーションに特化した次世代SNS・ウェブサービス群です。">
     
-    <!-- Google Search Console 確認用タグ -->
+    <!-- Google Search Console 確認用タグ (必要に応じて変更) -->
     <meta name="google-site-verification" content="Z2rHXTn9RZClgr4XgNlPX0di9h8peZXKxsakNEp9v-E" />
 
     <!-- Google AdSense -->
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1539164935971262" crossorigin="anonymous"></script>
 
-    <!-- デザイン -->
+    <!-- 外部リソース -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&family=Noto+Sans+JP:wght@400;500;700;900&display=swap" rel="stylesheet">
+
     <style>
-        body { font-family: 'Noto Sans JP', sans-serif; color: #111; line-height: 1.8; }
-        .gradient-text { background: linear-gradient(90deg, #000000, #444444); -webkit-background-clip: text; color: transparent; }
+        :root {
+            --bg: #050505;
+            --text: #ffffff;
+            --glass-bg: rgba(255, 255, 255, 0.03);
+            --glass-border: rgba(255, 255, 255, 0.08);
+        }
+
+        body { 
+            font-family: 'Inter', 'Noto Sans JP', sans-serif; 
+            background-color: var(--bg); 
+            color: var(--text); 
+            overflow-x: hidden;
+        }
+
+        /* 背景の光るオーブ */
+        .glow-orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(100px);
+            z-index: -1;
+            opacity: 0.4;
+            animation: float 10s ease-in-out infinite alternate;
+        }
+        .orb-1 { top: -10%; left: -10%; width: 500px; height: 500px; background: linear-gradient(135deg, #4f46e5, #9333ea); }
+        .orb-2 { bottom: -10%; right: -10%; width: 600px; height: 600px; background: linear-gradient(135deg, #ea580c, #e11d48); animation-delay: -5s; }
+
+        @keyframes float {
+            0% { transform: translate(0, 0) scale(1); }
+            100% { transform: translate(30px, 50px) scale(1.1); }
+        }
+
+        /* テキストグラデーション */
+        .text-gradient {
+            background: linear-gradient(to right, #fff, #a1a1aa);
+            -webkit-background-clip: text;
+            color: transparent;
+        }
+        .text-gradient-blue { background: linear-gradient(to right, #3b82f6, #8b5cf6); -webkit-background-clip: text; color: transparent; }
+
+        /* ガラス風カード (Bento UI) */
+        .glass-card {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-radius: 24px;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+            overflow: hidden;
+            text-decoration: none;
+            display: flex;
+            flex-col;
+        }
+        .glass-card:hover {
+            transform: translateY(-8px);
+            background: rgba(255, 255, 255, 0.06);
+            border-color: rgba(255, 255, 255, 0.15);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+        }
+
+        /* カード内のアイコン背景 */
+        .icon-wrapper {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 56px;
+            height: 56px;
+            border-radius: 16px;
+            margin-bottom: 16px;
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+
+        /* スクロールアニメーション */
+        .fade-up {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+        }
+        .fade-up.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
     </style>
 </head>
-<body class="bg-white">
+<body class="antialiased selection:bg-white selection:text-black">
 
-    <!-- ヘッダー -->
-    <header class="border-b border-gray-100 sticky top-0 z-50 bg-white/90 backdrop-blur">
-        <div class="max-w-5xl mx-auto px-6 py-4 flex justify-between items-center">
-            <h1 class="text-3xl font-black tracking-tighter">LoG</h1>
-            <a href="app.html" class="bg-black text-white px-6 py-2 rounded-full font-bold hover:bg-gray-800 transition shadow-lg">
-                アプリを起動
+    <!-- 背景装飾 -->
+    <div class="fixed inset-0 pointer-events-none overflow-hidden">
+        <div class="glow-orb orb-1"></div>
+        <div class="glow-orb orb-2"></div>
+    </div>
+
+    <!-- ナビゲーション -->
+    <header class="fixed top-0 w-full z-50 bg-[#050505]/60 backdrop-blur-md border-b border-white/5">
+        <div class="max-w-6xl mx-auto px-6 py-4 flex justify-between items-center">
+            <div class="text-2xl font-black tracking-tighter">LoG <span class="text-xs text-gray-500 font-normal ml-1 tracking-widest uppercase">Ecosystem</span></div>
+            <a href="app.html" class="bg-white text-black px-5 py-2 rounded-full text-sm font-bold hover:bg-gray-200 transition shadow-[0_0_15px_rgba(255,255,255,0.3)]">
+                SNSを開く
             </a>
         </div>
     </header>
 
-    <!-- メインビジュアル -->
-    <section class="py-24 text-center px-6">
-        <div class="max-w-3xl mx-auto">
-            <span class="bg-gray-100 text-gray-600 font-bold px-3 py-1 rounded-full text-xs mb-6 inline-block">Official Release v1.0</span>
-            <h2 class="text-5xl md:text-7xl font-black mb-8 leading-tight tracking-tight">
-                言葉だけの<br><span class="gradient-text">純粋な世界</span>へ。
-            </h2>
-            <p class="text-gray-500 mb-12 text-lg font-medium">
-                「映え」も「既読」も気にしない。<br>
-                90日で消えるログが、あなたを過去から解放します。<br>
-                中学生デベロッパーが提案する、新しいSNSの形。
-            </p>
-            <a href="app.html" class="inline-block bg-black text-white text-xl px-10 py-5 rounded-full font-bold hover:scale-105 transform duration-200 shadow-2xl">
-                今すぐ始める (無料)
+    <!-- ヒーローセクション -->
+    <section class="relative pt-40 pb-20 px-6 min-h-[80vh] flex flex-col items-center justify-center text-center fade-up visible">
+        <span class="border border-white/10 bg-white/5 px-4 py-1.5 rounded-full text-xs font-bold tracking-widest text-gray-400 mb-6 uppercase shadow-lg">
+            Developed by Haruto
+        </span>
+        <h1 class="text-6xl md:text-8xl font-black tracking-tighter mb-6 leading-tight">
+            Simplify your <br>
+            <span class="text-gradient">digital life.</span>
+        </h1>
+        <p class="text-gray-400 text-lg md:text-xl max-w-2xl mb-12 leading-relaxed">
+            ノイズを削ぎ落とし、言葉と本質だけに集中する。<br>
+            LoGは、中学生エンジニアが提案する全く新しいウェブ・エコシステムです。
+        </p>
+        <div class="flex flex-col sm:flex-row gap-4">
+            <a href="#ecosystem" class="bg-white/10 border border-white/20 text-white px-8 py-4 rounded-full font-bold hover:bg-white/20 transition flex items-center justify-center gap-2">
+                エコシステムを見る <span class="material-icons-round text-sm">expand_more</span>
             </a>
-            <p class="mt-4 text-xs text-gray-400">登録不要でデモ画面を確認できます</p>
         </div>
     </section>
 
-    <!-- AdSense 広告枠 1 -->
-    <div class="max-w-4xl mx-auto py-8 text-center bg-gray-50 my-8 rounded-xl border border-gray-100">
-        <span class="text-[10px] text-gray-400 mb-2 block tracking-widest">SPONSORED</span>
-        <ins class="adsbygoogle"
-             style="display:block"
-             data-ad-client="ca-pub-1539164935971262"
-             data-ad-slot="YOUR_AD_SLOT_ID" 
-             data-ad-format="auto"
-             data-ad-full-width-responsive="true"></ins>
-        <script>
-             (adsbygoogle = window.adsbygoogle || []).push({});
-        </script>
-    </div>
+    <!-- エコシステムグリッド (Bento UI) -->
+    <section id="ecosystem" class="py-20 px-6 max-w-6xl mx-auto scroll-mt-20">
+        <div class="text-center mb-16 fade-up">
+            <h2 class="text-4xl font-black mb-4">LoG Apps</h2>
+            <p class="text-gray-500">目的に合わせて、最適なツールを選択してください。</p>
+        </div>
 
-    <!-- 機能紹介 -->
-    <section class="py-20 px-6 bg-gray-50">
-        <div class="max-w-5xl mx-auto">
-            <div class="grid md:grid-cols-3 gap-12">
-                <div class="bg-white p-10 rounded-3xl shadow-sm">
-                    <div class="text-5xl mb-6">⏳</div>
-                    <h4 class="font-bold text-2xl mb-4">90日自動消去</h4>
-                    <p class="text-gray-500">
-                        投稿されたログはサーバー上で厳密に管理され、作成から90日が経過すると自動的に完全削除されます。デジタルタトゥーの心配はありません。
-                    </p>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            
+            <!-- 1. LoG SNS (Featured / 大きめ) -->
+            <a href="app.html" class="glass-card md:col-span-2 p-8 md:p-12 fade-up group">
+                <div class="absolute top-0 right-0 w-64 h-64 bg-blue-500/20 rounded-full blur-3xl -mr-20 -mt-20 pointer-events-none"></div>
+                <div class="flex justify-between items-start mb-16 relative z-10">
+                    <div class="icon-wrapper text-blue-400 border-blue-500/30">
+                        <span class="material-icons-round text-3xl">forum</span>
+                    </div>
+                    <span class="bg-blue-500 text-white text-xs font-black px-3 py-1 rounded-full uppercase tracking-wider">Final Edition</span>
                 </div>
-                <div class="bg-white p-10 rounded-3xl shadow-sm">
-                    <div class="text-5xl mb-6">📝</div>
-                    <h4 class="font-bold text-2xl mb-4">テキスト特化</h4>
-                    <p class="text-gray-500">
-                        画像や動画のアップロード機能をあえて排除しました。視覚的なノイズをなくし、文字による思考の共有だけに集中できる設計です。
+                <div class="relative z-10">
+                    <h3 class="text-3xl font-black mb-3">LoG SNS</h3>
+                    <p class="text-gray-400 text-lg leading-relaxed mb-6">
+                        90日で消えるテキスト限定の次世代SNS。<br>
+                        漂流ログ、称号ガチャ、XPランクシステムなど、独自のゲーミフィケーションを搭載。
                     </p>
+                    <span class="inline-flex items-center gap-1 font-bold text-blue-400 group-hover:text-blue-300 transition">
+                        アプリを起動 <span class="material-icons-round text-sm">arrow_forward</span>
+                    </span>
                 </div>
-                <div class="bg-white p-10 rounded-3xl shadow-sm">
-                    <div class="text-5xl mb-6">🏆</div>
-                    <h4 class="font-bold text-2xl mb-4">ランクシステム</h4>
-                    <p class="text-gray-500">
-                        投稿や「いいね」で経験値(XP)を獲得。ブロンズからオブシディアンまで、活動量に応じてランクが上がり、名前の色が変化します。
-                    </p>
+            </a>
+
+            <!-- 2. LoG Board -->
+            <a href="board.html" class="glass-card p-8 fade-up group" style="transition-delay: 100ms;">
+                <div class="absolute bottom-0 right-0 w-40 h-40 bg-emerald-500/20 rounded-full blur-3xl -mr-10 -mb-10 pointer-events-none"></div>
+                <div class="icon-wrapper text-emerald-400 border-emerald-500/30">
+                    <span class="material-icons-round text-3xl">dashboard</span>
                 </div>
-            </div>
+                <h3 class="text-2xl font-black mb-2">LoG Board</h3>
+                <p class="text-gray-400 text-sm mb-6 flex-1">
+                    アカウント登録不要の超軽量な匿名掲示板。好きな話題でスレッドを立ち上げよう。
+                </p>
+                <span class="inline-flex items-center gap-1 font-bold text-emerald-400 group-hover:text-emerald-300 transition">
+                    掲示板へ <span class="material-icons-round text-sm">arrow_forward</span>
+                </span>
+            </a>
+
+            <!-- 3. LoG Notes -->
+            <a href="notes.html" class="glass-card p-8 fade-up group" style="transition-delay: 200ms;">
+                <div class="absolute top-0 left-0 w-40 h-40 bg-amber-500/20 rounded-full blur-3xl -ml-10 -mt-10 pointer-events-none"></div>
+                <div class="icon-wrapper text-amber-400 border-amber-500/30">
+                    <span class="material-icons-round text-3xl">edit_note</span>
+                </div>
+                <h3 class="text-2xl font-black mb-2">LoG Notes</h3>
+                <p class="text-gray-400 text-sm mb-6 flex-1">
+                    ブラウザを開いて1秒で書き始められる。ローカルに自動保存される超高速メモ帳。
+                </p>
+                <span class="inline-flex items-center gap-1 font-bold text-amber-400 group-hover:text-amber-300 transition">
+                    メモを開く <span class="material-icons-round text-sm">arrow_forward</span>
+                </span>
+            </a>
+
+            <!-- 4. LoG Games -->
+            <a href="games.html" class="glass-card md:col-span-2 p-8 fade-up group" style="transition-delay: 300ms;">
+                <div class="absolute bottom-0 right-1/2 w-64 h-64 bg-rose-500/20 rounded-full blur-3xl -mb-20 pointer-events-none"></div>
+                <div class="flex justify-between items-start mb-6">
+                    <div class="icon-wrapper text-rose-400 border-rose-500/30">
+                        <span class="material-icons-round text-3xl">sports_esports</span>
+                    </div>
+                    <span class="border border-gray-600 text-gray-400 text-xs font-bold px-3 py-1 rounded-full uppercase">Basic Ver</span>
+                </div>
+                <h3 class="text-2xl font-black mb-2">LoG Games</h3>
+                <p class="text-gray-400 text-sm mb-6 max-w-lg">
+                    ブラウザだけでサクッと遊べるミニゲーム集。ちょっとした暇つぶしや、限界への挑戦に。（現在は10秒連打ゲームを収録）
+                </p>
+                <span class="inline-flex items-center gap-1 font-bold text-rose-400 group-hover:text-rose-300 transition">
+                    プレイする <span class="material-icons-round text-sm">arrow_forward</span>
+                </span>
+            </a>
+
         </div>
     </section>
 
-    <!-- 開発者ストーリー -->
-    <section class="py-24 px-6">
-        <div class="max-w-3xl mx-auto text-center">
-            <h3 class="text-3xl font-black mb-8">開発者ストーリー</h3>
-            <div class="text-gray-600 leading-relaxed space-y-6 text-left bg-gray-50 p-10 rounded-3xl">
+    <!-- フィロソフィー -->
+    <section class="py-24 px-6 border-t border-white/5 bg-black/50">
+        <div class="max-w-4xl mx-auto text-center fade-up">
+            <h2 class="text-4xl font-black mb-8">Philosophy</h2>
+            <div class="text-gray-400 leading-loose space-y-6 text-lg">
                 <p>
-                    こんにちは。LoGを開発した滋賀県在住の中学生エンジニアです。
-                    現代のSNSは「映え」や「承認欲求」に支配されすぎていないでしょうか？
-                    友人のキラキラした投稿を見て疲れてしまったり、過去の自分の投稿が残り続けることに不安を感じたりすることは誰にでもあるはずです。
+                    現代のインターネットは、過剰な情報と他人の評価（映え）で溢れかえっています。
+                    私たちはそれに疲れ、もっとシンプルに「自分の思考」を記録する場所が欲しいと考えました。
                 </p>
                 <p>
-                    私は、インターネットの原点である「言葉だけのコミュニケーション」に回帰したいと考え、このLoGを開発しました。
-                    プログラミング言語（JavaScript/Firebase）を独学で学び、数ヶ月かけて構築したこのプラットフォームは、
-                    私の技術の結晶であり、同時に同世代へのメッセージでもあります。
-                </p>
-                <p class="font-bold text-black">
-                    「今」感じたことを書き、「時」が来れば消える。
-                    そんな砂浜に文字を書くような、儚くも自由な体験をぜひLoGで楽しんでください。
+                    <strong class="text-white">LoG（ログ）</strong>は、その名の通り、丸太のように無骨で、航海日誌のようにただ記録を残すための場所です。
+                    画像は貼れません。90日経てばすべて消えます。
+                    だからこそ、今この瞬間のありのままの感情を書き残すことができるのです。
                 </p>
             </div>
         </div>
     </section>
 
     <!-- フッター -->
-    <footer class="bg-black text-gray-400 py-16 px-6 text-sm">
-        <div class="max-w-5xl mx-auto grid md:grid-cols-4 gap-8">
-            <div class="col-span-2">
-                <h2 class="text-4xl font-black text-white mb-4 tracking-tighter">LoG</h2>
-                <p class="mb-4 text-xs uppercase tracking-widest">Shiga-Minakuchi Node / Official v1.0</p>
-                <p>© 2026 LoG Project. All rights reserved.</p>
-            </div>
+    <footer class="border-t border-white/10 py-12 px-6">
+        <div class="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6">
             <div>
-                <h3 class="text-white font-bold mb-4">Links</h3>
-                <ul class="space-y-2">
-                    <li><a href="app.html" class="hover:text-white transition">ログイン / 新規登録</a></li>
-                    <li><a href="#" class="hover:text-white transition">開発者ブログ</a></li>
-                </ul>
+                <h2 class="text-2xl font-black tracking-tighter mb-1">LoG</h2>
+                <p class="text-gray-600 text-xs uppercase tracking-widest">Shiga-Minakuchi Node</p>
             </div>
-            <div>
-                <h3 class="text-white font-bold mb-4">Legal</h3>
-                <ul class="space-y-2">
-                    <li><a href="#" class="hover:text-white transition">利用規約</a></li>
-                    <li><a href="#" class="hover:text-white transition">プライバシーポリシー</a></li>
-                </ul>
+            <div class="flex gap-6 text-sm font-bold text-gray-400">
+                <a href="app.html" class="hover:text-white transition">SNS</a>
+                <a href="board.html" class="hover:text-white transition">Board</a>
+                <a href="notes.html" class="hover:text-white transition">Notes</a>
+                <a href="games.html" class="hover:text-white transition">Games</a>
             </div>
+            <p class="text-gray-600 text-xs">
+                &copy; 2026 LoG Project. Built by Haruto.
+            </p>
         </div>
     </footer>
 
+    <!-- スクロールアニメーション用スクリプト -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const observerOptions = {
+                root: null,
+                rootMargin: '0px',
+                threshold: 0.15
+            };
+
+            const observer = new IntersectionObserver((entries, observer) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('visible');
+                        observer.unobserve(entry.target); // 一度表示されたら監視を外す
+                    }
+                });
+            }, observerOptions);
+
+            const fadeElements = document.querySelectorAll('.fade-up');
+            fadeElements.forEach(el => observer.observe(el));
+        });
+    </script>
 </body>
 </html>
