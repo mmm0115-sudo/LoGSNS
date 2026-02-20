@@ -6,6 +6,13 @@
     <title>LoG | The Minimal Ecosystem</title>
     <meta name="description" content="LoG（ログ）は、シンプルさを追求して開発された、テキストコミュニケーションに特化した次世代SNS・ウェブサービス群です。">
     
+    <!-- PWAとして起動した場合は、自動的にSNS(app.html)へ飛ばす -->
+    <script>
+        if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true) {
+            window.location.replace('app.html');
+        }
+    </script>
+
     <!-- Google Search Console 確認用タグ (必要に応じて変更) -->
     <meta name="google-site-verification" content="Z2rHXTn9RZClgr4XgNlPX0di9h8peZXKxsakNEp9v-E" />
 
