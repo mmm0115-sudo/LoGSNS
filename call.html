@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>LoG Call | Voice Chat</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&family=Noto+Sans+JP:wght@400;700;900&display=swap" rel="stylesheet">
+    
+    <style>
+        body { font-family: 'Inter', 'Noto Sans JP', sans-serif; background-color: #050505; color: #ffffff; overflow-x: hidden; -webkit-tap-highlight-color: transparent; }
+        .hidden { display: none !important; }
+        
+        /* Glass Card */
+        .glass-card { background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 24px; padding: 24px; backdrop-filter: blur(10px); }
+        
+        /* グラデーション */
+        .grad-call { background: linear-gradient(135deg, #10b981, #059669); }
+        .text-grad-call { background: linear-gradient(135deg, #34d399, #10b981); -webkit-background-clip: text; color: transparent; }
+        
+        /* アバターの波紋エフェクト */
+        .avatar-container { position: relative; width: 100px; height: 100px; margin: 0 auto; transition: transform 0.1s ease-out, box-shadow 0.1s ease-out; border-radius: 50%; background-color: #111; border: 2px solid rgba(255,255,255,0.1); }
+        .avatar-img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; z-index: 10; position: relative; }
+        
+        /* トースト */
+        .toast { position: fixed; top: 80px; left: 50%; transform: translateX(-50%) translateY(-20px); background: rgba(16, 185, 129, 0.9); color: white; padding: 10px 24px; border-radius: 50px; font-weight: bold; opacity: 0; transition: 0.3s; pointer-events: none; z-index: 100; box-shadow: 0 4px 20px rgba(16, 185, 129, 0.5); }
+        .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+    </style>
+</head>
+<body class="flex flex-col min-h-screen">
+
+    <!-- トースト通知 -->
+    <div id="toast" class="toast">Message</div>
+
+    <!-- ヘッダー -->
+    <header class="p-4 md:p-6 flex items-center justify-between border-b border-white/10 bg-black/50 backdrop-blur sticky top-0 z-50">
+        <div class="flex items-center gap-4">
+            <a href="index.html" class="text-gray-400 hover:text-white transition"><span class="material-icons-round text-3xl">arrow_back</span></a>
+            <h1 class="text-xl font-black tracking-tight">LoG Call</h1>
+        </div>
+        <span class="text-xs font-bold text-emerald-400 bg-emerald-500/10 px-3 py-1 rounded-full tracking-widest uppercase flex items-center gap-1">
+            <span class="material-icons-round text-[10px]">mic</span> Voice
+        </span>
+    </header>
+
+    <main class="flex-1 relative flex flex-col">
+        
+        <!-- ========================================== -->
+        <!-- 1. ロビー画面 (ルーム選択) -->
+        <!-- ========================================== -->
+        <div id="view-lobby" class="flex-1 flex flex-col items-center justify-center p-6 animate-[fadeIn_0.5s_ease-out]">
+            <div class="glass-card w-full max-w-md text-center">
+                <div class="w-20 h-20 rounded-full grad-call mx-auto flex items-center justify-center mb-6 shadow-[0_0_30px_rgba(16,185,129,0.4)]">
+                    <span class="material-icons-round text-4xl text-white">headset_mic</span>
+                </div>
+                <h2 class="text-3xl font-black mb-2 text-grad-call">Join a Room</h2>
+                <p class="text-gray-400 text-sm mb-8">ルームIDを入力するか、新しく作成して友達を招待しましょう。</p>
+                
+                <div class="space-y-4">
+                    <input type="text" id="room-id-input" placeholder="ルームID (例: log123)" class="w-full bg-black/50 border border-white/20 rounded-xl p-4 text-center text-lg font-bold outline-none focus:border-emerald-500 transition tracking-widest uppercase">
+                    
+                    <button onclick="joinRoom()" class="w-full grad-call text-white font-black text-lg py-4 rounded-xl hover:opacity-90 transition shadow-lg active:scale-95">
+                        入室する / JOIN
+                    </button>
+                    
+                    <div class="relative py-2">
+                        <div class="absolute inset-0 flex items-center"><div class="w-full border-t border-white/10"></div></div>
+                        <div class="relative flex justify-center"><span class="bg-[#0f1115] px-4 text-xs text-gray-500">または</span></div>
+                    </div>
+
+                    <button onclick="createRoom()" class="w-full bg-white/5 border border-white/10 text-white font-bold py-4 rounded-xl hover:bg-white/10 transition active:scale-95">
+                        ランダムな部屋を作成
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ========================================== -->
+        <!-- 2. 通話ルーム画面 -->
+        <!-- ========================================== -->
+        <div id="view-room" class="hidden flex-1 flex flex-col p-6 relative">
+            <!-- ルーム情報 -->
+            <div class="text-center mb-8">
+                <h2 class="text-gray-400 text-sm font-bold tracking-widest uppercase mb-1">Current Room</h2>
+                <div class="flex items-center justify-center gap-2">
+                    <span id="current-room-id" class="text-3xl font-black text-white tracking-widest uppercase">XXXXXX</span>
+                    <button onclick="copyRoomId()" class="text-gray-400 hover:text-emerald-400 transition p-2"><span class="material-icons-round">content_copy</span></button>
+                </div>
+                <p class="text-xs text-gray-500 mt-2">このIDを友達に教えて通話に参加させましょう</p>
+            </div>
+
+            <!-- アバターグリッド -->
+            <div id="participants-grid" class="flex-1 flex flex-wrap content-start justify-center gap-8 overflow-y-auto pb-24">
+                <!-- 自分のアバター (雛形) -->
+                <!-- Javascriptで動的に追加されます -->
+            </div>
+
+            <!-- コントロールバー (画面下部固定) -->
+            <div class="fixed bottom-6 left-1/2 transform -translate-x-1/2 glass-card !rounded-full !padding-2 px-6 py-3 flex gap-6 items-center shadow-2xl border-white/20">
+                <button id="btn-mute" onclick="toggleMute()" class="w-14 h-14 rounded-full bg-white/10 flex items-center justify-center hover:bg-white/20 transition">
+                    <span id="icon-mute" class="material-icons-round text-2xl text-white">mic</span>
+                </button>
+                <button onclick="leaveRoom()" class="w-14 h-14 rounded-full bg-red-500 flex items-center justify-center hover:bg-red-600 transition shadow-[0_0_15px_rgba(239,68,68,0.5)]">
+                    <span class="material-icons-round text-2xl text-white">call_end</span>
+                </button>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- 音声再生用のコンテナ (画面には表示しない) -->
+    <div id="audio-container" class="hidden"></div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getFirestore, collection, doc, setDoc, onSnapshot, addDoc, query, where, serverTimestamp, deleteDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyCA4NQzxcz2gh8uaw3LKrKl_NEnE_fMybs",
+            authDomain: "lo-g-8a620.firebaseapp.com",
+            projectId: "lo-g-8a620",
+            storageBucket: "lo-g-8a620.firebasestorage.app",
+            messagingSenderId: "780857099698",
+            appId: "1:780857099698:web:b6cb359114da98ab3e50ab"
+        };
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        // --- 状態管理 ---
+        let currentUser = null;
+        let currentRoom = null;
+        let myName = "Guest_" + Math.floor(Math.random() * 1000);
+        let myIcon = "";
+        
+        let localStream = null;
+        let isMuted = false;
+        
+        // WebRTC関連
+        const peerConnections = {}; // uid -> RTCPeerConnection
+        const iceServers = {
+            iceServers: [ { urls: 'stun:stun.l.google.com:19302' }, { urls: 'stun:stun1.l.google.com:19302' } ]
+        };
+
+        // Firebase監視用リスナー解除関数
+        let unsubUsers = null;
+        let unsubSignals = null;
+
+        // Audioビジュアライザー関連
+        let audioCtx = null;
+        const analysers = {}; // uid -> analyser
+        let isVisualizerRunning = false;
+
+        // --- Util ---
+        window.showToast = (msg) => {
+            const t = document.getElementById('toast');
+            t.innerText = msg;
+            t.classList.add('show');
+            setTimeout(()=>t.classList.remove('show'), 3000);
+        };
+
+        // --- 初期化・認証 ---
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                currentUser = user;
+                myIcon = `https://api.dicebear.com/7.x/notionists/svg?seed=${currentUser.uid}`;
+            } else {
+                signInAnonymously(auth).catch(e => showToast("認証エラー: " + e.message));
+            }
+        });
+
+        // --- ロビー操作 ---
+        window.createRoom = () => {
+            const randomId = Math.random().toString(36).substring(2, 8).toUpperCase();
+            document.getElementById('room-id-input').value = randomId;
+            joinRoom();
+        };
+
+        window.joinRoom = async () => {
+            const roomId = document.getElementById('room-id-input').value.trim().toUpperCase();
+            if(!roomId) return showToast("ルームIDを入力してください");
+            if(!currentUser) return showToast("認証待ちです...");
+
+            try {
+                // マイクへのアクセス要求
+                localStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
+                
+                // AudioContextの初期化 (ブラウザの自動再生ポリシー対策)
+                if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                if (audioCtx.state === 'suspended') await audioCtx.resume();
+                
+                currentRoom = roomId;
+                document.getElementById('current-room-id').innerText = roomId;
+                
+                document.getElementById('view-lobby').classList.add('hidden');
+                document.getElementById('view-room').classList.remove('hidden');
+
+                // UIに自分を追加
+                addParticipantUI(currentUser.uid, myName, myIcon);
+                setupVisualizer(currentUser.uid, localStream);
+
+                // サーバーに入室を記録
+                await setDoc(doc(db, "log_calls", roomId, "users", currentUser.uid), {
+                    name: myName, icon: myIcon, joinedAt: serverTimestamp()
+                });
+
+                // 通信のセットアップ開始
+                setupWebRTC();
+                startVisualizerLoop();
+                
+                showToast(`ルーム ${roomId} に入室しました`);
+
+            } catch (err) {
+                console.error(err);
+                showToast("マイクへのアクセスが拒否されたか、エラーが発生しました。");
+            }
+        };
+
+        window.copyRoomId = () => {
+            if(!currentRoom) return;
+            navigator.clipboard.writeText(currentRoom).then(() => showToast("ルームIDをコピーしました！"));
+        };
+
+        // --- WebRTC シグナリング ---
+        function setupWebRTC() {
+            const roomId = currentRoom;
+
+            // 1. 他のユーザーの監視
+            unsubUsers = onSnapshot(collection(db, "log_calls", roomId, "users"), (snap) => {
+                snap.docChanges().forEach(change => {
+                    const uid = change.doc.id;
+                    const data = change.doc.data();
+
+                    if (change.type === 'added' && uid !== currentUser.uid) {
+                        addParticipantUI(uid, data.name, data.icon);
+                        // 自分よりIDが大きければ、自分がOfferを送る (重複接続防止のため順番決め)
+                        if (!peerConnections[uid] && currentUser.uid > uid) {
+                            createPeerConnection(uid, true);
+                        } else if (!peerConnections[uid]) {
+                            createPeerConnection(uid, false);
+                        }
+                    }
+                    if (change.type === 'removed' && uid !== currentUser.uid) {
+                        removeParticipantUI(uid);
+                        if (peerConnections[uid]) {
+                            peerConnections[uid].close();
+                            delete peerConnections[uid];
+                        }
+                        if (analysers[uid]) delete analysers[uid];
+                    }
+                });
+            });
+
+            // 2. 自分宛てのシグナルの監視
+            const signalsQuery = query(collection(db, "log_calls", roomId, "signals"), where("to", "==", currentUser.uid));
+            unsubSignals = onSnapshot(signalsQuery, (snap) => {
+                snap.docChanges().forEach(async change => {
+                    if (change.type === 'added') {
+                        const data = change.doc.data();
+                        const uid = data.from;
+                        let pc = peerConnections[uid];
+                        
+                        if (!pc) pc = createPeerConnection(uid, false);
+
+                        try {
+                            if (data.type === 'offer') {
+                                await pc.setRemoteDescription(new RTCSessionDescription(data.offer));
+                                const answer = await pc.createAnswer();
+                                await pc.setLocalDescription(answer);
+                                await addDoc(collection(db, "log_calls", roomId, "signals"), {
+                                    from: currentUser.uid, to: uid, type: 'answer', answer: { type: answer.type, sdp: answer.sdp }
+                                });
+                            } else if (data.type === 'answer') {
+                                await pc.setRemoteDescription(new RTCSessionDescription(data.answer));
+                            } else if (data.type === 'candidate') {
+                                await pc.addIceCandidate(new RTCIceCandidate(data.candidate));
+                            }
+                        } catch(e) { console.error("WebRTC Error:", e); }
+                        
+                        // 処理済みのシグナルは削除 (簡易化のためエラー処理は省略)
+                        deleteDoc(change.doc.ref).catch(()=>{});
+                    }
+                });
+            });
+        }
+
+        function createPeerConnection(targetUid, isInitiator) {
+            const pc = new RTCPeerConnection(iceServers);
+            peerConnections[targetUid] = pc;
+
+            // 自分の音声を相手に送る
+            localStream.getTracks().forEach(track => pc.addTrack(track, localStream));
+
+            // 相手の音声を受け取る
+            pc.ontrack = (event) => {
+                const stream = event.streams[0];
+                playRemoteAudio(targetUid, stream);
+                setupVisualizer(targetUid, stream);
+            };
+
+            // ICE候補の送信
+            pc.onicecandidate = (event) => {
+                if (event.candidate) {
+                    addDoc(collection(db, "log_calls", currentRoom, "signals"), {
+                        from: currentUser.uid, to: targetUid, type: 'candidate', candidate: event.candidate.toJSON()
+                    });
+                }
+            };
+
+            // Offerの作成
+            if (isInitiator) {
+                pc.createOffer().then(offer => {
+                    pc.setLocalDescription(offer);
+                    addDoc(collection(db, "log_calls", currentRoom, "signals"), {
+                        from: currentUser.uid, to: targetUid, type: 'offer', offer: { type: offer.type, sdp: offer.sdp }
+                    });
+                });
+            }
+
+            return pc;
+        }
+
+        // --- UI & Audio 操作 ---
+        function addParticipantUI(uid, name, icon) {
+            if(document.getElementById(`wrap-${uid}`)) return;
+            const grid = document.getElementById('participants-grid');
+            const isMe = uid === currentUser.uid;
+            grid.innerHTML += `
+                <div id="wrap-${uid}" class="flex flex-col items-center gap-3">
+                    <div id="avatar-${uid}" class="avatar-container">
+                        <img src="${icon}" class="avatar-img bg-white">
+                        ${isMe ? '<div class="absolute -bottom-2 -right-2 bg-emerald-500 text-xs font-bold px-2 py-0.5 rounded-full z-20">YOU</div>' : ''}
+                    </div>
+                    <div class="text-sm font-bold text-gray-300 max-w-[100px] truncate text-center">${name}</div>
+                </div>
+            `;
+        }
+
+        function removeParticipantUI(uid) {
+            const el = document.getElementById(`wrap-${uid}`);
+            if (el) el.remove();
+            const audioEl = document.getElementById(`audio-${uid}`);
+            if (audioEl) audioEl.remove();
+        }
+
+        function playRemoteAudio(uid, stream) {
+            let audioEl = document.getElementById(`audio-${uid}`);
+            if (!audioEl) {
+                audioEl = document.createElement('audio');
+                audioEl.id = `audio-${uid}`;
+                audioEl.autoplay = true;
+                document.getElementById('audio-container').appendChild(audioEl);
+            }
+            audioEl.srcObject = stream;
+        }
+
+        window.toggleMute = () => {
+            if (!localStream) return;
+            isMuted = !isMuted;
+            localStream.getAudioTracks()[0].enabled = !isMuted;
+            
+            const btn = document.getElementById('btn-mute');
+            const icon = document.getElementById('icon-mute');
+            if (isMuted) {
+                btn.classList.add('bg-red-500/20', 'text-red-500');
+                btn.classList.remove('bg-white/10', 'text-white');
+                icon.innerText = "mic_off";
+            } else {
+                btn.classList.remove('bg-red-500/20', 'text-red-500');
+                btn.classList.add('bg-white/10', 'text-white');
+                icon.innerText = "mic";
+            }
+        };
+
+        window.leaveRoom = async () => {
+            if (!currentRoom) return;
+            
+            // Firebaseから退室
+            if(unsubUsers) unsubUsers();
+            if(unsubSignals) unsubSignals();
+            await deleteDoc(doc(db, "log_calls", currentRoom, "users", currentUser.uid)).catch(()=>{});
+            
+            // WebRTC切断
+            Object.values(peerConnections).forEach(pc => pc.close());
+            for (let key in peerConnections) delete peerConnections[key];
+            
+            // メディア停止
+            if (localStream) {
+                localStream.getTracks().forEach(t => t.stop());
+                localStream = null;
+            }
+            
+            // UIリセット
+            document.getElementById('participants-grid').innerHTML = "";
+            document.getElementById('audio-container').innerHTML = "";
+            for (let key in analysers) delete analysers[key];
+            isVisualizerRunning = false;
+            currentRoom = null;
+            
+            document.getElementById('view-room').classList.add('hidden');
+            document.getElementById('view-lobby').classList.remove('hidden');
+        };
+
+        // --- 音声ビジュアライザー (話しているとアイコンが光る) ---
+        function setupVisualizer(uid, stream) {
+            if (!audioCtx) return;
+            try {
+                const source = audioCtx.createMediaStreamSource(stream);
+                const analyser = audioCtx.createAnalyser();
+                analyser.fftSize = 256;
+                source.connect(analyser);
+                analysers[uid] = analyser;
+            } catch (e) {
+                console.warn("Visualizer setup failed for", uid, e);
+            }
+        }
+
+        function startVisualizerLoop() {
+            if (isVisualizerRunning) return;
+            isVisualizerRunning = true;
+            
+            const draw = () => {
+                if (!isVisualizerRunning) return;
+                requestAnimationFrame(draw);
+                
+                for (const uid in analysers) {
+                    const analyser = analysers[uid];
+                    const dataArray = new Uint8Array(analyser.frequencyBinCount);
+                    analyser.getByteFrequencyData(dataArray);
+                    
+                    let sum = 0;
+                    for (let i = 0; i < dataArray.length; i++) sum += dataArray[i];
+                    const avg = sum / dataArray.length; // 0 〜 255
+                    
+                    const avatar = document.getElementById(`avatar-${uid}`);
+                    if (avatar) {
+                        // 音量に応じて大きさと光（影）を変化させる
+                        // ミュート中や無音の場合は変化なし
+                        const volumeRatio = (avg / 255);
+                        const scale = 1 + (volumeRatio * 0.15); // 最大1.15倍
+                        const glow = volumeRatio * 40; // 最大40pxのぼかし
+                        
+                        avatar.style.transform = `scale(${scale})`;
+                        
+                        if (glow > 2) {
+                            avatar.style.boxShadow = `0 0 ${glow}px ${glow/2}px rgba(16, 185, 129, 0.7)`;
+                            avatar.style.borderColor = `rgba(16, 185, 129, 1)`;
+                        } else {
+                            avatar.style.boxShadow = `none`;
+                            avatar.style.borderColor = `rgba(255,255,255,0.1)`;
+                        }
+                    }
+                }
+            };
+            draw();
+        }
+
+        // ページを閉じる時に退室処理を確実に実行
+        window.addEventListener('beforeunload', () => {
+            if(currentRoom && currentUser) {
+                // 非同期処理は間に合わない可能性があるため beacon や同期XHRを使うのが定石だが、今回は簡易的にdelete
+                deleteDoc(doc(db, "log_calls", currentRoom, "users", currentUser.uid));
+            }
+        });
+
+    </script>
+</body>
+</html>
