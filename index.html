@@ -32,10 +32,15 @@
 
     <style>
         :root {
-            --bg: #050505;
+            --bg: #030303;
             --text: #ffffff;
-            --glass-bg: rgba(255, 255, 255, 0.03);
-            --glass-border: rgba(255, 255, 255, 0.08);
+            --glass-bg: rgba(255, 255, 255, 0.02);
+            --glass-border: rgba(255, 255, 255, 0.05);
+            --accent-blue: #3b82f6;
+            --accent-green: #10b981;
+            --accent-purple: #8b5cf6;
+            --accent-rose: #f43f5e;
+            --accent-amber: #f59e0b;
         }
 
         body { 
@@ -43,81 +48,179 @@
             background-color: var(--bg); 
             color: var(--text); 
             overflow-x: hidden;
+            scroll-behavior: smooth;
         }
 
-        /* 背景の光るオーブ */
+        /* -------------------------
+           Background Effects
+        -------------------------- */
         .glow-orb {
             position: absolute;
             border-radius: 50%;
-            filter: blur(100px);
-            z-index: -1;
-            opacity: 0.4;
-            animation: float 10s ease-in-out infinite alternate;
+            filter: blur(120px);
+            z-index: -2;
+            opacity: 0.3;
+            animation: float 12s ease-in-out infinite alternate;
         }
-        .orb-1 { top: -10%; left: -10%; width: 500px; height: 500px; background: linear-gradient(135deg, #4f46e5, #9333ea); }
-        .orb-2 { bottom: -10%; right: -10%; width: 600px; height: 600px; background: linear-gradient(135deg, #ea580c, #e11d48); animation-delay: -5s; }
+        .orb-1 { top: -10%; left: -10%; width: 600px; height: 600px; background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple)); }
+        .orb-2 { bottom: -20%; right: -10%; width: 700px; height: 700px; background: linear-gradient(135deg, var(--accent-rose), var(--accent-amber)); animation-delay: -6s; }
 
         @keyframes float {
             0% { transform: translate(0, 0) scale(1); }
-            100% { transform: translate(30px, 50px) scale(1.1); }
+            100% { transform: translate(50px, 80px) scale(1.15); }
         }
 
-        /* テキストグラデーション */
+        /* マウス追従エフェクト (Flashlight) */
+        #cursor-glow {
+            position: fixed;
+            top: 0; left: 0;
+            width: 400px; height: 400px;
+            background: radial-gradient(circle, rgba(255,255,255,0.06) 0%, transparent 70%);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            pointer-events: none;
+            z-index: -1;
+            transition: opacity 0.3s ease;
+        }
+
+        /* 無限スクロールテキスト (Marquee) */
+        .marquee-container {
+            width: 100vw;
+            overflow: hidden;
+            white-space: nowrap;
+            position: absolute;
+            z-index: -1;
+            opacity: 0.05;
+            font-size: 15vw;
+            font-weight: 900;
+            user-select: none;
+            text-transform: uppercase;
+        }
+        .marquee-content {
+            display: inline-block;
+            animation: marquee 30s linear infinite;
+        }
+        .marquee-content.reverse {
+            animation: marquee-reverse 40s linear infinite;
+        }
+        @keyframes marquee {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-50%); }
+        }
+        @keyframes marquee-reverse {
+            0% { transform: translateX(-50%); }
+            100% { transform: translateX(0); }
+        }
+
+        /* -------------------------
+           Typography
+        -------------------------- */
         .text-gradient {
-            background: linear-gradient(to right, #fff, #a1a1aa);
+            background: linear-gradient(to right, #fff, #71717a);
             -webkit-background-clip: text;
             color: transparent;
         }
+        
+        .typewriter-cursor {
+            display: inline-block;
+            width: 3px;
+            height: 1em;
+            background-color: white;
+            animation: blink 1s step-end infinite;
+            vertical-align: text-bottom;
+            margin-left: 2px;
+        }
+        @keyframes blink { 50% { opacity: 0; } }
 
-        /* ガラス風カード (Bento UI) */
+        /* -------------------------
+           Bento UI Cards
+        -------------------------- */
         .glass-card {
             background: var(--glass-bg);
             border: 1px solid var(--glass-border);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border-radius: 24px;
-            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border-radius: 32px;
+            transition: all 0.5s cubic-bezier(0.165, 0.84, 0.44, 1);
             position: relative;
             overflow: hidden;
             text-decoration: none;
             display: flex;
             flex-direction: column;
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
         }
         .glass-card:hover {
-            transform: translateY(-8px);
-            background: rgba(255, 255, 255, 0.06);
-            border-color: rgba(255, 255, 255, 0.15);
-            box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+            transform: translateY(-10px) scale(1.02);
+            background: rgba(255, 255, 255, 0.05);
+            border-color: rgba(255, 255, 255, 0.2);
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.6);
+        }
+        
+        /* Shimmer Effect on Hover */
+        .glass-card::before {
+            content: "";
+            position: absolute;
+            top: 0; left: -100%;
+            width: 50%; height: 100%;
+            background: linear-gradient(to right, transparent, rgba(255,255,255,0.05), transparent);
+            transform: skewX(-20deg);
+            transition: all 0.7s ease;
+        }
+        .glass-card:hover::before {
+            left: 150%;
         }
 
-        /* カード内のアイコン背景 */
         .icon-wrapper {
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            width: 56px;
-            height: 56px;
-            border-radius: 16px;
-            margin-bottom: 16px;
-            background: rgba(255,255,255,0.1);
-            border: 1px solid rgba(255,255,255,0.05);
+            width: 64px;
+            height: 64px;
+            border-radius: 20px;
+            margin-bottom: 20px;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            transition: transform 0.3s ease;
+        }
+        .glass-card:hover .icon-wrapper {
+            transform: scale(1.1) rotate(5deg);
         }
 
-        /* ドット背景パターン */
         .dot-pattern {
             background-image: radial-gradient(rgba(255,255,255,0.1) 1px, transparent 1px);
-            background-size: 20px 20px;
+            background-size: 24px 24px;
         }
 
-        /* スクロールアニメーション */
+        /* -------------------------
+           Animations
+        -------------------------- */
         .fade-up {
             opacity: 0;
-            transform: translateY(30px);
-            transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+            transform: translateY(40px);
+            transition: opacity 1s cubic-bezier(0.165, 0.84, 0.44, 1), transform 1s cubic-bezier(0.165, 0.84, 0.44, 1);
         }
         .fade-up.visible {
             opacity: 1;
             transform: translateY(0);
+        }
+
+        /* FAQ Accordion */
+        .faq-answer {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.4s ease, opacity 0.4s ease;
+            opacity: 0;
+        }
+        .faq-item.active .faq-answer {
+            max-height: 200px;
+            opacity: 1;
+            margin-top: 1rem;
+        }
+        .faq-icon {
+            transition: transform 0.3s ease;
+        }
+        .faq-item.active .faq-icon {
+            transform: rotate(180deg);
         }
     </style>
 </head>
@@ -128,70 +231,135 @@
         <div class="glow-orb orb-1"></div>
         <div class="glow-orb orb-2"></div>
     </div>
+    
+    <!-- マウス追従グロウ -->
+    <div id="cursor-glow" class="hidden md:block"></div>
 
     <!-- ナビゲーション -->
-    <header class="fixed top-0 w-full z-50 bg-[#050505]/60 backdrop-blur-md border-b border-white/5">
-        <div class="max-w-6xl mx-auto px-6 py-4 flex justify-between items-center">
-            <div class="text-2xl font-black tracking-tighter">LoG <span class="text-xs text-gray-500 font-normal ml-1 tracking-widest uppercase">Ecosystem</span></div>
-            <a href="app.html" class="bg-white text-black px-5 py-2 rounded-full text-sm font-bold hover:bg-gray-200 transition shadow-[0_0_15px_rgba(255,255,255,0.3)]">
-                SNSを開く
-            </a>
+    <header class="fixed top-0 w-full z-50 bg-[#030303]/70 backdrop-blur-xl border-b border-white/5 transition-all duration-300" id="navbar">
+        <div class="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
+            <div class="flex items-baseline gap-2 cursor-pointer" onclick="window.scrollTo(0,0)">
+                <div class="text-2xl font-black tracking-tighter">LoG</div>
+                <div class="text-[10px] text-gray-500 font-bold tracking-[0.2em] uppercase border border-gray-700 rounded-sm px-1.5 py-0.5">Ecosystem</div>
+            </div>
+            <div class="flex items-center gap-4">
+                <a href="#ecosystem" class="hidden md:block text-sm font-bold text-gray-400 hover:text-white transition">Apps</a>
+                <a href="#deep-dive" class="hidden md:block text-sm font-bold text-gray-400 hover:text-white transition">Features</a>
+                <a href="#faq" class="hidden md:block text-sm font-bold text-gray-400 hover:text-white transition">FAQ</a>
+                <a href="app.html" class="bg-white text-black px-6 py-2.5 rounded-full text-sm font-bold hover:scale-105 transition duration-300 shadow-[0_0_20px_rgba(255,255,255,0.2)]">
+                    Launch App
+                </a>
+            </div>
         </div>
     </header>
 
     <!-- ヒーローセクション -->
-    <section class="relative pt-40 pb-20 px-6 min-h-[80vh] flex flex-col items-center justify-center text-center fade-up visible">
-        <span class="border border-white/10 bg-white/5 px-4 py-1.5 rounded-full text-xs font-bold tracking-widest text-gray-400 mb-6 uppercase shadow-lg">
-            A Minimal Project
-        </span>
-        <h1 class="text-6xl md:text-8xl font-black tracking-tighter mb-6 leading-tight">
-            Simplify your <br>
-            <span class="text-gradient">digital life.</span>
-        </h1>
-        <p class="text-gray-400 text-lg md:text-xl max-w-2xl mb-12 leading-relaxed">
-            ノイズを削ぎ落とし、言葉と本質だけに集中する。<br>
-            LoGは、シンプルさを極限まで追求した全く新しいウェブ・エコシステムです。
-        </p>
-        <div class="flex flex-col sm:flex-row gap-4">
-            <a href="#ecosystem" class="bg-white/10 border border-white/20 text-white px-8 py-4 rounded-full font-bold hover:bg-white/20 transition flex items-center justify-center gap-2">
-                提供サービス一覧 <span class="material-icons-round text-sm">expand_more</span>
-            </a>
+    <section class="relative pt-32 pb-20 px-6 min-h-screen flex flex-col items-center justify-center text-center overflow-hidden">
+        <!-- Marquee Background -->
+        <div class="marquee-container top-40 text-gray-800">
+            <div class="marquee-content">
+                MINIMALISM &nbsp;&bull;&nbsp; ANONYMITY &nbsp;&bull;&nbsp; EPHEMERAL &nbsp;&bull;&nbsp; MINIMALISM &nbsp;&bull;&nbsp; ANONYMITY &nbsp;&bull;&nbsp; EPHEMERAL
+            </div>
+        </div>
+        <div class="marquee-container bottom-20 text-gray-800">
+            <div class="marquee-content reverse">
+                COMMUNICATION &nbsp;&bull;&nbsp; FOCUS &nbsp;&bull;&nbsp; PURE TEXT &nbsp;&bull;&nbsp; COMMUNICATION &nbsp;&bull;&nbsp; FOCUS &nbsp;&bull;&nbsp; PURE TEXT
+            </div>
+        </div>
+
+        <div class="fade-up visible z-10">
+            <span class="inline-flex items-center gap-2 border border-white/10 bg-white/5 px-5 py-2 rounded-full text-xs font-bold tracking-widest text-gray-300 mb-8 shadow-2xl backdrop-blur-sm">
+                <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
+                OFFICIAL NODE v1.5 ONLINE
+            </span>
+            <h1 class="text-6xl md:text-8xl lg:text-9xl font-black tracking-tighter mb-6 leading-[1.1]">
+                Focus on <br>
+                <span class="text-gradient">what matters.</span>
+            </h1>
+            <p class="text-gray-400 text-lg md:text-2xl max-w-3xl mx-auto mb-12 leading-relaxed">
+                「映え」も「過去」も、ここには存在しない。<br>
+                不要なノイズを極限まで削ぎ落とした、<br class="hidden md:block">全く新しいウェブ・エコシステム。<br>
+                <span class="text-white font-bold mt-4 block">Welcome to the LoG. <span class="typewriter-cursor"></span></span>
+            </p>
+            <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                <a href="#ecosystem" class="bg-white text-black px-10 py-4 rounded-full font-black text-lg hover:scale-105 transition shadow-[0_0_30px_rgba(255,255,255,0.2)]">
+                    Explore Ecosystem
+                </a>
+                <a href="app.html" class="bg-white/5 border border-white/10 text-white px-10 py-4 rounded-full font-bold text-lg hover:bg-white/10 transition flex items-center justify-center gap-2">
+                    Open SNS <span class="material-icons-round text-sm">open_in_new</span>
+                </a>
+            </div>
+        </div>
+
+        <!-- スクロールインジケーター -->
+        <div class="absolute bottom-10 left-1/2 transform -translate-x-1/2 flex flex-col items-center animate-bounce opacity-50">
+            <span class="text-xs tracking-widest uppercase mb-2">Scroll</span>
+            <span class="material-icons-round">arrow_downward</span>
+        </div>
+    </section>
+
+    <!-- Stats セクション (数字ギミック) -->
+    <section class="py-12 border-y border-white/5 bg-[#0a0a0a]/50 backdrop-blur-lg relative z-10">
+        <div class="max-w-7xl mx-auto px-6 grid grid-cols-2 md:grid-cols-4 gap-8 text-center divide-x divide-white/5">
+            <div class="fade-up">
+                <div class="text-4xl md:text-5xl font-black text-white mb-2 font-mono"><span class="counter" data-target="90">0</span> <span class="text-xl">Days</span></div>
+                <div class="text-xs text-gray-500 font-bold tracking-widest uppercase">Auto Deletion</div>
+            </div>
+            <div class="fade-up" style="transition-delay: 100ms;">
+                <div class="text-4xl md:text-5xl font-black text-white mb-2 font-mono"><span class="counter" data-target="0">100</span> <span class="text-xl">Sec</span></div>
+                <div class="text-xs text-gray-500 font-bold tracking-widest uppercase">Account Setup</div>
+            </div>
+            <div class="fade-up" style="transition-delay: 200ms;">
+                <div class="text-4xl md:text-5xl font-black text-white mb-2 font-mono"><span class="counter" data-target="100">0</span> <span class="text-xl">%</span></div>
+                <div class="text-xs text-gray-500 font-bold tracking-widest uppercase">Pure Text focus</div>
+            </div>
+            <div class="fade-up" style="transition-delay: 300ms;">
+                <div class="text-4xl md:text-5xl font-black text-white mb-2 font-mono"><span class="counter" data-target="5">0</span> <span class="text-xl">Apps</span></div>
+                <div class="text-xs text-gray-500 font-bold tracking-widest uppercase">In Ecosystem</div>
+            </div>
         </div>
     </section>
 
     <!-- エコシステムグリッド (Bento UI) -->
-    <section id="ecosystem" class="py-20 px-6 max-w-6xl mx-auto scroll-mt-20">
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <!-- 1. LoG SNS -->
-            <a href="app.html" class="glass-card md:col-span-2 p-8 md:p-12 fade-up group">
-                <div class="absolute top-0 right-0 w-64 h-64 bg-blue-500/20 rounded-full blur-3xl -mr-20 -mt-20 pointer-events-none"></div>
-                <div class="flex justify-between items-start mb-16 relative z-10">
-                    <div class="icon-wrapper text-blue-400 border-blue-500/30">
-                        <span class="material-icons-round text-3xl">forum</span>
+    <section id="ecosystem" class="py-32 px-6 max-w-7xl mx-auto scroll-mt-20">
+        <div class="text-center mb-20 fade-up">
+            <h2 class="text-sm font-bold text-gray-500 tracking-[0.3em] uppercase mb-4">The Suite</h2>
+            <h3 class="text-5xl md:text-6xl font-black">Choose your tool.</h3>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 auto-rows-[minmax(200px,auto)]">
+            
+            <!-- 1. LoG SNS (Large) -->
+            <a href="app.html" class="glass-card md:col-span-2 md:row-span-2 p-10 fade-up group">
+                <div class="absolute top-0 right-0 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl -mr-20 -mt-20 pointer-events-none transition group-hover:bg-blue-500/20"></div>
+                <div class="flex justify-between items-start mb-auto relative z-10">
+                    <div class="icon-wrapper text-blue-400 border-blue-500/30 bg-blue-500/10">
+                        <span class="material-icons-round text-4xl">forum</span>
                     </div>
-                    <span class="bg-blue-500 text-white text-xs font-black px-3 py-1 rounded-full uppercase tracking-wider">Final Edition</span>
+                    <span class="border border-blue-500/30 text-blue-400 text-xs font-black px-4 py-1.5 rounded-full uppercase tracking-widest bg-blue-500/10">Flagship</span>
                 </div>
-                <div class="relative z-10 mt-auto">
-                    <h3 class="text-3xl font-black mb-3">LoG SNS</h3>
-                    <p class="text-gray-400 text-lg leading-relaxed mb-6">
-                        90日で消えるテキスト限定の次世代SNS。<br>過去に縛られない、新しいコミュニケーション。
+                <div class="relative z-10 mt-12">
+                    <h3 class="text-4xl font-black mb-4">LoG SNS</h3>
+                    <p class="text-gray-400 text-lg leading-relaxed mb-8 max-w-lg">
+                        90日で消える、過去に縛られないSNS。<br>
+                        漂流ログ、XPランク、称号ガチャなど、独自のゲーミフィケーションでテキストコミュニケーションを再定義します。
                     </p>
-                    <span class="inline-flex items-center gap-1 font-bold text-blue-400 group-hover:text-blue-300 transition">
-                        アプリを起動 <span class="material-icons-round text-sm">arrow_forward</span>
+                    <span class="inline-flex items-center gap-2 font-bold text-white bg-white/10 px-6 py-3 rounded-full group-hover:bg-blue-600 transition duration-300">
+                        アプリを起動する <span class="material-icons-round text-sm">arrow_forward</span>
                     </span>
                 </div>
             </a>
 
             <!-- 2. LoG Board -->
             <a href="board.html" class="glass-card p-8 fade-up group" style="transition-delay: 100ms;">
-                <div class="absolute bottom-0 right-0 w-40 h-40 bg-emerald-500/20 rounded-full blur-3xl -mr-10 -mb-10 pointer-events-none"></div>
-                <div class="icon-wrapper text-emerald-400 border-emerald-500/30">
+                <div class="absolute bottom-0 right-0 w-48 h-48 bg-emerald-500/10 rounded-full blur-3xl -mr-10 -mb-10 pointer-events-none transition group-hover:bg-emerald-500/20"></div>
+                <div class="icon-wrapper text-emerald-400 border-emerald-500/30 bg-emerald-500/10">
                     <span class="material-icons-round text-3xl">dashboard</span>
                 </div>
-                <div class="mt-auto">
+                <div class="mt-auto relative z-10">
                     <h3 class="text-2xl font-black mb-2">LoG Board</h3>
-                    <p class="text-gray-400 text-sm mb-6 flex-1">
-                        アカウント登録不要の超軽量な匿名掲示板。
+                    <p class="text-gray-400 text-sm mb-6">
+                        アカウント不要。思いついた瞬間にスレッドを立てられる、超軽量な完全匿名掲示板。
                     </p>
                     <span class="inline-flex items-center gap-1 font-bold text-emerald-400 group-hover:text-emerald-300 transition">
                         掲示板へ <span class="material-icons-round text-sm">arrow_forward</span>
@@ -199,16 +367,16 @@
                 </div>
             </a>
 
-            <!-- 3. LoG Call (New!) -->
+            <!-- 3. LoG Call -->
             <a href="call.html" class="glass-card p-8 fade-up group" style="transition-delay: 200ms;">
-                <div class="absolute bottom-0 left-0 w-40 h-40 bg-purple-500/20 rounded-full blur-3xl -ml-10 -mb-10 pointer-events-none"></div>
-                <div class="icon-wrapper text-purple-400 border-purple-500/30">
+                <div class="absolute top-0 left-0 w-48 h-48 bg-purple-500/10 rounded-full blur-3xl -ml-10 -mt-10 pointer-events-none transition group-hover:bg-purple-500/20"></div>
+                <div class="icon-wrapper text-purple-400 border-purple-500/30 bg-purple-500/10">
                     <span class="material-icons-round text-3xl">headset_mic</span>
                 </div>
-                <div class="mt-auto">
+                <div class="mt-auto relative z-10">
                     <h3 class="text-2xl font-black mb-2">LoG Call</h3>
-                    <p class="text-gray-400 text-sm mb-6 flex-1">
-                        URLで繋がる、登録不要の音声通話アプリ。
+                    <p class="text-gray-400 text-sm mb-6">
+                        URLひとつで繋がる。インストール不要、ブラウザ上で完結するセキュアな音声通話。
                     </p>
                     <span class="inline-flex items-center gap-1 font-bold text-purple-400 group-hover:text-purple-300 transition">
                         通話する <span class="material-icons-round text-sm">arrow_forward</span>
@@ -216,16 +384,16 @@
                 </div>
             </a>
 
-            <!-- 4. LoG Notes -->
-            <a href="notes.html" class="glass-card p-8 fade-up group" style="transition-delay: 300ms;">
-                <div class="absolute top-0 left-0 w-40 h-40 bg-amber-500/20 rounded-full blur-3xl -ml-10 -mt-10 pointer-events-none"></div>
-                <div class="icon-wrapper text-amber-400 border-amber-500/30">
-                    <span class="material-icons-round text-3xl">edit_note</span>
+            <!-- 4. LoG Notes (Horizontal) -->
+            <a href="notes.html" class="glass-card md:col-span-2 p-8 fade-up group flex flex-row items-center gap-8" style="transition-delay: 300ms;">
+                <div class="absolute right-0 top-1/2 -translate-y-1/2 w-64 h-64 bg-amber-500/10 rounded-full blur-3xl pointer-events-none transition group-hover:bg-amber-500/20"></div>
+                <div class="icon-wrapper text-amber-400 border-amber-500/30 bg-amber-500/10 flex-shrink-0 m-0">
+                    <span class="material-icons-round text-4xl">edit_note</span>
                 </div>
-                <div class="mt-auto">
+                <div class="relative z-10">
                     <h3 class="text-2xl font-black mb-2">LoG Notes</h3>
-                    <p class="text-gray-400 text-sm mb-6 flex-1">
-                        1秒で書き始められる、自動保存メモ帳。
+                    <p class="text-gray-400 text-sm md:text-base mb-4 max-w-md">
+                        思考を止めない。1秒で起動し、タイピングと同時に完全ローカルに自動保存される超高速メモパッド。
                     </p>
                     <span class="inline-flex items-center gap-1 font-bold text-amber-400 group-hover:text-amber-300 transition">
                         メモを開く <span class="material-icons-round text-sm">arrow_forward</span>
@@ -235,16 +403,14 @@
 
             <!-- 5. LoG Games -->
             <a href="games.html" class="glass-card p-8 fade-up group" style="transition-delay: 400ms;">
-                <div class="absolute bottom-0 right-1/2 w-40 h-40 bg-rose-500/20 rounded-full blur-3xl -mb-20 pointer-events-none"></div>
-                <div class="flex justify-between items-start mb-6">
-                    <div class="icon-wrapper text-rose-400 border-rose-500/30">
-                        <span class="material-icons-round text-3xl">sports_esports</span>
-                    </div>
+                <div class="absolute bottom-0 right-0 w-48 h-48 bg-rose-500/10 rounded-full blur-3xl -mb-10 -mr-10 pointer-events-none transition group-hover:bg-rose-500/20"></div>
+                <div class="icon-wrapper text-rose-400 border-rose-500/30 bg-rose-500/10">
+                    <span class="material-icons-round text-3xl">sports_esports</span>
                 </div>
-                <div class="mt-auto">
+                <div class="mt-auto relative z-10">
                     <h3 class="text-2xl font-black mb-2">LoG Games</h3>
-                    <p class="text-gray-400 text-sm mb-6 flex-1">
-                        ブラウザで遊べる暇つぶしミニゲーム集。
+                    <p class="text-gray-400 text-sm mb-6">
+                        暇つぶしの極み。東方風弾幕シューティングや反射神経テストなど、ブラウザ限界のゲーム集。
                     </p>
                     <span class="inline-flex items-center gap-1 font-bold text-rose-400 group-hover:text-rose-300 transition">
                         プレイする <span class="material-icons-round text-sm">arrow_forward</span>
@@ -255,171 +421,232 @@
     </section>
 
     <!-- 機能の詳細紹介 (Deep Dive) -->
-    <section class="py-24 px-6 bg-[#0a0a0a] border-t border-white/5 overflow-hidden">
-        <div class="max-w-5xl mx-auto space-y-32">
+    <section id="deep-dive" class="py-32 px-6 bg-[#080808] border-y border-white/5 overflow-hidden relative">
+        <div class="absolute inset-0 dot-pattern opacity-50"></div>
+        
+        <div class="max-w-6xl mx-auto space-y-40 relative z-10">
             
             <div class="text-center fade-up">
-                <h2 class="text-4xl font-black mb-4">Explore the Apps</h2>
-                <p class="text-gray-500">それぞれのサービスが提供する、独自の体験。</p>
+                <h2 class="text-sm font-bold text-gray-500 tracking-[0.3em] uppercase mb-4">Deep Dive</h2>
+                <h3 class="text-5xl md:text-6xl font-black">Designed for specific needs.</h3>
+                <p class="text-gray-400 mt-6 max-w-2xl mx-auto text-lg">すべての人に向けたものではありません。特定の悩みを解決するために、機能を目的に合わせて鋭く研ぎ澄ませています。</p>
             </div>
 
-            <!-- SNS 詳細 -->
-            <div id="detail-sns" class="flex flex-col md:flex-row gap-12 items-center fade-up scroll-mt-24">
-                <div class="flex-1">
-                    <div class="text-blue-500 font-bold tracking-widest mb-2 text-xs uppercase">Social Network</div>
-                    <h3 class="text-3xl font-black mb-6">言葉だけが主役のSNS。<br>過去を気にせず「今」を書こう。</h3>
-                    <p class="text-gray-400 leading-relaxed mb-8 text-sm md:text-base">
-                        写真や動画で自分を飾る必要はありません。投稿はすべて90日後に自動消去されるため、デジタルタトゥーを恐れることなく、今の素直な感情を共有できます。
+            <!-- Feature 1: SNS -->
+            <div class="flex flex-col md:flex-row gap-16 items-center fade-up">
+                <div class="flex-1 space-y-6">
+                    <div class="inline-flex items-center justify-center w-12 h-12 rounded-full bg-blue-500/10 text-blue-500 mb-2">
+                        <span class="material-icons-round text-2xl">timer</span>
+                    </div>
+                    <h4 class="text-4xl font-black leading-tight">デジタルタトゥーからの<br>完全な解放。</h4>
+                    <p class="text-gray-400 text-lg leading-relaxed">
+                        何気ない一言が一生ネットに残り続ける恐怖。LoG SNSは、すべての投稿が「90日」でサーバーから物理的に削除されます。
+                        画像を貼る機能すらありません。だからこそ、誰の目も気にせず、今の本当の気持ちだけを言葉にできるのです。
                     </p>
-                    <ul class="space-y-4 text-gray-300 mb-8 text-sm font-medium">
-                        <li class="flex items-center gap-3"><span class="material-icons-round text-blue-500 bg-blue-500/10 p-1.5 rounded-lg">timer</span> 90日で投稿が完全に消えるタイマー機能</li>
-                        <li class="flex items-center gap-3"><span class="material-icons-round text-blue-500 bg-blue-500/10 p-1.5 rounded-lg">military_tech</span> 投稿やいいねで育つ「XPランク」と称号ガチャ</li>
-                        <li class="flex items-center gap-3"><span class="material-icons-round text-blue-500 bg-blue-500/10 p-1.5 rounded-lg">sailing</span> 誰か一人の元にだけ届く「漂流ログ」</li>
-                    </ul>
-                    <a href="app.html" class="inline-block bg-white text-black px-8 py-3 rounded-full font-bold hover:bg-gray-200 transition hover:scale-105">SNSを始める</a>
+                    <div class="bg-white/5 border border-white/10 rounded-2xl p-6 mt-8">
+                        <h5 class="text-white font-bold mb-3 flex items-center gap-2"><span class="material-icons-round text-sm text-blue-400">check_circle</span> こんな人におすすめ</h5>
+                        <ul class="space-y-2 text-sm text-gray-400">
+                            <li>・ 過去の痛い投稿を掘り返されるのが嫌な人</li>
+                            <li>・ 写真映えを気にするSNSに疲れてしまった人</li>
+                            <li>・ 純粋にテキストだけで思考をアウトプットしたい人</li>
+                        </ul>
+                    </div>
                 </div>
-                <div class="flex-1 w-full bg-gradient-to-br from-blue-900/20 to-transparent border border-blue-500/20 rounded-3xl p-8 h-80 flex items-center justify-center relative dot-pattern">
-                    <span class="material-icons-round text-9xl text-blue-500/30 drop-shadow-[0_0_30px_rgba(59,130,246,0.5)]">forum</span>
-                </div>
-            </div>
-
-            <!-- Board 詳細 -->
-            <div id="detail-board" class="flex flex-col md:flex-row-reverse gap-12 items-center fade-up scroll-mt-24">
-                <div class="flex-1">
-                    <div class="text-emerald-500 font-bold tracking-widest mb-2 text-xs uppercase">Anonymous Board</div>
-                    <h3 class="text-3xl font-black mb-6">登録不要、完全匿名。<br>自由にスレッドを立てよう。</h3>
-                    <p class="text-gray-400 leading-relaxed mb-8 text-sm md:text-base">
-                        面倒なアカウント作成は一切不要。思いついた話題ですぐにスレッドを作成し、誰かと議論を始めることができます。SNSとは違う、昔ながらの掲示板の良さをシンプルに。
-                    </p>
-                    <ul class="space-y-4 text-gray-300 mb-8 text-sm font-medium">
-                        <li class="flex items-center gap-3"><span class="material-icons-round text-emerald-500 bg-emerald-500/10 p-1.5 rounded-lg">no_accounts</span> 面倒なログインや登録なしですぐ使える</li>
-                        <li class="flex items-center gap-3"><span class="material-icons-round text-emerald-500 bg-emerald-500/10 p-1.5 rounded-lg">add_comment</span> シンプルで迷わないスレッド作成UI</li>
-                    </ul>
-                    <a href="board.html" class="inline-block bg-white text-black px-8 py-3 rounded-full font-bold hover:bg-gray-200 transition hover:scale-105">掲示板を見る</a>
-                </div>
-                <div class="flex-1 w-full bg-gradient-to-bl from-emerald-900/20 to-transparent border border-emerald-500/20 rounded-3xl p-8 h-80 flex items-center justify-center relative dot-pattern">
-                    <span class="material-icons-round text-9xl text-emerald-500/30 drop-shadow-[0_0_30px_rgba(16,185,129,0.5)]">dashboard</span>
+                <div class="flex-1 w-full bg-gradient-to-br from-blue-900/20 to-transparent border border-blue-500/20 rounded-3xl p-8 h-[400px] flex flex-col items-center justify-center relative group">
+                    <div class="absolute inset-0 bg-blue-500/5 group-hover:bg-blue-500/10 transition duration-500 rounded-3xl"></div>
+                    <span class="material-icons-round text-9xl text-blue-500/40 drop-shadow-[0_0_30px_rgba(59,130,246,0.6)] transform group-hover:scale-110 transition duration-500">forum</span>
+                    <div class="absolute bottom-8 px-6 py-2 bg-black/80 backdrop-blur border border-blue-500/30 rounded-full text-blue-400 font-mono text-sm tracking-widest font-bold">Expires in 89d 23h</div>
                 </div>
             </div>
 
-            <!-- Call 詳細 -->
-            <div id="detail-call" class="flex flex-col md:flex-row gap-12 items-center fade-up scroll-mt-24">
-                <div class="flex-1">
-                    <div class="text-purple-500 font-bold tracking-widest mb-2 text-xs uppercase">Voice Chat</div>
-                    <h3 class="text-3xl font-black mb-6">URLひとつで繋がる。<br>極限まで削ぎ落とした音声通話。</h3>
-                    <p class="text-gray-400 leading-relaxed mb-8 text-sm md:text-base">
-                        アプリのインストールは一切不要。ルームIDを決めてURLを共有するだけで、すぐにブラウザからグループ通話が始められます。
+            <!-- Feature 2: Call & Board -->
+            <div class="flex flex-col md:flex-row-reverse gap-16 items-center fade-up">
+                <div class="flex-1 space-y-6">
+                    <div class="inline-flex items-center justify-center w-12 h-12 rounded-full bg-purple-500/10 text-purple-500 mb-2">
+                        <span class="material-icons-round text-2xl">no_accounts</span>
+                    </div>
+                    <h4 class="text-4xl font-black leading-tight">「アカウント登録」という<br>最大の摩擦をなくす。</h4>
+                    <p class="text-gray-400 text-lg leading-relaxed">
+                        通話をするためだけに、掲示板に書き込むためだけに、わざわざメールアドレスを登録してパスワードを考える必要はありません。
+                        LoG BoardやLoG Callは、サイトを開いたその瞬間からすべての機能を利用できます。
                     </p>
-                    <ul class="space-y-4 text-gray-300 mb-8 text-sm font-medium">
-                        <li class="flex items-center gap-3"><span class="material-icons-round text-purple-500 bg-purple-500/10 p-1.5 rounded-lg">link</span> ルームIDの共有だけですぐに繋がる</li>
-                        <li class="flex items-center gap-3"><span class="material-icons-round text-purple-500 bg-purple-500/10 p-1.5 rounded-lg">graphic_eq</span> 声の大きさに合わせてアイコンが光るUI</li>
-                    </ul>
-                    <a href="call.html" class="inline-block bg-white text-black px-8 py-3 rounded-full font-bold hover:bg-gray-200 transition hover:scale-105">通話を始める</a>
+                    <div class="bg-white/5 border border-white/10 rounded-2xl p-6 mt-8">
+                        <h5 class="text-white font-bold mb-3 flex items-center gap-2"><span class="material-icons-round text-sm text-purple-400">check_circle</span> 究極の使いやすさ</h5>
+                        <ul class="space-y-2 text-sm text-gray-400">
+                            <li>・ URLをLINEで送るだけで即グループ通話開始 (Call)</li>
+                            <li>・ 誰が書いたか一切追跡不可能な完全匿名設計 (Board)</li>
+                            <li>・ 面倒なアプリのインストールすら不要のWebベース</li>
+                        </ul>
+                    </div>
                 </div>
-                <div class="flex-1 w-full bg-gradient-to-br from-purple-900/20 to-transparent border border-purple-500/20 rounded-3xl p-8 h-80 flex items-center justify-center relative dot-pattern">
-                    <span class="material-icons-round text-9xl text-purple-500/30 drop-shadow-[0_0_30px_rgba(168,85,247,0.5)]">headset_mic</span>
-                </div>
-            </div>
-
-            <!-- Notes 詳細 -->
-            <div id="detail-notes" class="flex flex-col md:flex-row-reverse gap-12 items-center fade-up scroll-mt-24">
-                <div class="flex-1">
-                    <div class="text-amber-500 font-bold tracking-widest mb-2 text-xs uppercase">Quick Notepad</div>
-                    <h3 class="text-3xl font-black mb-6">思考を邪魔しない。<br>爆速起動の自動保存メモ。</h3>
-                    <p class="text-gray-400 leading-relaxed mb-8 text-sm md:text-base">
-                        思いついたアイデアを逃さないために作られました。保存ボタンを押す必要すらありません。あなたが文字を打つたびに、ブラウザに自動的に保存されます。
-                    </p>
-                    <ul class="space-y-4 text-gray-300 mb-8 text-sm font-medium">
-                        <li class="flex items-center gap-3"><span class="material-icons-round text-amber-500 bg-amber-500/10 p-1.5 rounded-lg">bolt</span> ページを開いて1秒で書き始められる</li>
-                        <li class="flex items-center gap-3"><span class="material-icons-round text-amber-500 bg-amber-500/10 p-1.5 rounded-lg">save</span> 入力のたびにローカルに完全自動保存</li>
-                    </ul>
-                    <a href="notes.html" class="inline-block bg-white text-black px-8 py-3 rounded-full font-bold hover:bg-gray-200 transition hover:scale-105">メモを使う</a>
-                </div>
-                <div class="flex-1 w-full bg-gradient-to-bl from-amber-900/20 to-transparent border border-amber-500/20 rounded-3xl p-8 h-80 flex items-center justify-center relative dot-pattern">
-                    <span class="material-icons-round text-9xl text-amber-500/30 drop-shadow-[0_0_30px_rgba(245,158,11,0.5)]">edit_note</span>
-                </div>
-            </div>
-
-            <!-- Games 詳細 -->
-            <div id="detail-games" class="flex flex-col md:flex-row gap-12 items-center fade-up scroll-mt-24">
-                <div class="flex-1">
-                    <div class="text-rose-500 font-bold tracking-widest mb-2 text-xs uppercase">Mini Games</div>
-                    <h3 class="text-3xl font-black mb-6">ちょっとした暇つぶし。<br>限界に挑むミニゲーム。</h3>
-                    <p class="text-gray-400 leading-relaxed mb-8 text-sm md:text-base">
-                        アプリをインストールする必要はありません。ブラウザ上ですぐに遊べる軽量なゲームコレクション。シューティングや反射神経テストを収録。あなたの最高記録は？
-                    </p>
-                    <ul class="space-y-4 text-gray-300 mb-8 text-sm font-medium">
-                        <li class="flex items-center gap-3"><span class="material-icons-round text-rose-500 bg-rose-500/10 p-1.5 rounded-lg">speed</span> インストール不要、超軽量動作</li>
-                        <li class="flex items-center gap-3"><span class="material-icons-round text-rose-500 bg-rose-500/10 p-1.5 rounded-lg">emoji_events</span> ブラウザにハイスコアを記録</li>
-                    </ul>
-                    <a href="games.html" class="inline-block bg-white text-black px-8 py-3 rounded-full font-bold hover:bg-gray-200 transition hover:scale-105">ゲームを遊ぶ</a>
-                </div>
-                <div class="flex-1 w-full bg-gradient-to-br from-rose-900/20 to-transparent border border-rose-500/20 rounded-3xl p-8 h-80 flex items-center justify-center relative dot-pattern">
-                    <span class="material-icons-round text-9xl text-rose-500/30 drop-shadow-[0_0_30px_rgba(244,63,94,0.5)]">sports_esports</span>
+                <div class="flex-1 w-full bg-gradient-to-bl from-purple-900/20 to-transparent border border-purple-500/20 rounded-3xl p-8 h-[400px] flex flex-col items-center justify-center relative group">
+                    <div class="absolute inset-0 bg-purple-500/5 group-hover:bg-purple-500/10 transition duration-500 rounded-3xl"></div>
+                    <div class="flex gap-4">
+                        <span class="material-icons-round text-8xl text-purple-500/40 drop-shadow-[0_0_30px_rgba(168,85,247,0.6)] transform group-hover:-translate-y-4 transition duration-500">headset_mic</span>
+                        <span class="material-icons-round text-8xl text-emerald-500/40 drop-shadow-[0_0_30px_rgba(16,185,129,0.6)] transform group-hover:translate-y-4 transition duration-500">dashboard</span>
+                    </div>
                 </div>
             </div>
 
         </div>
     </section>
 
-    <!-- フィロソフィー -->
-    <section class="py-24 px-6 border-t border-white/5 bg-black">
-        <div class="max-w-4xl mx-auto text-center fade-up">
-            <h2 class="text-4xl font-black mb-8">Philosophy</h2>
-            <div class="text-gray-400 leading-loose space-y-6 text-base md:text-lg">
-                <p>
-                    現代のインターネットは、過剰な情報と他人の評価（映え）で溢れかえっています。
-                    私たちはそれに疲れ、もっとシンプルに「自分の思考」を記録する場所が欲しいと考えました。
-                </p>
-                <p>
-                    <strong class="text-white">LoG（ログ）</strong>は、その名の通り、丸太のように無骨で、航海日誌のようにただ記録を残すための場所です。
-                    画像は貼れません。90日経てばすべて消えます。
-                    だからこそ、今この瞬間のありのままの感情を書き残すことができるのです。
-                </p>
+    <!-- FAQ セクション -->
+    <section id="faq" class="py-32 px-6 max-w-4xl mx-auto">
+        <div class="text-center mb-16 fade-up">
+            <h2 class="text-4xl font-black mb-4">Frequently Asked Questions</h2>
+            <p class="text-gray-500">LoGに関するよくある質問。</p>
+        </div>
+
+        <div class="space-y-4">
+            <!-- FAQ 1 -->
+            <div class="faq-item glass-card p-6 cursor-pointer fade-up" onclick="this.classList.toggle('active')">
+                <div class="flex justify-between items-center font-bold text-lg">
+                    <span>LoGは本当にすべて無料ですか？</span>
+                    <span class="material-icons-round faq-icon text-gray-400">expand_more</span>
+                </div>
+                <div class="faq-answer text-gray-400 leading-relaxed text-sm">
+                    はい、LoGエコシステムに含まれるすべてのアプリ（SNS、Board、Call、Notes、Games）は完全無料でご利用いただけます。運営費用はサイト内に表示される一部の広告収益によって賄われています。
+                </div>
             </div>
+            
+            <!-- FAQ 2 -->
+            <div class="faq-item glass-card p-6 cursor-pointer fade-up" onclick="this.classList.toggle('active')">
+                <div class="flex justify-between items-center font-bold text-lg">
+                    <span>90日で消えた投稿はどうなりますか？復元できますか？</span>
+                    <span class="material-icons-round faq-icon text-gray-400">expand_more</span>
+                </div>
+                <div class="faq-answer text-gray-400 leading-relaxed text-sm">
+                    作成から90日（約3ヶ月）が経過した投稿は、データベース上から物理的かつ完全に削除されます。管理者であっても復元することはできません。過去にとらわれず、今この瞬間のコミュニケーションをお楽しみください。
+                </div>
+            </div>
+
+            <!-- FAQ 3 -->
+            <div class="faq-item glass-card p-6 cursor-pointer fade-up" onclick="this.classList.toggle('active')">
+                <div class="flex justify-between items-center font-bold text-lg">
+                    <span>LoG Callでの通話は誰かに聞かれませんか？</span>
+                    <span class="material-icons-round faq-icon text-gray-400">expand_more</span>
+                </div>
+                <div class="faq-answer text-gray-400 leading-relaxed text-sm">
+                    LoG CallはWebRTCという技術を利用したP2P（端末間直接通信）を基本としています。音声データはサーバーに保存されず、暗号化されて通信されるため、ルームIDを知らない第三者に通話内容を聞かれることはありません。
+                </div>
+            </div>
+
+            <!-- FAQ 4 -->
+            <div class="faq-item glass-card p-6 cursor-pointer fade-up" onclick="this.classList.toggle('active')">
+                <div class="flex justify-between items-center font-bold text-lg">
+                    <span>スマホアプリ（iOS/Android）はありますか？</span>
+                    <span class="material-icons-round faq-icon text-gray-400">expand_more</span>
+                </div>
+                <div class="faq-answer text-gray-400 leading-relaxed text-sm">
+                    現在はWebブラウザ版のみの提供ですが、PWA（Progressive Web Apps）に対応しています。SafariやChromeのメニューから「ホーム画面に追加」を選択することで、ネイティブアプリと遜色ないフルスクリーン画面でご利用いただけます。
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- コールトゥアクション -->
+    <section class="py-24 px-6 text-center relative overflow-hidden">
+        <div class="absolute inset-0 bg-gradient-to-t from-blue-900/20 to-transparent pointer-events-none"></div>
+        <div class="max-w-2xl mx-auto relative z-10 fade-up">
+            <h2 class="text-5xl font-black mb-6">Ready to simplify?</h2>
+            <p class="text-gray-400 mb-10 text-lg">複雑なインターネットにさよならを。LoGの世界へようこそ。</p>
+            <a href="app.html" class="inline-block bg-white text-black px-12 py-5 rounded-full font-black text-xl hover:scale-105 transition duration-300 shadow-[0_0_40px_rgba(255,255,255,0.3)]">
+                LoG SNS を始める
+            </a>
         </div>
     </section>
 
     <!-- フッター -->
-    <footer class="border-t border-white/10 py-12 px-6">
-        <div class="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6">
-            <div>
-                <h2 class="text-2xl font-black tracking-tighter mb-1">LoG</h2>
+    <footer class="border-t border-white/10 py-12 px-6 bg-black">
+        <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-8">
+            <div class="text-center md:text-left">
+                <h2 class="text-3xl font-black tracking-tighter mb-1">LoG</h2>
                 <p class="text-gray-600 text-xs uppercase tracking-widest">Official Node</p>
             </div>
-            <div class="flex flex-wrap gap-6 text-sm font-bold text-gray-400">
+            <div class="flex flex-wrap justify-center gap-6 text-sm font-bold text-gray-400">
                 <a href="app.html" class="hover:text-white transition">SNS</a>
                 <a href="board.html" class="hover:text-white transition">Board</a>
                 <a href="call.html" class="hover:text-white transition">Call</a>
                 <a href="notes.html" class="hover:text-white transition">Notes</a>
                 <a href="games.html" class="hover:text-white transition">Games</a>
             </div>
-            <p class="text-gray-600 text-xs">
-                &copy; 2026 LoG Project. All rights reserved.
-            </p>
+            <div class="text-gray-600 text-xs text-center md:text-right">
+                <p>&copy; 2026 LoG Project.</p>
+                <p class="mt-1">All systems operational.</p>
+            </div>
         </div>
     </footer>
 
-    <!-- スクロールアニメーション用スクリプト -->
+    <!-- インタラクション用スクリプト -->
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            const observerOptions = {
-                root: null,
-                rootMargin: '0px',
-                threshold: 0.15
-            };
-
+            // 1. スクロールアニメーション (Fade-up)
+            const observerOptions = { root: null, rootMargin: '0px', threshold: 0.15 };
             const observer = new IntersectionObserver((entries, observer) => {
                 entries.forEach(entry => {
                     if (entry.isIntersecting) {
                         entry.target.classList.add('visible');
-                        observer.unobserve(entry.target); // 一度表示されたら監視を外す
+                        
+                        // 数字のカウントアップトリガー
+                        const counters = entry.target.querySelectorAll('.counter');
+                        counters.forEach(counter => {
+                            const target = +counter.getAttribute('data-target');
+                            const duration = 1500; // ms
+                            const increment = target / (duration / 16);
+                            let current = 0;
+                            
+                            const updateCounter = () => {
+                                current += increment;
+                                if (current < target) {
+                                    counter.innerText = Math.ceil(current);
+                                    requestAnimationFrame(updateCounter);
+                                } else {
+                                    counter.innerText = target;
+                                }
+                            };
+                            updateCounter();
+                        });
+                        
+                        observer.unobserve(entry.target);
                     }
                 });
             }, observerOptions);
 
-            const fadeElements = document.querySelectorAll('.fade-up');
-            fadeElements.forEach(el => observer.observe(el));
+            document.querySelectorAll('.fade-up').forEach(el => observer.observe(el));
+
+            // 2. マウス追従グロウエフェクト (PCのみ)
+            const cursorGlow = document.getElementById('cursor-glow');
+            if (window.matchMedia("(min-width: 768px)").matches) {
+                document.addEventListener('mousemove', (e) => {
+                    cursorGlow.style.left = e.clientX + 'px';
+                    cursorGlow.style.top = e.clientY + 'px';
+                });
+                
+                // リンクホバー時に少し光を強くする
+                document.querySelectorAll('a, button, .glass-card').forEach(el => {
+                    el.addEventListener('mouseenter', () => {
+                        cursorGlow.style.background = 'radial-gradient(circle, rgba(255,255,255,0.12) 0%, transparent 70%)';
+                    });
+                    el.addEventListener('mouseleave', () => {
+                        cursorGlow.style.background = 'radial-gradient(circle, rgba(255,255,255,0.06) 0%, transparent 70%)';
+                    });
+                });
+            }
+
+            // 3. ヘッダーのスクロール変化
+            const navbar = document.getElementById('navbar');
+            window.addEventListener('scroll', () => {
+                if (window.scrollY > 50) {
+                    navbar.classList.add('py-2');
+                    navbar.classList.remove('py-4');
+                    navbar.style.background = 'rgba(3,3,3,0.9)';
+                } else {
+                    navbar.classList.add('py-4');
+                    navbar.classList.remove('py-2');
+                    navbar.style.background = 'rgba(3,3,3,0.7)';
+                }
+            });
         });
     </script>
 </body>
