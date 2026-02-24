@@ -2,120 +2,786 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LoG Games</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>LoG Games | Arcade</title>
+    
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&family=Noto+Sans+JP:wght@400;700;900&display=swap" rel="stylesheet">
+    
     <style>
-        body { font-family: 'Inter', 'Noto Sans JP', sans-serif; background-color: #000; color: #fff; text-align: center; }
-        .tap-btn { transition: transform 0.05s; }
-        .tap-btn:active { transform: scale(0.9); }
+        body { font-family: 'Inter', 'Noto Sans JP', sans-serif; background-color: #050505; color: #ffffff; overflow-x: hidden; -webkit-tap-highlight-color: transparent; }
+        .hidden { display: none !important; }
+        
+        /* Glass Card */
+        .glass-card { background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 24px; padding: 24px; transition: transform 0.2s, background 0.2s; cursor: pointer; }
+        .glass-card:hover { transform: translateY(-5px); background: rgba(255, 255, 255, 0.08); }
+        .glass-card:active { transform: scale(0.98); }
+        
+        /* ゲームボタン系 */
+        .btn-giant { width: 250px; height: 250px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 3rem; font-weight: 900; transition: transform 0.1s; box-shadow: 0 10px 30px rgba(0,0,0,0.5); border: none; outline: none; }
+        .btn-giant:active { transform: scale(0.95); }
+        
+        /* グラデーション */
+        .grad-1 { background: linear-gradient(135deg, #3b82f6, #8b5cf6); }
+        .grad-2 { background: linear-gradient(135deg, #10b981, #0ea5e9); }
+        .grad-3 { background: linear-gradient(135deg, #f59e0b, #ef4444); }
+        .grad-4 { background: linear-gradient(135deg, #d946ef, #db2777); } /* シューティング用 */
+        
+        /* 反射神経ゲーム用 */
+        .bg-wait { background-color: #ef4444; transition: background-color 0s; }
+        .bg-ready { background-color: #10b981; transition: background-color 0s; }
+
+        /* シューティング用キャンバス */
+        #g4-canvas { touch-action: none; cursor: crosshair; }
     </style>
 </head>
 <body class="flex flex-col min-h-screen">
-    <header class="p-4 flex items-center gap-4">
-        <a href="index.html" class="text-gray-400 hover:text-white"><span class="material-icons-round">arrow_back</span></a>
-        <h1 class="text-xl font-black">LoG Games <span class="text-xs text-gray-500 font-normal">基礎版</span></h1>
+
+    <!-- 共通ヘッダー -->
+    <header class="p-4 md:p-6 flex items-center justify-between border-b border-white/10 bg-black/50 backdrop-blur sticky top-0 z-50 pointer-events-auto">
+        <div class="flex items-center gap-4">
+            <button onclick="goHome()" id="back-btn" class="text-gray-400 hover:text-white transition"><span class="material-icons-round text-3xl">arrow_back</span></button>
+            <h1 class="text-xl font-black tracking-tight">LoG Arcade</h1>
+        </div>
+        <span class="text-xs font-bold bg-white/10 px-3 py-1 rounded-full tracking-widest uppercase">Local Play</span>
     </header>
 
-    <main class="flex-1 flex flex-col items-center justify-center p-4">
+    <main class="flex-1 relative">
         
-        <div id="start-screen">
-            <span class="material-icons-round text-8xl mb-4 text-blue-500">touch_app</span>
-            <h2 class="text-3xl font-black mb-2">10秒連打ゲーム</h2>
-            <p class="text-gray-400 mb-8">10秒間で何回ボタンをタップできるか！</p>
-            <button onclick="startGame()" class="bg-white text-black px-8 py-3 rounded-full font-bold text-xl hover:bg-gray-200">START</button>
+        <!-- ========================================== -->
+        <!-- メニュー画面 -->
+        <!-- ========================================== -->
+        <div id="view-menu" class="max-w-4xl mx-auto p-6 pt-12 animate-[fadeIn_0.5s_ease-out]">
+            <div class="text-center mb-12">
+                <h2 class="text-4xl font-black mb-2">Select Game</h2>
+                <p class="text-gray-400">暇つぶしと、限界への挑戦。</p>
+            </div>
             
-            <div class="mt-8 text-sm text-gray-500">
-                最高記録: <span id="high-score" class="font-bold text-white">0</span> 回
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <!-- Game 1 -->
+                <div class="glass-card flex flex-col" onclick="showGame('game1')">
+                    <div class="w-16 h-16 rounded-2xl grad-1 flex items-center justify-center mb-6">
+                        <span class="material-icons-round text-3xl text-white">touch_app</span>
+                    </div>
+                    <h3 class="text-2xl font-black mb-2">Tap Smash</h3>
+                    <p class="text-gray-400 text-sm mb-6 flex-1">10秒間で画面を何回タップできるか。指の限界を超えろ。</p>
+                    <div class="mt-auto border-t border-white/10 pt-4 flex justify-between items-center text-sm">
+                        <span class="text-gray-500">Record</span>
+                        <span class="font-bold text-blue-400"><span id="record-g1">0</span> Taps</span>
+                    </div>
+                </div>
+
+                <!-- Game 2 -->
+                <div class="glass-card flex flex-col" onclick="showGame('game2')">
+                    <div class="w-16 h-16 rounded-2xl grad-2 flex items-center justify-center mb-6">
+                        <span class="material-icons-round text-3xl text-white">bolt</span>
+                    </div>
+                    <h3 class="text-2xl font-black mb-2">Reflex Test</h3>
+                    <p class="text-gray-400 text-sm mb-6 flex-1">画面が赤から緑に変わった瞬間にタップ。反射神経のテスト。</p>
+                    <div class="mt-auto border-t border-white/10 pt-4 flex justify-between items-center text-sm">
+                        <span class="text-gray-500">Fastest</span>
+                        <span class="font-bold text-emerald-400"><span id="record-g2">--</span> ms</span>
+                    </div>
+                </div>
+
+                <!-- Game 3 -->
+                <div class="glass-card flex flex-col" onclick="showGame('game3')">
+                    <div class="w-16 h-16 rounded-2xl grad-3 flex items-center justify-center mb-6">
+                        <span class="material-icons-round text-3xl text-white">timer</span>
+                    </div>
+                    <h3 class="text-2xl font-black mb-2">Perfect 10</h3>
+                    <p class="text-gray-400 text-sm mb-6 flex-1">見えなくなるタイマーを、自分の感覚だけで「ピッタリ10.00秒」で止めろ。</p>
+                    <div class="mt-auto border-t border-white/10 pt-4 flex justify-between items-center text-sm">
+                        <span class="text-gray-500">Closest Diff</span>
+                        <span class="font-bold text-orange-400">± <span id="record-g3">--</span> s</span>
+                    </div>
+                </div>
+
+                <!-- ★ NEW! Game 4: Neon Danmaku (弾幕シューティング) -->
+                <div class="glass-card flex flex-col md:col-span-3 border-pink-500/30 hover:border-pink-500/50" onclick="showGame('game4')">
+                    <div class="flex items-start justify-between mb-4">
+                        <div class="w-16 h-16 rounded-2xl grad-4 flex items-center justify-center">
+                            <span class="material-icons-round text-3xl text-white">flare</span>
+                        </div>
+                        <span class="bg-pink-500 text-white text-xs font-black px-3 py-1 rounded-full uppercase tracking-wider animate-pulse">Bullet Hell</span>
+                    </div>
+                    <h3 class="text-3xl font-black mb-2 text-transparent bg-clip-text grad-4">Neon Danmaku</h3>
+                    <p class="text-gray-400 text-sm md:text-base mb-6 flex-1">
+                        幾何学的な「弾幕」を避けろ。当たり判定は中心の赤い点（コア）のみ。<br>
+                        敵弾をギリギリで避ける「GRAZE（かすり）」と、上部でのアイテム自動回収を駆使してハイスコアを目指せ。
+                    </p>
+                    <div class="mt-auto border-t border-white/10 pt-4 flex justify-between items-center text-sm">
+                        <span class="text-gray-500">High Score</span>
+                        <span class="font-bold text-pink-400"><span id="record-g4">0</span> Pts</span>
+                    </div>
+                </div>
             </div>
         </div>
 
-        <div id="game-screen" class="hidden w-full max-w-sm">
-            <div class="flex justify-between items-center mb-8 px-4">
-                <div class="text-left">
-                    <div class="text-xs text-gray-400">TIME</div>
-                    <div class="text-4xl font-black text-red-500" id="time-left">10.0</div>
+        <!-- ========================================== -->
+        <!-- Game 1: Tap Smash (連打) -->
+        <!-- ========================================== -->
+        <div id="view-game1" class="hidden absolute inset-0 flex flex-col items-center justify-center p-6">
+            <div id="g1-setup" class="text-center">
+                <h2 class="text-5xl font-black mb-4">Tap Smash</h2>
+                <p class="text-gray-400 mb-12">10秒間、とにかく連打しろ！</p>
+                <button onclick="g1_start()" class="bg-white text-black px-12 py-4 rounded-full font-black text-2xl hover:scale-105 transition">START</button>
+            </div>
+
+            <div id="g1-play" class="hidden w-full max-w-sm text-center">
+                <div class="flex justify-between items-end mb-12 px-4 border-b border-white/20 pb-4">
+                    <div class="text-left">
+                        <div class="text-xs text-gray-400 font-bold tracking-widest">TIME</div>
+                        <div class="text-4xl font-black text-white font-mono" id="g1-time">10.0</div>
+                    </div>
+                    <div class="text-right">
+                        <div class="text-xs text-gray-400 font-bold tracking-widest">SCORE</div>
+                        <div class="text-5xl font-black text-blue-500 font-mono" id="g1-score">0</div>
+                    </div>
+                </div>
+                <button onclick="g1_tap()" class="btn-giant grad-1 text-white mx-auto">TAP!</button>
+            </div>
+
+            <div id="g1-result" class="hidden text-center">
+                <h2 class="text-2xl font-bold text-gray-400 tracking-widest mb-2">TIME UP!</h2>
+                <div class="text-8xl font-black text-white mb-8" id="g1-final-score">0</div>
+                <p id="g1-new-record" class="hidden text-yellow-400 font-bold mb-8 animate-pulse">🎉 NEW RECORD! 🎉</p>
+                <button onclick="g1_reset()" class="bg-white/10 border border-white/20 px-8 py-3 rounded-full font-bold hover:bg-white/20 transition">もう一度</button>
+            </div>
+        </div>
+
+        <!-- ========================================== -->
+        <!-- Game 2: Reflex Test (反射神経) -->
+        <!-- ========================================== -->
+        <div id="view-game2" class="hidden absolute inset-0 flex flex-col items-center justify-center p-6">
+            <div id="g2-setup" class="text-center z-10 relative">
+                <h2 class="text-5xl font-black mb-4">Reflex Test</h2>
+                <p class="text-gray-400 mb-12">画面が赤から「緑」に変わったらタップ！</p>
+                <button onclick="g2_start()" class="bg-white text-black px-12 py-4 rounded-full font-black text-2xl hover:scale-105 transition">START</button>
+            </div>
+
+            <div id="g2-play-area" onclick="g2_tap()" class="hidden absolute inset-0 flex flex-col items-center justify-center cursor-pointer select-none z-0">
+                <div id="g2-message" class="text-4xl font-black text-white pointer-events-none drop-shadow-md">Wait for Green...</div>
+            </div>
+
+            <div id="g2-result" class="hidden text-center z-10 relative">
+                <h2 class="text-xl font-bold text-gray-400 tracking-widest mb-2" id="g2-result-title">YOUR TIME</h2>
+                <div class="text-7xl font-black text-white mb-8" id="g2-final-time">0 ms</div>
+                <p id="g2-new-record" class="hidden text-yellow-400 font-bold mb-8 animate-pulse">🎉 FASTEST TIME! 🎉</p>
+                <button onclick="g2_reset()" class="bg-white/10 border border-white/20 px-8 py-3 rounded-full font-bold hover:bg-white/20 transition z-20 relative">もう一度</button>
+            </div>
+        </div>
+
+        <!-- ========================================== -->
+        <!-- Game 3: Perfect 10 (体内時計) -->
+        <!-- ========================================== -->
+        <div id="view-game3" class="hidden absolute inset-0 flex flex-col items-center justify-center p-6">
+            <div id="g3-setup" class="text-center">
+                <h2 class="text-5xl font-black mb-4 text-orange-500">Perfect 10</h2>
+                <p class="text-gray-400 mb-12 max-w-sm mx-auto leading-relaxed">スタートするとタイマーが走り、3秒で見えなくなります。自分の感覚を頼りに、ぴったり「10.00秒」でストップを押してください。</p>
+                <button onclick="g3_start()" class="bg-white text-black px-12 py-4 rounded-full font-black text-2xl hover:scale-105 transition">START</button>
+            </div>
+
+            <div id="g3-play" class="hidden w-full text-center flex flex-col items-center justify-center h-full">
+                <div class="text-8xl font-black text-white font-mono mb-16 tracking-tighter" id="g3-timer-display">0.00</div>
+                <button onclick="g3_stop()" class="btn-giant grad-3 text-white border-4 border-white/20">STOP</button>
+            </div>
+
+            <div id="g3-result" class="hidden text-center">
+                <h2 class="text-2xl font-bold text-gray-400 tracking-widest mb-2">RESULT</h2>
+                <div class="text-7xl font-black text-white font-mono mb-2" id="g3-final-time">10.00</div>
+                <div class="text-xl font-bold mb-8" id="g3-diff-display">誤差: 0.00s</div>
+                
+                <p id="g3-new-record" class="hidden text-yellow-400 font-bold mb-8 animate-pulse">🎉 CLOSEST RECORD! 🎉</p>
+                <button onclick="g3_reset()" class="bg-white/10 border border-white/20 px-8 py-3 rounded-full font-bold hover:bg-white/20 transition">もう一度</button>
+            </div>
+        </div>
+
+        <!-- ========================================== -->
+        <!-- ★ NEW! Game 4: Neon Danmaku (弾幕シューティング) -->
+        <!-- ========================================== -->
+        <div id="view-game4" class="hidden absolute inset-0 flex flex-col items-center justify-center bg-[#050505] overflow-hidden">
+            
+            <!-- スタート画面 -->
+            <div id="g4-setup" class="text-center z-20 absolute inset-0 flex flex-col items-center justify-center bg-black/80 backdrop-blur-sm">
+                <h2 class="text-6xl font-black mb-2 text-transparent bg-clip-text grad-4">Neon Danmaku</h2>
+                <p class="text-gray-400 mb-8 font-bold tracking-widest text-sm max-w-sm">指でスワイプ、またはキーボード(矢印/WASD)で移動。Shiftで低速移動。画面上部に行くとアイテム自動回収。</p>
+                <button onclick="g4_start()" class="bg-white text-black px-12 py-4 rounded-full font-black text-2xl hover:scale-105 transition shadow-[0_0_20px_rgba(219,39,119,0.5)]">START</button>
+            </div>
+            
+            <!-- ゲームキャンバス -->
+            <canvas id="g4-canvas" class="w-full h-full block z-0"></canvas>
+
+            <!-- プレイ中UI (スコア & ライフ & グレイズ) -->
+            <div id="g4-ui" class="absolute top-[80px] left-6 right-6 flex justify-between items-start pointer-events-none hidden z-10">
+                <div>
+                    <div class="text-xs font-bold text-pink-400 tracking-widest">SCORE</div>
+                    <div class="text-3xl font-black text-white drop-shadow-lg font-mono mb-2" id="g4-score-display">0</div>
+                    <div class="flex gap-1" id="g4-hp-display"></div>
                 </div>
                 <div class="text-right">
-                    <div class="text-xs text-gray-400">SCORE</div>
-                    <div class="text-4xl font-black text-blue-500" id="score">0</div>
+                    <div class="text-xs font-bold text-blue-400 tracking-widest">GRAZE</div>
+                    <div class="text-2xl font-black text-white drop-shadow-lg font-mono" id="g4-graze-display">0</div>
                 </div>
             </div>
-            
-            <button onclick="tap()" id="tap-btn" class="tap-btn bg-gradient-to-tr from-blue-600 to-purple-600 w-64 h-64 rounded-full mx-auto shadow-2xl flex items-center justify-center text-4xl font-black">
-                TAP!
-            </button>
-        </div>
 
-        <div id="result-screen" class="hidden">
-            <h2 class="text-2xl font-bold mb-2">TIME UP!</h2>
-            <div class="text-gray-400 mb-2">あなたのスコア</div>
-            <div class="text-7xl font-black text-blue-500 mb-8" id="final-score">0</div>
-            
-            <button onclick="resetGame()" class="bg-white text-black px-8 py-3 rounded-full font-bold mb-4">もう一度プレイ</button>
+            <!-- リザルト画面 -->
+            <div id="g4-result" class="hidden text-center z-20 absolute inset-0 flex flex-col items-center justify-center bg-black/90 backdrop-blur-md">
+                <h2 class="text-2xl font-bold text-pink-500 tracking-widest mb-2">GAME OVER</h2>
+                <div class="text-8xl font-black text-white mb-2 font-mono" id="g4-final-score">0</div>
+                <div class="text-gray-400 mb-8">Graze: <span id="g4-final-graze" class="font-bold text-blue-400">0</span></div>
+                <p id="g4-new-record" class="hidden text-yellow-400 font-bold mb-8 animate-pulse">🎉 NEW HIGH SCORE! 🎉</p>
+                <button onclick="g4_reset()" class="bg-white/10 border border-white/20 px-8 py-3 rounded-full font-bold hover:bg-white/20 transition">もう一度</button>
+            </div>
+
         </div>
 
     </main>
 
     <script>
-        let score = 0;
-        let timeLeft = 10.0;
-        let timer = null;
-        let isPlaying = false;
-        
-        // 最高記録の読み込み
-        let highScore = localStorage.getItem('log_games_high') || 0;
-        document.getElementById('high-score').innerText = highScore;
+        // --- 画面遷移管理 ---
+        let currentView = 'menu';
 
-        function startGame() {
-            score = 0;
-            timeLeft = 10.0;
-            isPlaying = true;
+        function showGame(gameId) {
+            document.getElementById('view-menu').classList.add('hidden');
+            document.getElementById('view-game1').classList.add('hidden');
+            document.getElementById('view-game2').classList.add('hidden');
+            document.getElementById('view-game3').classList.add('hidden');
+            document.getElementById('view-game4').classList.add('hidden');
             
-            document.getElementById('start-screen').classList.add('hidden');
-            document.getElementById('result-screen').classList.add('hidden');
-            document.getElementById('game-screen').classList.remove('hidden');
+            document.getElementById('view-' + gameId).classList.remove('hidden');
+            currentView = gameId;
             
-            document.getElementById('score').innerText = score;
-            document.getElementById('time-left').innerText = timeLeft.toFixed(1);
+            document.getElementById('back-btn').onclick = goMenu;
 
-            timer = setInterval(() => {
-                timeLeft -= 0.1;
-                document.getElementById('time-left').innerText = Math.max(0, timeLeft).toFixed(1);
-                
-                if (timeLeft <= 0) {
-                    endGame();
-                }
+            // シューティング画面の初期化設定
+            if(gameId === 'game4') g4_resize();
+        }
+
+        function goMenu() {
+            g1_reset();
+            g2_reset();
+            g3_reset();
+            g4_forceEnd(); 
+            
+            document.getElementById('view-game1').classList.add('hidden');
+            document.getElementById('view-game2').classList.add('hidden');
+            document.getElementById('view-game3').classList.add('hidden');
+            document.getElementById('view-game4').classList.add('hidden');
+            document.getElementById('view-menu').classList.remove('hidden');
+            currentView = 'menu';
+            
+            document.getElementById('back-btn').onclick = goHome;
+            loadRecords(); 
+        }
+
+        function goHome() {
+            window.location.href = 'index.html'; 
+        }
+
+        // --- 記録ロード ---
+        function loadRecords() {
+            const r1 = localStorage.getItem('log_g1_high') || 0;
+            const r2 = localStorage.getItem('log_g2_best');
+            const r3 = localStorage.getItem('log_g3_best');
+            const r4 = localStorage.getItem('log_g4_high') || 0;
+            
+            document.getElementById('record-g1').innerText = r1;
+            document.getElementById('record-g2').innerText = r2 ? r2 : '--';
+            document.getElementById('record-g3').innerText = r3 ? parseFloat(r3).toFixed(2) : '--';
+            document.getElementById('record-g4').innerText = r4;
+        }
+        loadRecords();
+
+        // ==========================================
+        // Game 1: Tap Smash ロジック
+        // ==========================================
+        let g1_score = 0; let g1_timeLeft = 10.0; let g1_timer = null; let g1_isPlaying = false;
+        function g1_start() {
+            g1_score = 0; g1_timeLeft = 10.0; g1_isPlaying = true;
+            document.getElementById('g1-setup').classList.add('hidden'); document.getElementById('g1-result').classList.add('hidden'); document.getElementById('g1-new-record').classList.add('hidden'); document.getElementById('g1-play').classList.remove('hidden');
+            document.getElementById('g1-score').innerText = g1_score; document.getElementById('g1-time').innerText = g1_timeLeft.toFixed(1);
+            g1_timer = setInterval(() => {
+                g1_timeLeft -= 0.1; document.getElementById('g1-time').innerText = Math.max(0, g1_timeLeft).toFixed(1);
+                if (g1_timeLeft <= 0) g1_end();
             }, 100);
         }
+        function g1_tap() {
+            if (!g1_isPlaying) return; g1_score++; document.getElementById('g1-score').innerText = g1_score;
+            const btn = document.querySelector('#g1-play .btn-giant'); btn.style.transform = 'scale(0.9)'; setTimeout(() => btn.style.transform = 'scale(1)', 50);
+        }
+        function g1_end() {
+            clearInterval(g1_timer); g1_isPlaying = false; document.getElementById('g1-play').classList.add('hidden'); document.getElementById('g1-result').classList.remove('hidden'); document.getElementById('g1-final-score').innerText = g1_score;
+            let high = parseInt(localStorage.getItem('log_g1_high') || 0);
+            if (g1_score > high) { localStorage.setItem('log_g1_high', g1_score); document.getElementById('g1-new-record').classList.remove('hidden'); }
+        }
+        function g1_reset() { clearInterval(g1_timer); g1_isPlaying = false; document.getElementById('g1-play').classList.add('hidden'); document.getElementById('g1-result').classList.add('hidden'); document.getElementById('g1-setup').classList.remove('hidden'); }
 
-        function tap() {
-            if (!isPlaying) return;
-            score++;
-            document.getElementById('score').innerText = score;
+        // ==========================================
+        // Game 2: Reflex Test ロジック
+        // ==========================================
+        let g2_state = 'init'; let g2_timeout = null; let g2_startTime = 0;
+        function g2_start() {
+            document.getElementById('g2-setup').classList.add('hidden'); document.getElementById('g2-result').classList.add('hidden'); document.getElementById('g2-new-record').classList.add('hidden');
+            const area = document.getElementById('g2-play-area'); area.classList.remove('hidden'); area.className = "absolute inset-0 flex flex-col items-center justify-center cursor-pointer select-none z-0 bg-wait";
+            document.getElementById('g2-message').innerText = "Wait for Green...";
+            g2_state = 'waiting';
+            g2_timeout = setTimeout(g2_go, Math.random() * 3000 + 2000);
+        }
+        function g2_go() {
+            if(g2_state !== 'waiting') return; g2_state = 'ready';
+            const area = document.getElementById('g2-play-area'); area.className = "absolute inset-0 flex flex-col items-center justify-center cursor-pointer select-none z-0 bg-ready";
+            document.getElementById('g2-message').innerText = "TAP NOW!"; g2_startTime = performance.now();
+        }
+        function g2_tap() {
+            if (g2_state === 'init' || g2_state === 'done') return;
+            if (g2_state === 'waiting') { clearTimeout(g2_timeout); g2_end("TOO SOON!", "フライングです"); } 
+            else if (g2_state === 'ready') {
+                const reactionTime = Math.round(performance.now() - g2_startTime); g2_end(reactionTime + " ms", "TIME");
+                let best = localStorage.getItem('log_g2_best');
+                if (!best || reactionTime < parseInt(best)) { localStorage.setItem('log_g2_best', reactionTime); document.getElementById('g2-new-record').classList.remove('hidden'); }
+            }
+        }
+        function g2_end(timeText, titleText) {
+            g2_state = 'done'; document.getElementById('g2-play-area').classList.add('hidden'); document.getElementById('g2-result').classList.remove('hidden'); document.getElementById('g2-final-time').innerText = timeText; document.getElementById('g2-result-title').innerText = titleText;
+        }
+        function g2_reset() { clearTimeout(g2_timeout); g2_state = 'init'; document.getElementById('g2-play-area').classList.add('hidden'); document.getElementById('g2-result').classList.add('hidden'); document.getElementById('g2-setup').classList.remove('hidden'); }
+
+        // ==========================================
+        // Game 3: Perfect 10 ロジック
+        // ==========================================
+        let g3_startTime = 0; let g3_timer = null; let g3_isPlaying = false;
+        function g3_start() {
+            g3_isPlaying = true; document.getElementById('g3-setup').classList.add('hidden'); document.getElementById('g3-result').classList.add('hidden'); document.getElementById('g3-new-record').classList.add('hidden'); document.getElementById('g3-play').classList.remove('hidden');
+            const display = document.getElementById('g3-timer-display'); display.innerText = "0.00"; display.classList.remove('opacity-0');
+            g3_startTime = performance.now();
+            g3_timer = setInterval(() => {
+                const elapsed = (performance.now() - g3_startTime) / 1000;
+                if (elapsed > 3.0 && !display.classList.contains('opacity-0')) display.classList.add('transition-opacity', 'duration-500', 'opacity-0');
+                if (elapsed <= 3.5) display.innerText = elapsed.toFixed(2);
+            }, 10);
+        }
+        function g3_stop() {
+            if (!g3_isPlaying) return; clearInterval(g3_timer); g3_isPlaying = false;
+            const elapsed = (performance.now() - g3_startTime) / 1000; const diff = Math.abs(10.00 - elapsed);
+            document.getElementById('g3-play').classList.add('hidden'); document.getElementById('g3-result').classList.remove('hidden'); document.getElementById('g3-final-time').innerText = elapsed.toFixed(3) + "s";
+            const diffEl = document.getElementById('g3-diff-display'); diffEl.innerText = "誤差: ±" + diff.toFixed(3) + "s";
+            if(diff <= 0.1) diffEl.className = "text-xl font-bold mb-8 text-emerald-400"; else if(diff <= 0.5) diffEl.className = "text-xl font-bold mb-8 text-blue-400"; else diffEl.className = "text-xl font-bold mb-8 text-red-400";
+            let best = localStorage.getItem('log_g3_best');
+            if (!best || diff < parseFloat(best)) { localStorage.setItem('log_g3_best', diff.toFixed(3)); document.getElementById('g3-new-record').classList.remove('hidden'); }
+        }
+        function g3_reset() { clearInterval(g3_timer); g3_isPlaying = false; document.getElementById('g3-play').classList.add('hidden'); document.getElementById('g3-result').classList.add('hidden'); document.getElementById('g3-setup').classList.remove('hidden'); document.getElementById('g3-timer-display').classList.remove('opacity-0', 'transition-opacity', 'duration-500'); }
+
+        // ==========================================
+        // ★ NEW! Game 4: Neon Danmaku ロジック
+        // ==========================================
+        const g4_canvas = document.getElementById('g4-canvas');
+        const g4_ctx = g4_canvas.getContext('2d');
+        let g4_width, g4_height, g4_reqId;
+        let g4_isPlaying = false;
+        
+        // ゲームステータス (東方風に hitbox を極小化)
+        let g4_player = { x: 0, y: 0, size: 16, hitbox: 3, hp: 3, invincible: 0 };
+        let g4_bullets = [];
+        let g4_enemyBullets = [];
+        let g4_enemies = [];
+        let g4_items = [];
+        let g4_particles = [];
+        let g4_score = 0;
+        let g4_graze = 0;
+        let g4_frameCounter = 0;
+        
+        function g4_resize() {
+            g4_width = window.innerWidth;
+            g4_height = window.innerHeight;
+            g4_canvas.width = g4_width;
+            g4_canvas.height = g4_height;
+            if (!g4_isPlaying) {
+                g4_player.x = g4_width / 2;
+                g4_player.y = g4_height - 150;
+                g4_drawPlayer();
+            }
+        }
+        window.addEventListener('resize', () => { if(currentView === 'game4') g4_resize(); });
+
+        // --- 操作系 (相対移動・スワイプ操作対応) ---
+        let g4_isDragging = false;
+        let g4_dragStartX = 0; let g4_dragStartY = 0;
+        let g4_playerStartX = 0; let g4_playerStartY = 0;
+
+        // PC用 (絶対座標)
+        g4_canvas.addEventListener('mousedown', (e) => { g4_isDragging = true; g4_player.x = e.clientX; g4_player.y = e.clientY; });
+        g4_canvas.addEventListener('mousemove', (e) => { if(g4_isDragging) { g4_player.x = e.clientX; g4_player.y = e.clientY; }});
+        g4_canvas.addEventListener('mouseup', () => { g4_isDragging = false; });
+        
+        // スマホ用 (指を隠さないための相対移動)
+        g4_canvas.addEventListener('touchstart', (e) => { 
+            g4_isDragging = true; 
+            g4_dragStartX = e.touches[0].clientX; 
+            g4_dragStartY = e.touches[0].clientY; 
+            g4_playerStartX = g4_player.x;
+            g4_playerStartY = g4_player.y;
+        }, {passive: false});
+        g4_canvas.addEventListener('touchmove', (e) => { 
+            if(g4_isDragging && currentView === 'game4') {
+                e.preventDefault(); // スクロール防止
+                let dx = e.touches[0].clientX - g4_dragStartX;
+                let dy = e.touches[0].clientY - g4_dragStartY;
+                
+                // 少し早めに動くように感度調整
+                g4_player.x = g4_playerStartX + (dx * 1.5); 
+                g4_player.y = g4_playerStartY + (dy * 1.5); 
+                
+                // 画面外に出ないように
+                g4_player.x = Math.max(10, Math.min(g4_width - 10, g4_player.x));
+                g4_player.y = Math.max(10, Math.min(g4_height - 10, g4_player.y));
+            }
+        }, {passive: false});
+        g4_canvas.addEventListener('touchend', () => { g4_isDragging = false; });
+
+        // --- 操作系 (キーボード対応) ---
+        let g4_keys = { up: false, down: false, left: false, right: false, shift: false };
+        window.addEventListener('keydown', (e) => {
+            if (currentView === 'game4') {
+                if (e.key === 'ArrowUp' || e.key.toLowerCase() === 'w') g4_keys.up = true;
+                if (e.key === 'ArrowDown' || e.key.toLowerCase() === 's') g4_keys.down = true;
+                if (e.key === 'ArrowLeft' || e.key.toLowerCase() === 'a') g4_keys.left = true;
+                if (e.key === 'ArrowRight' || e.key.toLowerCase() === 'd') g4_keys.right = true;
+                if (e.key === 'Shift') g4_keys.shift = true;
+            }
+        });
+        window.addEventListener('keyup', (e) => {
+            if (currentView === 'game4') {
+                if (e.key === 'ArrowUp' || e.key.toLowerCase() === 'w') g4_keys.up = false;
+                if (e.key === 'ArrowDown' || e.key.toLowerCase() === 's') g4_keys.down = false;
+                if (e.key === 'ArrowLeft' || e.key.toLowerCase() === 'a') g4_keys.left = false;
+                if (e.key === 'ArrowRight' || e.key.toLowerCase() === 'd') g4_keys.right = false;
+                if (e.key === 'Shift') g4_keys.shift = false;
+            }
+        });
+
+        function g4_start() {
+            g4_resize();
+            g4_player = { x: g4_width / 2, y: g4_height - 150, size: 16, hitbox: 3, hp: 3, invincible: 0 };
+            g4_bullets = []; g4_enemyBullets = []; g4_enemies = []; g4_items = []; g4_particles = [];
+            g4_score = 0; g4_graze = 0; g4_frameCounter = 0;
+            g4_isPlaying = true;
+            
+            g4_updateUI();
+            document.getElementById('g4-setup').classList.add('hidden');
+            document.getElementById('g4-result').classList.add('hidden');
+            document.getElementById('g4-new-record').classList.add('hidden');
+            document.getElementById('g4-ui').classList.remove('hidden');
+            
+            g4_loop();
         }
 
-        function endGame() {
-            clearInterval(timer);
-            isPlaying = false;
-            
-            document.getElementById('game-screen').classList.add('hidden');
-            document.getElementById('result-screen').classList.remove('hidden');
-            document.getElementById('final-score').innerText = score;
+        function g4_updateUI() {
+            document.getElementById('g4-score-display').innerText = g4_score;
+            document.getElementById('g4-graze-display').innerText = g4_graze;
+            let hpHTML = '';
+            for(let i=0; i<g4_player.hp; i++) {
+                hpHTML += '<span class="material-icons-round text-pink-500 text-xl drop-shadow-md">favorite</span>';
+            }
+            document.getElementById('g4-hp-display').innerHTML = hpHTML;
+        }
 
-            // 最高記録更新
-            if (score > highScore) {
-                highScore = score;
-                localStorage.setItem('log_games_high', highScore);
-                document.getElementById('high-score').innerText = highScore;
+        function g4_spawnEnemy() {
+            let r = Math.random();
+            let type = 'normal'; // 自機狙い
+            let hp = 3;
+            let color = '#0ea5e9';
+            let speed = Math.random() * 1.5 + 1;
+            
+            if(r > 0.85) { type = 'circle'; hp = 10; color = '#f59e0b'; speed = 0.5; } // 全方位中ボス
+            else if(r > 0.7) { type = 'spiral'; hp = 8; color = '#d946ef'; speed = 1.0; } // 螺旋中ボス
+
+            g4_enemies.push({
+                x: Math.random() * (g4_width - 40) + 20,
+                y: -30,
+                vx: 0,
+                vy: speed,
+                size: type==='normal'? 15 : 25,
+                color: color,
+                hp: hp + Math.floor(g4_score/5000), // 時間経過でHP増加
+                type: type,
+                tick: 0
+            });
+        }
+
+        function g4_loop() {
+            if (!g4_isPlaying) return;
+            g4_reqId = requestAnimationFrame(g4_loop);
+            g4_frameCounter++;
+            
+            // キーボード移動処理 (Shiftで低速移動)
+            let speed = g4_keys.shift ? 2.5 : 6;
+            if (g4_keys.up) g4_player.y -= speed;
+            if (g4_keys.down) g4_player.y += speed;
+            if (g4_keys.left) g4_player.x -= speed;
+            if (g4_keys.right) g4_player.x += speed;
+            
+            // 画面外に出ないようにクランプ
+            g4_player.x = Math.max(10, Math.min(g4_width - 10, g4_player.x));
+            g4_player.y = Math.max(10, Math.min(g4_height - 10, g4_player.y));
+
+            // 背景クリア (少し暗めに)
+            g4_ctx.fillStyle = 'rgba(5, 5, 5, 0.4)';
+            g4_ctx.fillRect(0, 0, g4_width, g4_height);
+            
+            // --- プレイヤー状態 ---
+            if(g4_player.invincible > 0) g4_player.invincible--;
+
+            // --- 弾発射 (自機) ---
+            if (g4_frameCounter % 6 === 0) {
+                g4_bullets.push({ x: g4_player.x - 10, y: g4_player.y - 10, speed: -25, color: '#fbcfe8' });
+                g4_bullets.push({ x: g4_player.x + 10, y: g4_player.y - 10, speed: -25, color: '#fbcfe8' });
+                if(g4_score > 3000) { // パワーアップ
+                    g4_bullets.push({ x: g4_player.x - 20, y: g4_player.y - 5, speed: -22, color: '#f472b6', vx: -1 });
+                    g4_bullets.push({ x: g4_player.x + 20, y: g4_player.y - 5, speed: -22, color: '#f472b6', vx: 1 });
+                }
+            }
+            
+            // --- 敵スポーン ---
+            let spawnInterval = Math.max(30, 80 - Math.floor(g4_score/200));
+            if (g4_frameCounter % spawnInterval === 0) g4_spawnEnemy();
+            
+            // --- 自機弾の更新 ---
+            for (let i = g4_bullets.length - 1; i >= 0; i--) {
+                let b = g4_bullets[i];
+                b.y += b.speed;
+                if(b.vx) b.x += b.vx;
+                
+                g4_ctx.fillStyle = b.color;
+                g4_ctx.shadowBlur = 10; g4_ctx.shadowColor = b.color;
+                g4_ctx.fillRect(b.x-2, b.y-8, 4, 16);
+                g4_ctx.shadowBlur = 0; 
+                
+                if (b.y < -20) g4_bullets.splice(i, 1);
+            }
+            
+            // --- 敵の更新・弾幕発射 ---
+            for (let i = g4_enemies.length - 1; i >= 0; i--) {
+                let e = g4_enemies[i];
+                e.x += e.vx; e.y += e.vy; e.tick++;
+                
+                // ボスは途中で止まる
+                if((e.type === 'circle' || e.type === 'spiral') && e.y > g4_height/4) {
+                    e.vy = 0;
+                    e.x += Math.sin(e.tick * 0.05) * 1.5; // ふわふわ動く
+                }
+
+                // 弾幕パターン
+                if (e.type === 'normal' && e.tick % 60 === 0 && e.y > 0 && e.y < g4_height/2) {
+                    // 自機狙い
+                    let angle = Math.atan2(g4_player.y - e.y, g4_player.x - e.x);
+                    g4_enemyBullets.push({x: e.x, y: e.y, vx: Math.cos(angle)*4, vy: Math.sin(angle)*4, color: '#ef4444', size: 5});
+                } 
+                else if (e.type === 'circle' && e.tick % 50 === 0) {
+                    // 全方位
+                    for(let a=0; a<Math.PI*2; a+=Math.PI/6) {
+                        g4_enemyBullets.push({x: e.x, y: e.y, vx: Math.cos(a)*3, vy: Math.sin(a)*3, color: '#f59e0b', size: 6});
+                    }
+                }
+                else if (e.type === 'spiral' && e.tick % 6 === 0) {
+                    // 螺旋
+                    let a = e.tick * 0.15;
+                    g4_enemyBullets.push({x: e.x, y: e.y, vx: Math.cos(a)*4, vy: Math.sin(a)*4, color: '#d946ef', size: 5});
+                    g4_enemyBullets.push({x: e.x, y: e.y, vx: Math.cos(a+Math.PI)*4, vy: Math.sin(a+Math.PI)*4, color: '#3b82f6', size: 5});
+                }
+                
+                // 描画
+                g4_ctx.fillStyle = e.color;
+                g4_ctx.shadowBlur = 15; g4_ctx.shadowColor = e.color;
+                g4_ctx.beginPath();
+                g4_ctx.arc(e.x, e.y, e.size, 0, Math.PI*2);
+                g4_ctx.fill();
+                g4_ctx.shadowBlur = 0;
+                
+                // 自機弾との当たり判定
+                for (let j = g4_bullets.length - 1; j >= 0; j--) {
+                    let b = g4_bullets[j];
+                    if (Math.hypot(b.x - e.x, b.y - e.y) < e.size + 4) {
+                        e.hp--; g4_bullets.splice(j, 1);
+                        g4_createParticles(b.x, b.y, '#ffffff', 2);
+                        if (e.hp <= 0) {
+                            g4_createParticles(e.x, e.y, e.color, 15);
+                            
+                            // アイテムドロップ
+                            let dropCount = e.type === 'normal' ? 1 : 5;
+                            for(let k=0; k<dropCount; k++) {
+                                g4_items.push({x: e.x + (Math.random()-0.5)*20, y: e.y + (Math.random()-0.5)*20, vy: -3 + Math.random()*2});
+                            }
+                            
+                            g4_score += (e.size > 20 ? 100 : 20);
+                            g4_enemies.splice(i, 1);
+                            g4_updateUI();
+                            break;
+                        }
+                    }
+                }
+                
+                // 体当たり判定
+                if (g4_enemies[i] && g4_player.invincible <= 0) { 
+                    if (Math.hypot(g4_player.x - e.x, g4_player.y - e.y) < g4_player.hitbox + e.size) {
+                        g4_hitPlayer();
+                        if(!g4_isPlaying) return;
+                    }
+                }
+                
+                // 画面外削除
+                if (e.y > g4_height + 50 && g4_enemies[i]) g4_enemies.splice(i, 1);
+            }
+
+            // --- 敵弾の更新・判定 ---
+            for(let i=g4_enemyBullets.length-1; i>=0; i--) {
+                let b = g4_enemyBullets[i];
+                b.x += b.vx; b.y += b.vy;
+                
+                g4_ctx.fillStyle = '#ffffff';
+                g4_ctx.beginPath(); g4_ctx.arc(b.x, b.y, b.size, 0, Math.PI*2); g4_ctx.fill();
+                g4_ctx.fillStyle = b.color;
+                g4_ctx.beginPath(); g4_ctx.arc(b.x, b.y, b.size-2, 0, Math.PI*2); g4_ctx.fill();
+
+                let dist = Math.hypot(g4_player.x - b.x, g4_player.y - b.y);
+                
+                // 被弾 (コア判定)
+                if(dist < g4_player.hitbox + b.size - 1 && g4_player.invincible <= 0) {
+                    g4_enemyBullets.splice(i, 1);
+                    g4_hitPlayer();
+                    if(!g4_isPlaying) return;
+                } 
+                // グレイズ (かすり判定)
+                else if (dist < g4_player.size + b.size + 15 && !b.grazed && g4_player.invincible <= 0) {
+                    b.grazed = true;
+                    g4_graze++;
+                    g4_score += 15;
+                    g4_updateUI();
+                    g4_createParticles(g4_player.x, g4_player.y, '#ffffff', 1); // 火花
+                }
+
+                // 画面外削除
+                if(b.y > g4_height+20 || b.x < -20 || b.x > g4_width+20) g4_enemyBullets.splice(i, 1);
+            }
+
+            // --- アイテムの更新 ---
+            let autoCollect = (g4_player.y < g4_height * 0.3); // 画面上部で自動回収
+            for(let i=g4_items.length-1; i>=0; i--) {
+                let item = g4_items[i];
+                
+                if(autoCollect) {
+                    let angle = Math.atan2(g4_player.y - item.y, g4_player.x - item.x);
+                    item.x += Math.cos(angle) * 15;
+                    item.y += Math.sin(angle) * 15;
+                } else {
+                    item.vy += 0.1; // 重力
+                    item.y += item.vy;
+                }
+
+                g4_ctx.fillStyle = '#60a5fa'; // 点符カラー
+                g4_ctx.fillRect(item.x-4, item.y-4, 8, 8);
+
+                // 取得判定
+                if(Math.hypot(g4_player.x - item.x, g4_player.y - item.y) < g4_player.size + 10) {
+                    g4_score += 500;
+                    g4_items.splice(i, 1);
+                    g4_updateUI();
+                } else if(item.y > g4_height + 20) {
+                    g4_items.splice(i, 1);
+                }
+            }
+            
+            // --- パーティクル ---
+            for (let i = g4_particles.length - 1; i >= 0; i--) {
+                let p = g4_particles[i];
+                p.x += p.vx; p.y += p.vy; p.life -= 0.05;
+                g4_ctx.fillStyle = p.color; g4_ctx.globalAlpha = Math.max(0, p.life);
+                g4_ctx.beginPath(); g4_ctx.arc(p.x, p.y, p.size, 0, Math.PI*2); g4_ctx.fill();
+                g4_ctx.globalAlpha = 1.0;
+                if (p.life <= 0) g4_particles.splice(i, 1);
+            }
+            
+            // --- プレイヤー描画 ---
+            g4_drawPlayer();
+        }
+
+        function g4_hitPlayer() {
+            g4_player.hp--;
+            g4_player.invincible = 120; // 2秒無敵
+            g4_updateUI();
+            g4_createParticles(g4_player.x, g4_player.y, '#db2777', 30);
+            
+            // 画面フラッシュ
+            g4_ctx.fillStyle = 'rgba(239, 68, 68, 0.5)';
+            g4_ctx.fillRect(0, 0, g4_width, g4_height);
+            
+            if (g4_player.hp <= 0) g4_gameOver();
+        }
+
+        function g4_drawPlayer() {
+            // 点滅 (無敵時間中)
+            if(g4_player.invincible > 0 && Math.floor(g4_player.invincible / 5) % 2 === 0) return;
+
+            // 機体
+            g4_ctx.fillStyle = '#ffffff';
+            g4_ctx.shadowBlur = 15; g4_ctx.shadowColor = '#db2777';
+            g4_ctx.beginPath();
+            g4_ctx.moveTo(g4_player.x, g4_player.y - g4_player.size);
+            g4_ctx.lineTo(g4_player.x - g4_player.size, g4_player.y + g4_player.size);
+            g4_ctx.lineTo(g4_player.x + g4_player.size, g4_player.y + g4_player.size);
+            g4_ctx.closePath();
+            g4_ctx.fill();
+            g4_ctx.shadowBlur = 0;
+
+            // コア (東方風の当たり判定可視化)
+            g4_ctx.fillStyle = '#ef4444';
+            g4_ctx.beginPath();
+            g4_ctx.arc(g4_player.x, g4_player.y, g4_player.hitbox, 0, Math.PI*2);
+            g4_ctx.fill();
+        }
+
+        function g4_createParticles(x, y, color, count) {
+            for (let i = 0; i < count; i++) {
+                g4_particles.push({
+                    x: x, y: y,
+                    vx: (Math.random() - 0.5) * 8, vy: (Math.random() - 0.5) * 8,
+                    life: 1.0, size: Math.random() * 3 + 1, color: color
+                });
             }
         }
 
-        function resetGame() {
-            document.getElementById('result-screen').classList.add('hidden');
-            document.getElementById('start-screen').classList.remove('hidden');
+        function g4_gameOver() {
+            g4_isPlaying = false;
+            cancelAnimationFrame(g4_reqId);
+            
+            g4_createParticles(g4_player.x, g4_player.y, '#ffffff', 50);
+            g4_createParticles(g4_player.x, g4_player.y, '#db2777', 30);
+            
+            setTimeout(() => {
+                document.getElementById('g4-ui').classList.add('hidden');
+                document.getElementById('g4-result').classList.remove('hidden');
+                document.getElementById('g4-final-score').innerText = g4_score;
+                document.getElementById('g4-final-graze').innerText = g4_graze;
+
+                let high = parseInt(localStorage.getItem('log_g4_high') || 0);
+                if (g4_score > high) {
+                    localStorage.setItem('log_g4_high', g4_score);
+                    document.getElementById('g4-new-record').classList.remove('hidden');
+                }
+            }, 500);
+        }
+
+        function g4_reset() {
+            document.getElementById('g4-result').classList.add('hidden');
+            document.getElementById('g4-setup').classList.remove('hidden');
+            g4_ctx.clearRect(0,0,g4_width,g4_height);
+            g4_drawPlayer();
+        }
+
+        function g4_forceEnd() {
+            g4_isPlaying = false;
+            cancelAnimationFrame(g4_reqId);
         }
     </script>
 </body>
