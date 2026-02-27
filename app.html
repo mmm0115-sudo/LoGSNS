@@ -548,46 +548,7 @@
             </div>
         </div>
 
-        <!-- E. SPACE (Universe) -->
-        <div id="tab-space" class="hidden pb-24 h-[calc(100vh-140px)] relative overflow-hidden bg-[#050510]">
-            <canvas id="space-canvas" class="w-full h-full cursor-crosshair"></canvas>
 
-            <!-- Space UI Overlay -->
-            <div class="absolute top-4 left-4 right-4 flex justify-between items-start pointer-events-none">
-                <div class="bg-black/50 backdrop-blur border border-white/10 rounded-xl p-3 inline-block">
-                    <div class="text-xs font-bold text-gray-400 mb-1">LoG Space (Beta)</div>
-                    <div class="flex gap-4">
-                        <div class="text-pink-500 font-bold text-xs"><span
-                                class="material-icons-round text-[10px]">whatshot</span> Neon: <span
-                                id="space-point-neon">0</span></div>
-                        <div class="text-blue-500 font-bold text-xs"><span
-                                class="material-icons-round text-[10px]">memory</span> Cyber: <span
-                                id="space-point-cyber">0</span></div>
-                        <div class="text-gray-300 font-bold text-xs"><span
-                                class="material-icons-round text-[10px]">nightlight_round</span> Void: <span
-                                id="space-point-void">0</span></div>
-                    </div>
-                </div>
-
-                <div class="flex flex-col gap-2 pointer-events-auto">
-                    <button onclick="dropLog()"
-                        class="w-12 h-12 bg-emerald-500/20 text-emerald-400 border border-emerald-500/50 rounded-full flex items-center justify-center shadow-[0_0_15px_rgba(16,185,129,0.3)] hover:scale-110 transition group">
-                        <span class="material-icons-round group-hover:rotate-12 transition">place</span>
-                    </button>
-                    <div class="text-[9px] text-center font-bold text-emerald-400">10 XP</div>
-                </div>
-            </div>
-
-            <!-- Virtual Joystick (Mobile) / Controls wrapper -->
-            <div class="absolute bottom-8 left-8 right-8 flex justify-between pointer-events-none opacity-50">
-                <div class="w-24 h-24 rounded-full border-2 border-white/20 flex items-center justify-center">
-                    <div class="w-8 h-8 rounded-full bg-white/30"></div>
-                </div>
-                <div class="text-right text-xs font-bold text-white/50 tracking-widest mt-auto">
-                    WASD or SWIPE to Move
-                </div>
-            </div>
-        </div>
 
         <!-- Navigation -->
         <nav
@@ -596,16 +557,6 @@
                     class="material-icons-round text-3xl">home</span></button>
             <button onclick="switchTab('explore')" class="nav-item" data-target="explore"><span
                     class="material-icons-round text-3xl">search</span></button>
-
-            <!-- Space Tab Button -->
-            <button onclick="switchTab('space')" class="nav-item relative group pb-1" data-target="space">
-                <div
-                    class="absolute inset-0 bg-gradient-to-t from-purple-500/20 to-transparent blur-md opacity-0 group-hover:opacity-100 transition rounded-full pointer-events-none">
-                </div>
-                <span
-                    class="material-icons-round text-3xl text-purple-400/80 group-hover:text-pink-400 transition relative z-10"
-                    style="text-shadow: 0 0 10px rgba(168,85,247,0.5);">public</span>
-            </button>
 
             <button onclick="switchTab('bottle')" class="nav-item" data-target="bottle"><span
                     class="material-icons-round text-3xl">sailing</span></button>
@@ -894,6 +845,11 @@
                     await checkStreak();
                     await checkMissions('login');
                     initApp(true);
+
+                    // Force faction selection if not set
+                    if (!myProfile.faction) {
+                        document.getElementById('profile-modal').classList.remove('hidden');
+                    }
                 } else {
                     document.getElementById('profile-modal').classList.remove('hidden');
                 }
@@ -911,8 +867,15 @@
             const diff = Math.floor((now - last) / (1000 * 60 * 60 * 24));
             let streak = (diff === 1) ? (myProfile.streak || 0) + 1 : (diff === 0 ? (myProfile.streak || 0) : 1);
             if (diff >= 1 || !myProfile.lastLogin) {
-                await updateDoc(doc(db, "users", currentUser.uid), { lastLogin: serverTimestamp(), streak, expireAt: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000) });
+                await updateDoc(doc(db, "users", currentUser.uid), {
+                    lastLogin: serverTimestamp(),
+                    streak,
+                    xp: increment(50), // Daily Login Bonus
+                    expireAt: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000)
+                });
                 myProfile.streak = streak;
+                myProfile.xp = (myProfile.xp || 0) + 50;
+                showToast("ログインボーナス: +50 XP");
             }
         }
 
@@ -1103,6 +1066,12 @@
             if (quoteData) data.quote = quoteData;
 
             await addDoc(collection(db, "logs"), data);
+
+            // Posting Reward: +5 XP
+            await updateDoc(doc(db, "users", currentUser.uid), { xp: increment(5) });
+            myProfile.xp = (myProfile.xp || 0) + 5;
+            updateMyProfileUI();
+
             await checkMissions('post');
 
             document.getElementById('post-text').value = "";
@@ -1217,6 +1186,12 @@
             if (d.likes.includes(currentUser.uid)) await updateDoc(r, { likes: arrayRemove(currentUser.uid) });
             else {
                 await updateDoc(r, { likes: arrayUnion(currentUser.uid) });
+
+                // Liking Reward: +1 XP
+                await updateDoc(doc(db, "users", currentUser.uid), { xp: increment(1) });
+                myProfile.xp = (myProfile.xp || 0) + 1;
+                updateMyProfileUI();
+
                 await checkMissions('like');
                 if (to !== currentUser.uid) await addDoc(collection(db, "notif"), { to, from: myProfile.name, type: 'like', read: false, createdAt: serverTimestamp(), expireAt: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000) });
             }
@@ -1370,221 +1345,11 @@
         window.openSettings = () => document.getElementById('settings-modal').classList.remove('hidden');
         window.signOutApp = () => { signOut(auth); document.getElementById('settings-modal').classList.add('hidden'); };
 
-        // --- LoG Space 2D Engine ---
-        const spaceCanvas = document.getElementById('space-canvas');
-        const ctx = spaceCanvas.getContext('2d');
-        let spaceActive = false;
-        let players = {};
-        let mySpacePos = { x: 0, y: 0 };
-        const keys = {};
-
-        function resizeCanvas() {
-            spaceCanvas.width = spaceCanvas.clientWidth;
-            spaceCanvas.height = spaceCanvas.clientHeight;
-        }
-        window.addEventListener('resize', resizeCanvas);
-        resizeCanvas();
-
-        function drawSpace() {
-            if (!spaceActive) return;
-
-            // 仮想空間の描画クリア
-            ctx.clearRect(0, 0, spaceCanvas.width, spaceCanvas.height);
-
-            // 背景グリッド描画
-            ctx.strokeStyle = "rgba(255, 255, 255, 0.05)";
-            ctx.lineWidth = 1;
-            const gridSize = 50;
-            const offsetX = mySpacePos.x % gridSize;
-            const offsetY = mySpacePos.y % gridSize;
-            ctx.beginPath();
-            for (let x = -offsetX; x < spaceCanvas.width; x += gridSize) {
-                ctx.moveTo(x, 0); ctx.lineTo(x, spaceCanvas.height);
-            }
-            for (let y = -offsetY; y < spaceCanvas.height; y += gridSize) {
-                ctx.moveTo(0, y); ctx.lineTo(spaceCanvas.width, y);
-            }
-            ctx.stroke();
-
-            // 他プレイヤー描画
-            const cx = spaceCanvas.width / 2;
-            const cy = spaceCanvas.height / 2;
-
-            for (let pid in players) {
-                if (pid === currentUser?.uid) continue;
-                const p = players[pid];
-                const screenX = cx + (p.x - mySpacePos.x);
-                const screenY = cy + (p.y - mySpacePos.y);
-
-                // 画面外なら計算スキップ
-                if (screenX < -50 || screenX > spaceCanvas.width + 50 || screenY < -50 || screenY > spaceCanvas.height + 50) continue;
-
-                // 所属陣営によるエフェクト色
-                let tColor = 'white';
-                if (p.faction === 'neon') tColor = '#ec4899';
-                else if (p.faction === 'cyber') tColor = '#3b82f6';
-                else if (p.faction === 'void') tColor = '#d1d5db';
-
-                // アバター画像 (簡略化で丸を描画)
-                ctx.beginPath();
-                ctx.arc(screenX, screenY, 15, 0, Math.PI * 2);
-                ctx.fillStyle = tColor;
-                ctx.fill();
-
-                // ネームタグ
-                ctx.fillStyle = "rgba(255, 255, 255, 0.8)";
-                ctx.font = "10px sans-serif";
-                ctx.textAlign = "center";
-                ctx.fillText(p.name || "User", screenX, screenY + 28);
-            }
-
-            // 空間ログ描画
-            for (let lid in spaceLogs) {
-                const log = spaceLogs[lid];
-                const screenX = cx + (log.x - mySpacePos.x);
-                const screenY = cy + (log.y - mySpacePos.y);
-
-                if (screenX < -100 || screenX > spaceCanvas.width + 100 || screenY < -100 || screenY > spaceCanvas.height + 100) continue;
-
-                let lColor = '#10b981'; // default emerald
-                if (log.faction === 'neon') lColor = '#ec4899';
-                else if (log.faction === 'cyber') lColor = '#3b82f6';
-                else if (log.faction === 'void') lColor = '#d1d5db';
-
-                ctx.fillStyle = lColor;
-                ctx.globalAlpha = 0.2;
-                ctx.beginPath();
-                ctx.arc(screenX, screenY, 20, 0, Math.PI * 2);
-                ctx.fill();
-                ctx.globalAlpha = 1.0;
-
-                ctx.fillStyle = '#fff';
-                ctx.font = "bold 12px sans-serif";
-                ctx.textAlign = "center";
-                ctx.fillText(log.text, screenX, screenY - 5);
-
-                ctx.fillStyle = 'rgba(255,255,255,0.5)';
-                ctx.font = "8px sans-serif";
-                ctx.fillText(`- ${log.author}`, screenX, screenY + 8);
-            }
-
-            // 自プレイヤー描画（中心固定）
-            if (currentUser && myProfile) {
-                let myColor = 'white';
-                if (myProfile.faction === 'neon') myColor = '#ec4899';
-                else if (myProfile.faction === 'cyber') myColor = '#3b82f6';
-                else if (myProfile.faction === 'void') myColor = '#d1d5db';
-
-                // Glow Effect
-                ctx.shadowBlur = 15;
-                ctx.shadowColor = myColor;
-
-                ctx.beginPath();
-                ctx.arc(cx, cy, 15, 0, Math.PI * 2);
-                ctx.fillStyle = myColor;
-                ctx.fill();
-
-                ctx.shadowBlur = 0; // reset
-                ctx.fillStyle = "white";
-                ctx.font = "bold 10px sans-serif";
-                ctx.textAlign = "center";
-                ctx.fillText("You", cx, cy + 28);
-            }
-
-            requestAnimationFrame(drawSpace);
-        }
-
-        // 移動ロジック
-        function updateSpaceMovement() {
-            if (!spaceActive || !currentUser) return;
-            let dx = 0; let dy = 0;
-            const speed = 3;
-            if (keys['ArrowUp'] || keys['w']) dy -= speed;
-            if (keys['ArrowDown'] || keys['s']) dy += speed;
-            if (keys['ArrowLeft'] || keys['a']) dx -= speed;
-            if (keys['ArrowRight'] || keys['d']) dx += speed;
-
-            if (dx !== 0 || dy !== 0) {
-                mySpacePos.x += dx;
-                mySpacePos.y += dy;
-                // Firestoreへ位置を定期同期 (連投防ぐためスロットリングが必要だがここでは簡略化)
-                if (Math.random() < 0.2) { // 簡易的な同期頻度制限
-                    setDoc(doc(db, "universe_space", currentUser.uid), {
-                        x: mySpacePos.x, y: mySpacePos.y,
-                        name: myProfile.name, faction: myProfile.faction,
-                        lastActive: serverTimestamp()
-                    }, { merge: true });
-                }
-            }
-            setTimeout(updateSpaceMovement, 1000 / 60); // 60fps
-        }
-
-        window.addEventListener('keydown', e => keys[e.key] = true);
-        window.addEventListener('keyup', e => keys[e.key] = false);
-
-        // Firebase Sync
-        let unsubSpace = null;
-        let unsubLogs = null;
-        let spaceLogs = {};
-
-        function initSpaceSync() {
-            if (unsubSpace) return; // 既に監視中ならスキップ
-            // リアルタイム位置情報の購読
-            const lastHour = new Date(Date.now() - 60 * 60 * 1000);
-            unsubSpace = onSnapshot(query(collection(db, "universe_space"), where("lastActive", ">", lastHour)), (s) => {
-                players = {};
-                s.forEach(doc => {
-                    players[doc.id] = doc.data();
-                });
-            });
-
-            // 空間ログの購読 (直近100件など)
-            unsubLogs = onSnapshot(query(collection(db, "universe_logs"), orderBy("createdAt", "desc"), limit(100)), (s) => {
-                spaceLogs = {};
-                s.forEach(doc => {
-                    let d = doc.data();
-                    if (d.expireAt && d.expireAt.toDate() > new Date()) {
-                        spaceLogs[doc.id] = d;
-                    }
-                });
-            });
-        }
-
-        // Faction Points リスナー
-        onSnapshot(doc(db, "universe", "factions"), (docSnap) => {
-            if (docSnap.exists()) {
-                const data = docSnap.data();
-                const pNeon = document.getElementById('space-point-neon');
-                const pCyber = document.getElementById('space-point-cyber');
-                const pVoid = document.getElementById('space-point-void');
-                if (pNeon) pNeon.innerText = data.neon || 0;
-                if (pCyber) pCyber.innerText = data.cyber || 0;
-                if (pVoid) pVoid.innerText = data.void || 0;
-            }
-        });
-
-        window.dropLog = async () => {
-            if (!requireAuth()) return;
-            if ((myProfile.xp || 0) < 10) return showToast("XP不足 (10必要)");
-            const msg = prompt("この場所に看板を建てます（メッセージを入力）:");
-            if (!msg) return;
-
-            await updateDoc(doc(db, "users", currentUser.uid), { xp: increment(-10) });
-            myProfile.xp -= 10; updateMyProfileUI();
-
-            await addDoc(collection(db, "universe_logs"), {
-                x: mySpacePos.x, y: mySpacePos.y,
-                text: msg, author: myProfile.name, faction: myProfile.faction,
-                createdAt: serverTimestamp(), expireAt: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000)
-            });
-            showToast("座標 (" + Math.floor(mySpacePos.x) + ", " + Math.floor(mySpacePos.y) + ") にログを刻みました");
-        };
-
         window.switchTab = (t) => {
             // 通知とプロフィールタブはログイン必須にする
-            if ((t === 'notif' || t === 'profile' || t === 'space') && !requireAuth()) return;
+            if ((t === 'notif' || t === 'profile') && !requireAuth()) return;
 
-            ['home', 'explore', 'space', 'bottle', 'notif', 'profile', 'other-profile', 'chat'].forEach(x => {
+            ['home', 'explore', 'bottle', 'notif', 'profile', 'other-profile', 'chat'].forEach(x => {
                 const el = document.getElementById(`tab-${x}`);
                 if (el) el.classList.add('hidden');
             });
@@ -1596,20 +1361,7 @@
             const b = document.querySelector(`.nav-item[data-target="${t}"]`); if (b) b.classList.add('nav-active');
             if (t === 'notif') document.getElementById('nav-badge').style.display = 'none';
 
-            // SpaceエンジンのON/OFF
-            if (t === 'space') {
-                if (!spaceActive) {
-                    spaceActive = true;
-                    initSpaceSync();
-                    resizeCanvas();
-                    requestAnimationFrame(drawSpace);
-                    updateSpaceMovement();
-                }
-            } else {
-                spaceActive = false;
-            }
-
-            if (t !== 'space') window.scrollTo({ top: 0, behavior: 'smooth' });
+            window.scrollTo({ top: 0, behavior: 'smooth' });
         };
     </script>
 </body>

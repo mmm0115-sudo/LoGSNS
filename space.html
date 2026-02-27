@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>LoG Space | The Minimal Metaverse</title>
+    <!-- OGP Meta Tags -->
+    <meta property="og:title" content="LoG Space | The Minimal Metaverse">
+    <meta property="og:description" content="テキストだけが残る空間。果てなき宇宙でログを刻め。">
+    <meta property="og:type" content="website">
+    <meta name="twitter:card" content="summary_large_image">
+
+    <!-- Libraries -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&family=Noto+Sans+JP:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <style>
+        :root { --bg: #030303; --text: #ffffff; --subtext: #a1a1aa; --border: #27272a; --card: #18181b; }
+        body { margin: 0; padding: 0; background-color: #050510; color: white; overflow: hidden; font-family: 'Inter', 'Noto Sans JP', sans-serif; }
+        .modal-overlay { background: rgba(0, 0, 0, 0.7); backdrop-filter: blur(5px); }
+        .toast { position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%) translateY(20px); background: rgba(0, 0, 0, 0.8); color: white; padding: 10px 20px; border-radius: 50px; font-size: 0.85rem; font-weight: bold; opacity: 0; transition: 0.3s; pointer-events: none; z-index: 100; white-space: nowrap; }
+        .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+        .btn-primary { background: white; color: black; font-weight: bold; border-radius: 9999px; }
+    </style>
+</head>
+<body>
+    <div id="toast" class="toast"></div>
+
+    <!-- Space Header (Back to Hub) -->
+    <div class="fixed top-4 left-4 z-40 bg-black/50 backdrop-blur border border-white/10 rounded-xl p-3 inline-block">
+        <a href="index.html" class="flex items-center gap-2 text-white hover:text-gray-300 transition">
+            <span class="material-icons-round text-lg">arrow_back</span>
+            <span class="text-sm font-bold">Exit Space</span>
+        </a>
+    </div>
+
+    <!-- Space HUD -->
+    <div class="fixed top-4 right-4 z-40 bg-black/50 backdrop-blur border border-white/10 rounded-xl p-3 text-right">
+        <div class="text-xs font-bold text-gray-400 mb-1">Faction War</div>
+        <div class="flex gap-4 justify-end">
+            <div class="text-pink-500 font-bold text-xs"><span class="material-icons-round text-[10px]">whatshot</span> Neon: <span id="space-point-neon">0</span></div>
+            <div class="text-blue-500 font-bold text-xs"><span class="material-icons-round text-[10px]">memory</span> Cyber: <span id="space-point-cyber">0</span></div>
+            <div class="text-gray-300 font-bold text-xs"><span class="material-icons-round text-[10px]">nightlight_round</span> Void: <span id="space-point-void">0</span></div>
+        </div>
+        <div class="text-[10px] text-gray-500 mt-2" id="my-space-status">Not logged in</div>
+    </div>
+
+    <!-- Canvas Engine -->
+    <div class="w-screen h-screen relative overflow-hidden bg-[#050510]">
+        <canvas id="space-canvas" class="w-full h-full cursor-crosshair"></canvas>
+
+        <div class="absolute bottom-6 right-6 flex flex-col gap-2 z-40">
+            <button onclick="dropLog()" class="w-16 h-16 bg-emerald-500/20 text-emerald-400 border border-emerald-500/50 rounded-full flex items-center justify-center shadow-[0_0_15px_rgba(16,185,129,0.3)] hover:scale-110 transition group">
+                <span class="material-icons-round text-3xl group-hover:rotate-12 transition">place</span>
+            </button>
+            <div class="text-[10px] text-center font-bold text-emerald-400"> Drop Log<br>(10 XP)</div>
+        </div>
+
+        <div class="absolute bottom-8 left-8 flex justify-between pointer-events-none opacity-50 z-40">
+            <div class="w-24 h-24 rounded-full border-2 border-white/20 flex items-center justify-center">
+                <div class="w-8 h-8 rounded-full bg-white/30"></div>
+            </div>
+            <div class="ml-4 flex flex-col justify-end text-xs font-bold text-white/50 tracking-widest pb-4">
+                WASD / SWIPE <br>to Move
+            </div>
+        </div>
+    </div>
+
+    <!-- ■ Auth Modal ■ -->
+    <div id="auth-modal" class="modal-overlay hidden fixed inset-0 z-50 flex items-center justify-center p-4">
+        <div class="bg-[var(--card)] p-8 rounded-3xl w-full max-w-sm shadow-2xl border border-[var(--border)] text-center relative text-[var(--text)]">
+            <button onclick="window.location.href='index.html'" class="absolute top-4 right-4 text-[var(--subtext)]"><span class="material-icons-round">close</span></button>
+            <h1 class="text-4xl font-black tracking-tighter mb-2">LoG Space</h1>
+            <p class="text-[var(--subtext)] text-sm mb-8">宇宙へ旅立つにはログインが必要です。</p>
+
+            <div class="space-y-4">
+                <button id="google-login-btn" class="w-full border border-[var(--border)] py-3 rounded-full font-bold flex justify-center items-center gap-3 hover:bg-[var(--border)]/50 transition">
+                    <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" class="w-5 h-5">
+                    Googleで続行
+                </button>
+                <div class="space-y-3 pt-4 border-t border-[var(--border)]">
+                    <input id="auth-email" type="email" placeholder="Email" class="w-full bg-[var(--border)]/30 border border-[var(--border)] rounded-xl p-3 outline-none focus:border-[var(--text)] transition text-white">
+                    <input id="auth-password" type="password" placeholder="Password" class="w-full bg-[var(--border)]/30 border border-[var(--border)] rounded-xl p-3 outline-none focus:border-[var(--text)] transition text-white">
+                    <div class="flex gap-2">
+                        <button onclick="emailAuth('login')" class="flex-1 btn-primary text-black py-3">ログイン</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getFirestore, collection, addDoc, query, orderBy, limit, onSnapshot, serverTimestamp, doc, getDoc, setDoc, updateDoc, increment, where } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        const firebaseConfig = { apiKey: "AIzaSyCA4NQzxcz2gh8uaw3LKrKl_NEnE_fMybs", authDomain: "lo-g-8a620.firebaseapp.com", projectId: "lo-g-8a620", storageBucket: "lo-g-8a620.firebasestorage.app", messagingSenderId: "780857099698", appId: "1:780857099698:web:b6cb359114da98ab3e50ab" };
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        let currentUser = null, myProfile = null;
+        let players = {}, spaceLogs = {}, keys = {};
+        let mySpacePos = { x: 0, y: 0 };
+        const spaceCanvas = document.getElementById('space-canvas');
+        const ctx = spaceCanvas.getContext('2d');
+
+        const showToast = (m) => { const t = document.getElementById('toast'); t.innerText = m; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 3000); };
+
+        function resizeCanvas() { spaceCanvas.width = spaceCanvas.clientWidth; spaceCanvas.height = spaceCanvas.clientHeight; }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        // Auth
+        document.getElementById('google-login-btn').onclick = () => signInWithPopup(auth, new GoogleAuthProvider()).catch(e=>showToast(e.message));
+        window.emailAuth = (t) => {
+            const e = document.getElementById('auth-email').value, p = document.getElementById('auth-password').value;
+            signInWithEmailAndPassword(auth, e, p).catch(err=>showToast(err.message));
+        };
+
+        onAuthStateChanged(auth, async (u) => {
+            if (u) {
+                currentUser = u;
+                document.getElementById('auth-modal').classList.add('hidden');
+                const d = await getDoc(doc(db, "users", u.uid));
+                if (d.exists()) {
+                    myProfile = d.data();
+                    document.getElementById('my-space-status').innerText = `${myProfile.name} | ${myProfile.xp} XP | Faction: ${myProfile.faction || 'None'}`;
+                    initSpaceSync();
+                    requestAnimationFrame(drawSpace);
+                    updateSpaceMovement();
+                } else {
+                    alert("プロフィールが未設定です。SNSアプリ（app.html）で先にアカウント設定を完了してください。");
+                    window.location.href = 'app.html';
+                }
+            } else {
+                document.getElementById('auth-modal').classList.remove('hidden');
+                document.getElementById('my-space-status').innerText = "Not logged in";
+            }
+        });
+
+        // Space Engine Core
+        function drawSpace() {
+            ctx.clearRect(0, 0, spaceCanvas.width, spaceCanvas.height);
+            
+            ctx.strokeStyle = "rgba(255, 255, 255, 0.05)"; ctx.lineWidth = 1;
+            const gridSize = 50; const offsetX = mySpacePos.x % gridSize; const offsetY = mySpacePos.y % gridSize;
+            ctx.beginPath();
+            for (let x = -offsetX; x < spaceCanvas.width; x += gridSize) { ctx.moveTo(x, 0); ctx.lineTo(x, spaceCanvas.height); }
+            for (let y = -offsetY; y < spaceCanvas.height; y += gridSize) { ctx.moveTo(0, y); ctx.lineTo(spaceCanvas.width, y); }
+            ctx.stroke();
+
+            const cx = spaceCanvas.width / 2; const cy = spaceCanvas.height / 2;
+
+            for (let pid in players) {
+                if (pid === currentUser?.uid) continue;
+                const p = players[pid];
+                const screenX = cx + (p.x - mySpacePos.x); const screenY = cy + (p.y - mySpacePos.y);
+                if (screenX < -50 || screenX > spaceCanvas.width + 50 || screenY < -50 || screenY > spaceCanvas.height + 50) continue;
+
+                let tColor = 'white';
+                if (p.faction === 'neon') tColor = '#ec4899'; else if (p.faction === 'cyber') tColor = '#3b82f6'; else if (p.faction === 'void') tColor = '#d1d5db';
+
+                ctx.beginPath(); ctx.arc(screenX, screenY, 15, 0, Math.PI * 2); ctx.fillStyle = tColor; ctx.fill();
+                ctx.fillStyle = "rgba(255, 255, 255, 0.8)"; ctx.font = "10px sans-serif"; ctx.textAlign = "center"; ctx.fillText(p.name || "User", screenX, screenY + 28);
+            }
+
+            for (let lid in spaceLogs) {
+                const log = spaceLogs[lid];
+                const screenX = cx + (log.x - mySpacePos.x); const screenY = cy + (log.y - mySpacePos.y);
+                if (screenX < -100 || screenX > spaceCanvas.width + 100 || screenY < -100 || screenY > spaceCanvas.height + 100) continue;
+
+                let lColor = '#10b981';
+                if(log.faction === 'neon') lColor = '#ec4899'; else if(log.faction === 'cyber') lColor = '#3b82f6'; else if(log.faction === 'void') lColor = '#d1d5db';
+
+                ctx.fillStyle = lColor; ctx.globalAlpha = 0.2; ctx.beginPath(); ctx.arc(screenX, screenY, 20, 0, Math.PI * 2); ctx.fill(); ctx.globalAlpha = 1.0;
+                ctx.fillStyle = '#fff'; ctx.font = "bold 12px sans-serif"; ctx.textAlign = "center"; ctx.fillText(log.text, screenX, screenY - 5);
+                ctx.fillStyle = 'rgba(255,255,255,0.5)'; ctx.font = "8px sans-serif"; ctx.fillText(`- ${log.author}`, screenX, screenY + 8);
+            }
+
+            if (currentUser && myProfile) {
+                let myColor = 'white';
+                if (myProfile.faction === 'neon') myColor = '#ec4899'; else if (myProfile.faction === 'cyber') myColor = '#3b82f6'; else if (myProfile.faction === 'void') myColor = '#d1d5db';
+                ctx.shadowBlur = 15; ctx.shadowColor = myColor; ctx.beginPath(); ctx.arc(cx, cy, 15, 0, Math.PI * 2); ctx.fillStyle = myColor; ctx.fill();
+                ctx.shadowBlur = 0; ctx.fillStyle = "white"; ctx.font = "bold 10px sans-serif"; ctx.textAlign = "center"; ctx.fillText("You", cx, cy + 28);
+            }
+
+            requestAnimationFrame(drawSpace);
+        }
+
+        function updateSpaceMovement() {
+            if (!currentUser) return;
+            let dx = 0; let dy = 0; const speed = 4;
+            if (keys['w'] || keys['ArrowUp']) dy -= speed;
+            if (keys['s'] || keys['ArrowDown']) dy += speed;
+            if (keys['a'] || keys['ArrowLeft']) dx -= speed;
+            if (keys['d'] || keys['ArrowRight']) dx += speed;
+
+            if (dx !== 0 || dy !== 0) {
+                mySpacePos.x += dx; mySpacePos.y += dy;
+                if (Math.random() < 0.2) {
+                    setDoc(doc(db, "universe_space", currentUser.uid), { x: mySpacePos.x, y: mySpacePos.y, name: myProfile.name, faction: myProfile.faction, lastActive: serverTimestamp() }, { merge: true });
+                }
+            }
+            setTimeout(updateSpaceMovement, 1000 / 60);
+        }
+
+        window.addEventListener('keydown', e => keys[e.key] = true);
+        window.addEventListener('keyup', e => keys[e.key] = false);
+
+        function initSpaceSync() {
+            const lastHour = new Date(Date.now() - 60 * 60 * 1000);
+            onSnapshot(query(collection(db, "universe_space"), where("lastActive", ">", lastHour)), (s) => { players = {}; s.forEach(doc => { players[doc.id] = doc.data(); }); });
+            onSnapshot(query(collection(db, "universe_logs"), orderBy("createdAt", "desc"), limit(100)), (s) => { spaceLogs = {}; s.forEach(doc => { let d = doc.data(); if(d.expireAt && d.expireAt.toDate() > new Date()) spaceLogs[doc.id] = d; }); });
+        }
+
+        onSnapshot(doc(db, "universe", "factions"), (docSnap) => {
+            if (docSnap.exists()) {
+                const data = docSnap.data();
+                document.getElementById('space-point-neon').innerText = data.neon || 0;
+                document.getElementById('space-point-cyber').innerText = data.cyber || 0;
+                document.getElementById('space-point-void').innerText = data.void || 0;
+            }
+        });
+
+        window.dropLog = async () => {
+            if (!currentUser) return;
+            if ((myProfile.xp || 0) < 10) return showToast("XP 부족 (10 XP 필요)");
+            const msg = prompt("この場所に看板を建てます（メッセージを入力）:");
+            if (!msg) return;
+
+            await updateDoc(doc(db, "users", currentUser.uid), { xp: increment(-10) });
+            myProfile.xp -= 10; document.getElementById('my-space-status').innerText = `${myProfile.name} | ${myProfile.xp} XP | Faction: ${myProfile.faction || 'None'}`;
+            await addDoc(collection(db, "universe_logs"), { x: mySpacePos.x, y: mySpacePos.y, text: msg, author: myProfile.name, faction: myProfile.faction, createdAt: serverTimestamp(), expireAt: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000) });
+            showToast("座標 (" + Math.floor(mySpacePos.x) + ", " + Math.floor(mySpacePos.y) + ") にログを刻みました");
+        };
+    </script>
+</body>
+</html>

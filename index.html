@@ -411,7 +411,7 @@
             <h3 class="text-5xl md:text-6xl font-black">Choose your tool.</h3>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 auto-rows-[minmax(200px,auto)]">
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 auto-rows-[minmax(200px,auto)]">
 
             <!-- 1. LoG SNS (Large) -->
             <a href="app.html" class="glass-card md:col-span-2 md:row-span-2 p-10 fade-up group">
@@ -438,8 +438,34 @@
                 </div>
             </a>
 
-            <!-- 2. LoG Board -->
-            <a href="board.html" class="glass-card p-8 fade-up group" style="transition-delay: 100ms;">
+            <!-- 2. LoG Space (Large) -->
+            <a href="space.html" class="glass-card md:col-span-2 md:row-span-2 p-10 fade-up group"
+                style="transition-delay: 100ms;">
+                <div
+                    class="absolute bottom-0 right-0 w-96 h-96 bg-pink-500/10 rounded-full blur-3xl -mr-20 -mb-20 pointer-events-none transition group-hover:bg-pink-500/20">
+                </div>
+                <div class="flex justify-between items-start mb-auto relative z-10">
+                    <div class="icon-wrapper text-pink-400 border-pink-500/30 bg-pink-500/10">
+                        <span class="material-icons-round text-4xl">public</span>
+                    </div>
+                    <span
+                        class="border border-pink-500/30 text-pink-400 text-xs font-black px-4 py-1.5 rounded-full uppercase tracking-widest bg-pink-500/10">Metaverse</span>
+                </div>
+                <div class="relative z-10 mt-12">
+                    <h3 class="text-4xl font-black mb-4">LoG Space</h3>
+                    <p class="text-gray-400 text-lg leading-relaxed mb-8 max-w-lg">
+                        テキストだけが残る、果てなき仮想空間。<br>
+                        3つの陣営に分かれ、宇宙のあちこちにメッセージを残し、探索するミニマルなメタバース体験。
+                    </p>
+                    <span
+                        class="inline-flex items-center gap-2 font-bold text-white bg-white/10 px-6 py-3 rounded-full group-hover:bg-pink-600 transition duration-300">
+                        宇宙へ降り立つ <span class="material-icons-round text-sm">arrow_forward</span>
+                    </span>
+                </div>
+            </a>
+
+            <!-- 3. LoG Board -->
+            <a href="board.html" class="glass-card p-6 fade-up group" style="transition-delay: 200ms;">
                 <div
                     class="absolute bottom-0 right-0 w-48 h-48 bg-emerald-500/10 rounded-full blur-3xl -mr-10 -mb-10 pointer-events-none transition group-hover:bg-emerald-500/20">
                 </div>
@@ -447,19 +473,19 @@
                     <span class="material-icons-round text-3xl">dashboard</span>
                 </div>
                 <div class="mt-auto relative z-10">
-                    <h3 class="text-2xl font-black mb-2">LoG Board</h3>
-                    <p class="text-gray-400 text-sm mb-6">
-                        アカウント不要。思いついた瞬間にスレッドを立てられる、超軽量な完全匿名掲示板。
+                    <h3 class="text-xl font-black mb-2">LoG Board</h3>
+                    <p class="text-gray-400 text-sm mb-4">
+                        アカウント不要。思いついた瞬間にスレッドを立てられる完全匿名掲示板。
                     </p>
                     <span
-                        class="inline-flex items-center gap-1 font-bold text-emerald-400 group-hover:text-emerald-300 transition">
+                        class="inline-flex items-center gap-1 font-bold text-emerald-400 group-hover:text-emerald-300 transition text-sm">
                         掲示板へ <span class="material-icons-round text-sm">arrow_forward</span>
                     </span>
                 </div>
             </a>
 
-            <!-- 3. LoG Call -->
-            <a href="call.html" class="glass-card p-8 fade-up group" style="transition-delay: 200ms;">
+            <!-- 4. LoG Call -->
+            <a href="call.html" class="glass-card p-6 fade-up group" style="transition-delay: 300ms;">
                 <div
                     class="absolute top-0 left-0 w-48 h-48 bg-purple-500/10 rounded-full blur-3xl -ml-10 -mt-10 pointer-events-none transition group-hover:bg-purple-500/20">
                 </div>
@@ -467,12 +493,12 @@
                     <span class="material-icons-round text-3xl">headset_mic</span>
                 </div>
                 <div class="mt-auto relative z-10">
-                    <h3 class="text-2xl font-black mb-2">LoG Call</h3>
-                    <p class="text-gray-400 text-sm mb-6">
-                        URLひとつで繋がる。インストール不要、ブラウザ上で完結するセキュアな音声通話。
+                    <h3 class="text-xl font-black mb-2">LoG Call</h3>
+                    <p class="text-gray-400 text-sm mb-4">
+                        URLひとつで繋がる。インストール不要、ブラウザ完結のセキュア音声通話。
                     </p>
                     <span
-                        class="inline-flex items-center gap-1 font-bold text-purple-400 group-hover:text-purple-300 transition">
+                        class="inline-flex items-center gap-1 font-bold text-purple-400 group-hover:text-purple-300 transition text-sm">
                         通話する <span class="material-icons-round text-sm">arrow_forward</span>
                     </span>
                 </div>
@@ -480,7 +506,7 @@
 
 
             <!-- 5. LoG Games -->
-            <a href="games.html" class="glass-card p-8 fade-up group" style="transition-delay: 400ms;">
+            <a href="games.html" class="glass-card p-6 md:col-span-2 fade-up group" style="transition-delay: 400ms;">
                 <div
                     class="absolute bottom-0 right-0 w-48 h-48 bg-rose-500/10 rounded-full blur-3xl -mb-10 -mr-10 pointer-events-none transition group-hover:bg-rose-500/20">
                 </div>
@@ -488,12 +514,12 @@
                     <span class="material-icons-round text-3xl">sports_esports</span>
                 </div>
                 <div class="mt-auto relative z-10">
-                    <h3 class="text-2xl font-black mb-2">LoG Games</h3>
-                    <p class="text-gray-400 text-sm mb-6">
+                    <h3 class="text-xl font-black mb-2">LoG Games</h3>
+                    <p class="text-gray-400 text-sm mb-4">
                         暇つぶしの極み。東方風弾幕シューティングや反射神経テストなど、ブラウザ限界のゲーム集。
                     </p>
                     <span
-                        class="inline-flex items-center gap-1 font-bold text-rose-400 group-hover:text-rose-300 transition">
+                        class="inline-flex items-center gap-1 font-bold text-rose-400 group-hover:text-rose-300 transition text-sm">
                         プレイする <span class="material-icons-round text-sm">arrow_forward</span>
                     </span>
                 </div>
