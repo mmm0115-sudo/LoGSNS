@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="ja">
 <head>
@@ -77,33 +78,14 @@
     <!-- Toast Notification -->
     <div id="toast" class="toast"></div>
 
-    <!-- ■ Login Screen ■ -->
-    <div id="login-screen" class="min-h-screen flex flex-col items-center justify-center p-8 bg-white dark:bg-black transition-colors">
-        <h1 class="text-7xl font-black tracking-tighter mb-4 text-black dark:text-white">LoG</h1>
-        <div class="inline-block bg-black dark:bg-white text-white dark:text-black px-4 py-1 rounded-full text-xs font-bold tracking-[0.3em] mb-12">FINAL EDITION</div>
-        <div class="w-full max-w-sm space-y-4">
-            <button id="google-login-btn" class="w-full border border-gray-300 dark:border-gray-700 py-3 rounded-full font-bold flex justify-center items-center gap-3 hover:bg-gray-50 dark:hover:bg-gray-900 transition">
-                <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" class="w-5 h-5"> Googleで開始
-            </button>
-            <div id="email-form" class="space-y-3 pt-4 border-t border-gray-100 dark:border-gray-800">
-                <input id="auth-email" type="email" placeholder="Email" class="w-full bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-lg p-3 outline-none">
-                <input id="auth-password" type="password" placeholder="Password" class="w-full bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-lg p-3 outline-none">
-                <div class="flex gap-2">
-                    <button onclick="emailAuth('login')" class="flex-1 bg-black dark:bg-white text-white dark:text-black py-3 rounded-full font-bold">Login</button>
-                    <button onclick="emailAuth('signup')" class="flex-1 border border-gray-300 dark:border-gray-700 py-3 rounded-full font-bold">Sign Up</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- ■ Main App ■ -->
-    <div id="app-screen" class="hidden max-w-xl mx-auto min-h-screen bg-[var(--bg)] shadow-2xl relative pb-20 border-x border-[var(--border)]">
+    <!-- ■ Main App (未ログインでも表示されるベース画面) ■ -->
+    <div id="app-screen" class="max-w-xl mx-auto min-h-screen bg-[var(--bg)] shadow-2xl relative pb-20 border-x border-[var(--border)]">
         
         <!-- Header -->
         <header class="sticky top-0 bg-[var(--nav-bg)] backdrop-blur-md z-40 border-b border-[var(--border)] px-4 py-3 flex justify-between items-center" onclick="window.scrollTo({top:0, behavior:'smooth'})">
-            <img id="header-icon" src="" class="w-8 h-8 rounded-full object-cover border border-[var(--border)] cursor-pointer" onclick="switchTab('profile')">
+            <img id="header-icon" src="https://api.dicebear.com/7.x/notionists/svg?seed=guest" class="w-8 h-8 rounded-full object-cover border border-[var(--border)] cursor-pointer bg-gray-100" onclick="switchTab('profile')">
             <div class="text-xl font-black tracking-tight cursor-pointer" onclick="switchTab('home')">LoG</div>
-            <div class="flex items-center gap-1 text-xs font-bold text-orange-500 bg-orange-500/10 px-2 py-1 rounded-full">
+            <div class="flex items-center gap-1 text-xs font-bold text-orange-500 bg-orange-500/10 px-2 py-1 rounded-full cursor-pointer" onclick="requireAuth()">
                 <span class="material-icons-round text-sm">local_fire_department</span>
                 <span id="streak-count">0</span>
             </div>
@@ -113,9 +95,9 @@
         <div id="tab-home" class="pb-24">
             <div class="p-4 border-b border-[var(--border)]">
                 <div class="flex gap-3">
-                    <img id="input-icon" src="" class="w-10 h-10 rounded-full bg-gray-200 object-cover">
-                    <div class="flex-1">
-                        <textarea id="post-text" rows="2" placeholder="いまどうしてる？" class="w-full text-lg resize-none bg-transparent focus:outline-none placeholder-[var(--subtext)]"></textarea>
+                    <img id="input-icon" src="https://api.dicebear.com/7.x/notionists/svg?seed=guest" class="w-10 h-10 rounded-full bg-gray-100 object-cover">
+                    <div class="flex-1" onclick="requireAuth()">
+                        <textarea id="post-text" rows="2" placeholder="いまどうしてる？" class="w-full text-lg resize-none bg-transparent focus:outline-none placeholder-[var(--subtext)]" readonly></textarea>
                         
                         <!-- アンケート & 引用UI -->
                         <div id="poll-creator" class="hidden mb-3 space-y-2 p-3 border border-[var(--border)] rounded-xl bg-[var(--bg)]">
@@ -123,16 +105,16 @@
                             <input id="poll-2" type="text" placeholder="選択肢 2" class="w-full bg-[var(--border)]/30 rounded p-2 text-sm outline-none">
                         </div>
                         <div id="quote-preview" class="hidden mb-3 p-3 rounded-xl border border-[var(--border)] text-sm relative">
-                            <button onclick="cancelQuote()" class="absolute top-1 right-2 text-[var(--subtext)]">×</button>
+                            <button onclick="event.stopPropagation(); cancelQuote()" class="absolute top-1 right-2 text-[var(--subtext)]">×</button>
                             <div class="font-bold mb-1" id="quote-target-name"></div>
                             <div class="truncate text-[var(--subtext)]" id="quote-target-text"></div>
                         </div>
 
                         <div class="flex justify-between items-center pt-2 border-t border-[var(--border)]">
                             <div class="flex gap-2">
-                                <button onclick="togglePoll()" class="btn-ghost text-[var(--accent)]"><span class="material-icons-round">poll</span></button>
+                                <button onclick="event.stopPropagation(); togglePoll()" class="btn-ghost text-[var(--accent)] pointer-events-none"><span class="material-icons-round">poll</span></button>
                             </div>
-                            <button id="post-btn" class="btn-primary">ポスト</button>
+                            <button id="post-btn" class="btn-primary pointer-events-none">ポスト</button>
                         </div>
                     </div>
                 </div>
@@ -283,7 +265,30 @@
         </nav>
     </div>
 
-    <!-- Modals -->
+    <!-- ■ Auth Modal (ログイン要求モーダル) ■ -->
+    <div id="auth-modal" class="modal-overlay hidden fixed inset-0 z-50 flex items-center justify-center p-4">
+        <div class="bg-[var(--card)] p-8 rounded-3xl w-full max-w-sm shadow-2xl border border-[var(--border)] text-center relative">
+            <button onclick="closeAuthModal()" class="absolute top-4 right-4 text-[var(--subtext)]"><span class="material-icons-round">close</span></button>
+            <h1 class="text-4xl font-black tracking-tighter mb-2">LoG</h1>
+            <p class="text-[var(--subtext)] text-sm mb-8">この機能を利用するには、<br>ログインまたはアカウント作成が必要です。</p>
+            
+            <div class="space-y-4">
+                <button id="google-login-btn" class="w-full border border-[var(--border)] py-3 rounded-full font-bold flex justify-center items-center gap-3 hover:bg-[var(--border)]/50 transition">
+                    <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" class="w-5 h-5"> Googleで続行
+                </button>
+                <div class="space-y-3 pt-4 border-t border-[var(--border)]">
+                    <input id="auth-email" type="email" placeholder="Email" class="w-full bg-[var(--border)]/30 border border-[var(--border)] rounded-xl p-3 outline-none focus:border-[var(--text)] transition">
+                    <input id="auth-password" type="password" placeholder="Password" class="w-full bg-[var(--border)]/30 border border-[var(--border)] rounded-xl p-3 outline-none focus:border-[var(--text)] transition">
+                    <div class="flex gap-2">
+                        <button onclick="emailAuth('login')" class="flex-1 btn-primary py-3">ログイン</button>
+                        <button onclick="emailAuth('signup')" class="flex-1 border border-[var(--border)] py-3 rounded-full font-bold hover:bg-[var(--border)]/50 transition">新規登録</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Other Modals -->
     <div id="bottle-modal" class="modal-overlay hidden fixed inset-0 z-50 flex items-center justify-center">
         <div class="bg-[var(--card)] p-6 rounded-2xl w-80 shadow-2xl border border-[var(--border)] text-center">
             <h2 class="text-lg font-bold mb-2">手紙を流す</h2>
@@ -296,18 +301,19 @@
     </div>
 
     <div id="profile-modal" class="modal-overlay hidden fixed inset-0 z-50 flex items-center justify-center">
-        <div class="bg-[var(--card)] p-6 rounded-2xl w-80 shadow-2xl border border-[var(--border)]">
+        <div class="bg-[var(--card)] p-6 rounded-2xl w-80 shadow-2xl border border-[var(--border)] text-center">
             <h2 class="text-xl font-bold mb-4">初期設定</h2>
-            <input id="edit-name-input" type="text" class="w-full bg-[var(--border)]/30 rounded p-3 mb-4 font-bold outline-none text-[var(--text)]" placeholder="表示名">
+            <p class="text-[var(--subtext)] text-sm mb-4">ようこそ。表示名を設定してください。</p>
+            <input id="edit-name-input" type="text" class="w-full bg-[var(--border)]/30 rounded-xl border border-[var(--border)] p-3 mb-4 font-bold outline-none focus:border-[var(--text)] transition text-[var(--text)]" placeholder="表示名 (例: Haruto)">
             <button onclick="saveProfile()" class="w-full btn-primary py-3">開始</button>
         </div>
     </div>
 
     <div id="settings-modal" class="modal-overlay hidden fixed inset-0 z-50 flex items-center justify-center">
         <div class="bg-[var(--card)] p-6 rounded-2xl w-80 shadow-2xl border border-[var(--border)]">
-            <button onclick="toggleDarkMode()" class="w-full flex justify-between items-center p-3 font-bold mb-2">ダークモード <span class="material-icons-round">dark_mode</span></button>
-            <button onclick="signOutApp()" class="w-full text-left p-3 text-[var(--danger)] font-bold">ログアウト</button>
-            <button onclick="document.getElementById('settings-modal').classList.add('hidden')" class="mt-4 w-full py-2 text-sm">閉じる</button>
+            <button onclick="toggleDarkMode()" class="w-full flex justify-between items-center p-3 font-bold mb-2 rounded-lg hover:bg-[var(--border)]/50 transition">ダークモード <span class="material-icons-round">dark_mode</span></button>
+            <button onclick="signOutApp()" class="w-full text-left p-3 text-[var(--danger)] font-bold rounded-lg hover:bg-red-500/10 transition">ログアウト</button>
+            <button onclick="document.getElementById('settings-modal').classList.add('hidden')" class="mt-4 w-full py-2 text-sm font-bold text-[var(--subtext)]">閉じる</button>
         </div>
     </div>
 
@@ -324,42 +330,49 @@
         let currentUser=null, myProfile=null, quoteData=null, isPoll=false;
         let currentProfileTab = 'posts', currentChatUser=null;
 
-        const MISSIONS = {
-            login: { label: "ログイン", target: 1, xp: 50 },
-            like: { label: "3回いいね", target: 3, xp: 30 },
-            post: { label: "1回ポスト", target: 1, xp: 20 }
-        };
+        const MISSIONS = { login: { label: "ログイン", target: 1, xp: 50 }, like: { label: "3回いいね", target: 3, xp: 30 }, post: { label: "1回ポスト", target: 1, xp: 20 } };
         const TITLES = ["見習い", "住人", "詩人", "哲学", "虚無", "猫", "神", "富豪", "ニート", "将軍", "伝説", "歩行者", "空気", "勇者"];
 
         // Utils
         const showToast = (m) => { const t=document.getElementById('toast'); t.innerText=m; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),3000); };
         const authErr = (e) => showToast("Error: " + e.message);
         
+        // ログイン要求ガード (未ログインならモーダルを出してfalseを返す)
+        window.requireAuth = () => {
+            if (!currentUser) {
+                document.getElementById('auth-modal').classList.remove('hidden');
+                return false;
+            }
+            return true;
+        };
+        window.closeAuthModal = () => document.getElementById('auth-modal').classList.add('hidden');
+
         // Auth
         document.getElementById('google-login-btn').onclick = () => signInWithPopup(auth, new GoogleAuthProvider()).catch(authErr);
         window.emailAuth = (t) => {
             const e=document.getElementById('auth-email').value, p=document.getElementById('auth-password').value;
             if(t==='login') signInWithEmailAndPassword(auth,e,p).catch(authErr);
             else createUserWithEmailAndPassword(auth,e,p).catch(authErr);
-        }
+        };
 
         onAuthStateChanged(auth, async (u) => {
             if(u){
                 currentUser = u;
+                closeAuthModal(); // ログイン成功したらモーダルを閉じる
                 const d = await getDoc(doc(db,"users",u.uid));
                 if(d.exists()){ 
                     myProfile = d.data();
                     if(!myProfile.following) myProfile.following = [];
                     await checkStreak();
                     await checkMissions('login');
-                    initApp(); 
+                    initApp(true); 
                 } else {
-                    document.getElementById('login-screen').classList.add('hidden');
                     document.getElementById('profile-modal').classList.remove('hidden');
                 }
             } else {
-                document.getElementById('login-screen').classList.remove('hidden');
-                document.getElementById('app-screen').classList.add('hidden');
+                currentUser = null;
+                myProfile = null;
+                initApp(false); // 未ログイン状態でもアプリを描画する
             }
         });
 
@@ -376,6 +389,7 @@
         }
 
         async function checkMissions(type) {
+            if(!currentUser) return;
             const today = new Date().toISOString().split('T')[0];
             let missions = myProfile.missions || {};
             if (missions.date !== today) missions = { date: today, login: 0, like: 0, post: 0, claimed: [] };
@@ -399,18 +413,34 @@
             updateMyProfileUI();
         }
 
-        function initApp() {
-            document.getElementById('login-screen').classList.add('hidden');
-            document.getElementById('app-screen').classList.remove('hidden');
-            document.getElementById('profile-modal').classList.add('hidden');
+        function initApp(isLogged) {
             if(localStorage.getItem('theme')==='dark') document.body.classList.add('dark');
-            updateMyProfileUI();
+            
+            // 誰でも見れるデータのロード
             loadTimeline();
-            loadNotifications();
             loadRanking();
+
+            if(isLogged) {
+                // ログイン済み用UIセットアップ
+                updateMyProfileUI();
+                loadNotifications();
+                document.getElementById('post-text').removeAttribute('readonly');
+                document.getElementById('post-text').style.pointerEvents = 'auto';
+                document.getElementById('post-btn').style.pointerEvents = 'auto';
+                document.querySelector('.btn-ghost > span.material-icons-round').parentElement.style.pointerEvents = 'auto';
+            } else {
+                // ゲスト用UIセットアップ
+                document.getElementById('header-icon').src = "https://api.dicebear.com/7.x/notionists/svg?seed=guest";
+                document.getElementById('input-icon').src = "https://api.dicebear.com/7.x/notionists/svg?seed=guest";
+                // 投稿欄をクリックした時にログインモーダルを出すように
+                document.getElementById('post-text').setAttribute('readonly', 'true');
+                document.getElementById('post-text').style.pointerEvents = 'none'; // クリックイベントを親(flex-1)に貫通させる
+                document.getElementById('post-btn').style.pointerEvents = 'none';
+            }
         }
 
         function updateMyProfileUI() {
+            if(!myProfile) return;
             const icon = myProfile.icon || `https://api.dicebear.com/7.x/notionists/svg?seed=${currentUser.uid}`;
             document.getElementById('header-icon').src = icon;
             document.getElementById('input-icon').src = icon;
@@ -458,6 +488,7 @@
 
         // --- Other Profile ---
         window.viewUser = async (uid) => {
+            if(!requireAuth()) return;
             if(uid === currentUser.uid) { switchTab('profile'); return; }
             const d = await getDoc(doc(db, "users", uid));
             if(!d.exists()) return;
@@ -489,6 +520,7 @@
         };
 
         window.toggleFollow = async (uid, btn) => {
+            if(!requireAuth()) return;
             const myRef = doc(db,"users",currentUser.uid);
             if(myProfile.following && myProfile.following.includes(uid)) {
                 await updateDoc(myRef, { following: arrayRemove(uid) });
@@ -509,8 +541,12 @@
         };
 
         // --- Post & Timeline ---
-        window.togglePoll = () => { isPoll=!isPoll; document.getElementById('poll-creator').classList.toggle('hidden'); };
+        window.togglePoll = () => { 
+            if(!requireAuth()) return;
+            isPoll=!isPoll; document.getElementById('poll-creator').classList.toggle('hidden'); 
+        };
         document.getElementById('post-btn').onclick = async () => {
+            if(!requireAuth()) return;
             const text = document.getElementById('post-text').value; const p1 = document.getElementById('poll-1').value; const p2 = document.getElementById('poll-2').value;
             if(!text.trim() && !p1) return;
             
@@ -533,7 +569,7 @@
                 const c = document.getElementById('timeline'); c.innerHTML = "";
                 snap.forEach(d => c.innerHTML += buildPostHTML(d.id, d.data()));
             });
-            loadMyPosts();
+            if(currentUser) loadMyPosts();
         }
 
         window.switchProfileSubTab = (type) => {
@@ -544,12 +580,14 @@
         };
 
         function loadMyPosts() {
+            if(!currentUser) return;
             onSnapshot(query(collection(db,"logs"), where("uid","==",currentUser.uid), orderBy("createdAt","desc"), limit(20)), (s) => {
                 const c = document.getElementById('my-timeline'); c.innerHTML = "";
                 s.forEach(d => c.innerHTML += buildPostHTML(d.id, d.data()));
             });
         }
         function loadMyLikes() {
+            if(!currentUser) return;
             onSnapshot(query(collection(db,"logs"), where("likes", "array-contains", currentUser.uid), limit(20)), (s) => {
                 const c = document.getElementById('my-timeline'); c.innerHTML = "";
                 if(s.empty) c.innerHTML = "<div class='p-4 text-center text-sm text-[var(--subtext)]'>いいねなし</div>";
@@ -558,14 +596,15 @@
         }
 
         function buildPostHTML(id, d, isPin=false) {
-            const isLiked = d.likes && d.likes.includes(currentUser.uid);
-            const isMine = d.uid === currentUser.uid;
+            // currentUserがnull（未ログイン）の場合のエラーを防ぐため、安全なチェックを行う
+            const isLiked = currentUser && d.likes && d.likes.includes(currentUser.uid);
+            const isMine = currentUser && d.uid === currentUser.uid;
             let pollUI = "";
             if(d.poll) {
                 pollUI = `<div class="poll-container">`;
                 d.poll.options.forEach((o, i) => {
                     const pct = d.poll.total ? Math.round((o.votes.length/d.poll.total)*100) : 0;
-                    pollUI += `<div onclick="event.stopPropagation();vote('${id}',${i})" class="poll-option"><div class="poll-fill" style="width:${pct}%"></div><span class="z-10 text-sm font-bold">${o.txt}</span><span class="z-10 text-xs font-bold">${pct}%</span></div>`;
+                    pollUI += `<div onclick="event.stopPropagation();vote('${id}',${i})" class="poll-option hover:bg-[var(--border)]/20"><div class="poll-fill" style="width:${pct}%"></div><span class="z-10 text-sm font-bold">${o.txt}</span><span class="z-10 text-xs font-bold">${pct}%</span></div>`;
                 });
                 pollUI += `</div>`;
             }
@@ -583,12 +622,12 @@
                             </div>
                             ${isMine && !isPin ? `<div class="relative group"><button class="text-[var(--subtext)]">•••</button><div class="hidden group-hover:block absolute right-0 bg-[var(--card)] border border-[var(--border)] shadow-lg rounded p-1 z-10 w-24"><button onclick="pin('${id}')" class="w-full text-left text-xs p-2 hover:bg-[var(--border)]">固定</button><button onclick="del('${id}')" class="w-full text-left text-xs p-2 text-[var(--danger)] hover:bg-[var(--border)]">削除</button></div></div>` : ''}
                         </div>
-                        <p class="text-[15px] mt-1 whitespace-pre-wrap leading-relaxed">${d.text}</p>
+                        <p class="text-[15px] mt-1 whitespace-pre-wrap leading-relaxed break-words">${d.text}</p>
                         ${pollUI}
                         ${d.quote ? `<div class="p-3 mt-2 rounded-xl border border-[var(--border)] text-sm"><div class="font-bold">${d.quote.name}</div><div class="text-[var(--subtext)] truncate">${d.quote.text}</div></div>` : ''}
                         <div class="flex justify-between mt-3 max-w-xs text-[var(--subtext)]">
-                            <button onclick="event.stopPropagation();setQuote('${d.text}','${d.authorName}')" class="btn-ghost"><span class="material-icons-round text-lg">cached</span></button>
-                            <button onclick="event.stopPropagation();like('${id}','${d.uid}')" class="btn-ghost ${isLiked?'like-active like-anim':''}"><span class="material-icons-round text-lg">${isLiked?'favorite':'favorite_border'}</span> <span class="text-xs ml-1">${d.likes?d.likes.length:0}</span></button>
+                            <button onclick="event.stopPropagation();setQuote('${d.text.replace(/'/g, "\\'").replace(/\n/g, " ")}','${d.authorName}')" class="btn-ghost"><span class="material-icons-round text-lg">cached</span></button>
+                            <button onclick="event.stopPropagation();like('${id}','${d.uid}')" class="btn-ghost ${isLiked?'like-active like-anim text-[#f91880]':''}"><span class="material-icons-round text-lg">${isLiked?'favorite':'favorite_border'}</span> <span class="text-xs ml-1">${d.likes?d.likes.length:0}</span></button>
                         </div>
                     </div>
                 </div>`;
@@ -596,12 +635,14 @@
 
         // --- Actions ---
         window.vote = async (id, idx) => {
+            if(!requireAuth()) return;
             const r = doc(db,"logs",id); const d=(await getDoc(r)).data();
             let voted=false; d.poll.options.forEach(o=>{if(o.votes.includes(currentUser.uid))voted=true});
             if(voted) return showToast("投票済み");
             d.poll.options[idx].votes.push(currentUser.uid); d.poll.total++; await updateDoc(r,{poll:d.poll});
         };
         window.like = async (id, to) => {
+            if(!requireAuth()) return;
             const r = doc(db,"logs",id); const d=(await getDoc(r)).data();
             if(d.likes.includes(currentUser.uid)) await updateDoc(r,{likes:arrayRemove(currentUser.uid)});
             else { 
@@ -610,7 +651,10 @@
                 if(to !== currentUser.uid) await addDoc(collection(db,"notif"), { to, from: myProfile.name, type: 'like', read: false, createdAt: serverTimestamp() });
             }
         };
-        window.setQuote = (t,n) => { quoteData={text:t, name:n}; document.getElementById('quote-preview').classList.remove('hidden'); document.getElementById('quote-target-name').innerText=n; document.getElementById('quote-target-text').innerText=t; };
+        window.setQuote = (t,n) => { 
+            if(!requireAuth()) return;
+            quoteData={text:t, name:n}; document.getElementById('quote-preview').classList.remove('hidden'); document.getElementById('quote-target-name').innerText=n; document.getElementById('quote-target-text').innerText=t; 
+        };
         window.cancelQuote = () => { quoteData=null; document.getElementById('quote-preview').classList.add('hidden'); };
         window.pin = async (id) => { await updateDoc(doc(db,"users",currentUser.uid), {pinnedId: id}); showToast("固定しました"); location.reload(); };
         window.del = async (id) => { if(confirm("削除？")) await deleteDoc(doc(db,"logs",id)); };
@@ -628,6 +672,7 @@
             });
         }
         function loadNotifications() {
+            if(!currentUser) return;
             onSnapshot(query(collection(db,"notif"), where("to","==",currentUser.uid), orderBy("createdAt","desc"), limit(20)), (s) => {
                 const l = document.getElementById('notif-list'); l.innerHTML = "";
                 const b = document.getElementById('nav-badge');
@@ -649,7 +694,10 @@
         };
 
         // --- Bottle ---
-        window.openBottleModal = () => document.getElementById('bottle-modal').classList.remove('hidden');
+        window.openBottleModal = () => {
+            if(!requireAuth()) return;
+            document.getElementById('bottle-modal').classList.remove('hidden');
+        }
         window.sendBottle = async () => {
             const text = document.getElementById('bottle-input').value; if(!text.trim()) return;
             const exp = new Date(); exp.setDate(exp.getDate() + 30);
@@ -658,6 +706,7 @@
             showToast("手紙を海に流しました"); document.getElementById('bottle-input').value = ""; document.getElementById('bottle-modal').classList.add('hidden');
         };
         window.pickupBottle = async () => {
+            if(!requireAuth()) return;
             const q = query(collection(db, "bottles"), where("status", "==", "unread"), orderBy("createdAt", "desc"), limit(20));
             const snap = await getDocs(q);
             const others = snap.docs.filter(d => d.data().senderUid !== currentUser.uid);
@@ -672,6 +721,7 @@
 
         // --- Gacha ---
         window.spinGacha = async () => {
+            if(!requireAuth()) return;
             if((myProfile.xp || 0) < 50) return showToast("XP不足 (50必要)");
             if(!confirm("50 XP消費しますか？")) return;
             const newTitle = TITLES[Math.floor(Math.random() * TITLES.length)];
@@ -681,7 +731,10 @@
         };
 
         // --- Chat ---
-        window.openChat = (uid, name) => { currentChatUser = uid; document.getElementById('chat-target-name').innerText = name; switchTab('chat'); loadMessages(uid); };
+        window.openChat = (uid, name) => { 
+            if(!requireAuth()) return;
+            currentChatUser = uid; document.getElementById('chat-target-name').innerText = name; switchTab('chat'); loadMessages(uid); 
+        };
         function loadMessages(t) {
             onSnapshot(query(collection(db, "chats", [currentUser.uid, t].sort().join("_"), "messages"), orderBy("createdAt", "asc"), limit(50)), (s) => {
                 const d = document.getElementById('chat-messages'); d.innerHTML = "";
@@ -695,8 +748,19 @@
         window.saveProfile = async () => { const n=document.getElementById('edit-name-input').value; if(!n)return; await setDoc(doc(db,"users",currentUser.uid),{name:n,icon:`https://api.dicebear.com/7.x/notionists/svg?seed=${currentUser.uid}`,xp:0},{merge:true}); location.reload(); };
         window.toggleDarkMode = () => { document.body.classList.toggle('dark'); localStorage.setItem('theme',document.body.classList.contains('dark')?'dark':'light'); };
         window.openSettings = () => document.getElementById('settings-modal').classList.remove('hidden');
-        window.signOutApp = () => signOut(auth);
-        window.switchTab = (t) => { ['home','explore','bottle','notif','profile','other-profile','chat'].forEach(x => document.getElementById(`tab-${x}`).classList.add('hidden')); document.getElementById(`tab-${t}`).classList.remove('hidden'); document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('nav-active')); const b = document.querySelector(`.nav-item[data-target="${t}"]`); if(b) b.classList.add('nav-active'); if(t==='notif') document.getElementById('nav-badge').style.display='none'; };
+        window.signOutApp = () => { signOut(auth); document.getElementById('settings-modal').classList.add('hidden'); };
+        
+        window.switchTab = (t) => { 
+            // 通知とプロフィールタブはログイン必須にする
+            if((t === 'notif' || t === 'profile') && !requireAuth()) return;
+
+            ['home','explore','bottle','notif','profile','other-profile','chat'].forEach(x => document.getElementById(`tab-${x}`).classList.add('hidden')); 
+            document.getElementById(`tab-${t}`).classList.remove('hidden'); 
+            document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('nav-active')); 
+            const b = document.querySelector(`.nav-item[data-target="${t}"]`); if(b) b.classList.add('nav-active'); 
+            if(t==='notif') document.getElementById('nav-badge').style.display='none'; 
+            window.scrollTo({top:0, behavior:'smooth'});
+        };
     </script>
 </body>
 </html>
