@@ -442,7 +442,30 @@
                 <div class="flex items-center gap-4 mt-3">
                     <div class="flex items-center gap-1"><span class="font-bold" id="profile-xp">0</span> <span
                             class="text-xs text-[var(--subtext)]">XP</span></div>
-                    <div class="flex items-center gap-1"><span class="font-bold" id="profile-rank">Unranked</span></div>
+                    <div id="profile-faction-badge"
+                        class="hidden items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold border">
+                        <span id="profile-faction-icon" class="material-icons-round text-[12px]"></span>
+                        <span id="profile-faction-name"></span>
+                    </div>
+                </div>
+
+                <!-- LoG Market (Economy) -->
+                <div onclick="document.getElementById('market-modal').classList.remove('hidden')"
+                    class="mt-4 p-4 border border-[var(--border)] rounded-2xl cursor-pointer bg-gradient-to-r from-emerald-500/5 to-teal-500/5 hover:from-emerald-500/10 hover:to-teal-500/10 transition relative overflow-hidden group">
+                    <div class="flex justify-between items-center relative z-10">
+                        <div class="flex items-center gap-3">
+                            <div
+                                class="w-10 h-10 rounded-full bg-emerald-500/20 flex items-center justify-center text-emerald-400">
+                                <span class="material-icons-round">storefront</span>
+                            </div>
+                            <div>
+                                <div class="text-sm font-black text-emerald-400 tracking-wide mb-1">LoG Market</div>
+                                <div class="text-[10px] font-bold text-[var(--subtext)]">XPを使ってアイテムを購入・陣営を支援</div>
+                            </div>
+                        </div>
+                        <span
+                            class="material-icons-round text-[var(--subtext)] group-hover:text-emerald-400 transition">chevron_right</span>
+                    </div>
                 </div>
 
 
@@ -527,6 +550,47 @@
             </div>
         </div>
 
+        <!-- E. SPACE (Universe) -->
+        <div id="tab-space" class="hidden pb-24 h-[calc(100vh-140px)] relative overflow-hidden bg-[#050510]">
+            <canvas id="space-canvas" class="w-full h-full cursor-crosshair"></canvas>
+
+            <!-- Space UI Overlay -->
+            <div class="absolute top-4 left-4 right-4 flex justify-between items-start pointer-events-none">
+                <div class="bg-black/50 backdrop-blur border border-white/10 rounded-xl p-3 inline-block">
+                    <div class="text-xs font-bold text-gray-400 mb-1">LoG Space (Beta)</div>
+                    <div class="flex gap-4">
+                        <div class="text-pink-500 font-bold text-xs"><span
+                                class="material-icons-round text-[10px]">whatshot</span> Neon: <span
+                                id="space-point-neon">0</span></div>
+                        <div class="text-blue-500 font-bold text-xs"><span
+                                class="material-icons-round text-[10px]">memory</span> Cyber: <span
+                                id="space-point-cyber">0</span></div>
+                        <div class="text-gray-300 font-bold text-xs"><span
+                                class="material-icons-round text-[10px]">nightlight_round</span> Void: <span
+                                id="space-point-void">0</span></div>
+                    </div>
+                </div>
+
+                <div class="flex flex-col gap-2 pointer-events-auto">
+                    <button onclick="dropLog()"
+                        class="w-12 h-12 bg-emerald-500/20 text-emerald-400 border border-emerald-500/50 rounded-full flex items-center justify-center shadow-[0_0_15px_rgba(16,185,129,0.3)] hover:scale-110 transition group">
+                        <span class="material-icons-round group-hover:rotate-12 transition">place</span>
+                    </button>
+                    <div class="text-[9px] text-center font-bold text-emerald-400">10 XP</div>
+                </div>
+            </div>
+
+            <!-- Virtual Joystick (Mobile) / Controls wrapper -->
+            <div class="absolute bottom-8 left-8 right-8 flex justify-between pointer-events-none opacity-50">
+                <div class="w-24 h-24 rounded-full border-2 border-white/20 flex items-center justify-center">
+                    <div class="w-8 h-8 rounded-full bg-white/30"></div>
+                </div>
+                <div class="text-right text-xs font-bold text-white/50 tracking-widest mt-auto">
+                    WASD or SWIPE to Move
+                </div>
+            </div>
+        </div>
+
         <!-- Navigation -->
         <nav
             class="fixed bottom-0 w-full max-w-xl bg-[var(--nav-bg)] border-t border-[var(--border)] flex justify-around py-3 z-50 backdrop-blur pb-6">
@@ -534,6 +598,17 @@
                     class="material-icons-round text-3xl">home</span></button>
             <button onclick="switchTab('explore')" class="nav-item" data-target="explore"><span
                     class="material-icons-round text-3xl">search</span></button>
+
+            <!-- Space Tab Button -->
+            <button onclick="switchTab('space')" class="nav-item relative group pb-1" data-target="space">
+                <div
+                    class="absolute inset-0 bg-gradient-to-t from-purple-500/20 to-transparent blur-md opacity-0 group-hover:opacity-100 transition rounded-full pointer-events-none">
+                </div>
+                <span
+                    class="material-icons-round text-3xl text-purple-400/80 group-hover:text-pink-400 transition relative z-10"
+                    style="text-shadow: 0 0 10px rgba(168,85,247,0.5);">public</span>
+            </button>
+
             <button onclick="switchTab('bottle')" class="nav-item" data-target="bottle"><span
                     class="material-icons-round text-3xl">sailing</span></button>
             <button onclick="switchTab('notif')" class="nav-item" data-target="notif">
@@ -590,14 +665,156 @@
         </div>
     </div>
 
-    <div id="profile-modal" class="modal-overlay hidden fixed inset-0 z-50 flex items-center justify-center">
-        <div class="bg-[var(--card)] p-6 rounded-2xl w-80 shadow-2xl border border-[var(--border)] text-center">
-            <h2 class="text-xl font-bold mb-4">初期設定</h2>
-            <p class="text-[var(--subtext)] text-sm mb-4">ようこそ。表示名を設定してください。</p>
+    <div id="profile-modal" class="modal-overlay hidden fixed inset-0 z-50 flex items-center justify-center p-4">
+        <div
+            class="bg-[var(--card)] p-6 rounded-2xl w-full max-w-sm shadow-2xl border border-[var(--border)] text-center">
+            <h2 class="text-xl font-black mb-2">所属陣営の選択</h2>
+            <p class="text-[var(--subtext)] text-sm mb-6">世界（Universe）のどこに所属するか選んでください。</p>
+
+            <div class="grid grid-cols-1 gap-3 mb-6">
+                <!-- Neon -->
+                <label class="cursor-pointer relative">
+                    <input type="radio" name="faction" value="neon" class="peer sr-only" checked>
+                    <div
+                        class="p-4 rounded-xl border-2 border-[var(--border)] peer-checked:border-pink-500 peer-checked:bg-pink-500/10 transition flex items-center gap-4 text-left">
+                        <div
+                            class="w-10 h-10 rounded-full bg-pink-500 flex items-center justify-center shadow-[0_0_15px_rgba(236,72,153,0.5)]">
+                            <span class="material-icons-round text-white">whatshot</span>
+                        </div>
+                        <div>
+                            <div class="font-black text-pink-500">Neon (ネオン)</div>
+                            <div class="text-[10px] text-[var(--subtext)]">情熱と混沌の勢力</div>
+                        </div>
+                    </div>
+                </label>
+                <!-- Cyber -->
+                <label class="cursor-pointer relative">
+                    <input type="radio" name="faction" value="cyber" class="peer sr-only">
+                    <div
+                        class="p-4 rounded-xl border-2 border-[var(--border)] peer-checked:border-blue-500 peer-checked:bg-blue-500/10 transition flex items-center gap-4 text-left">
+                        <div
+                            class="w-10 h-10 rounded-full bg-blue-500 flex items-center justify-center shadow-[0_0_15px_rgba(59,130,246,0.5)]">
+                            <span class="material-icons-round text-white">memory</span>
+                        </div>
+                        <div>
+                            <div class="font-black text-blue-500">Cyber (サイバー)</div>
+                            <div class="text-[10px] text-[var(--subtext)]">技術と秩序の勢力</div>
+                        </div>
+                    </div>
+                </label>
+                <!-- Void -->
+                <label class="cursor-pointer relative">
+                    <input type="radio" name="faction" value="void" class="peer sr-only">
+                    <div
+                        class="p-4 rounded-xl border-2 border-gray-600 peer-checked:border-gray-300 peer-checked:bg-gray-500/10 transition flex items-center gap-4 text-left">
+                        <div
+                            class="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center shadow-[0_0_15px_rgba(255,255,255,0.2)] border border-gray-600">
+                            <span class="material-icons-round text-gray-300">nightlight_round</span>
+                        </div>
+                        <div>
+                            <div class="font-black text-gray-300">Void (ヴォイド)</div>
+                            <div class="text-[10px] text-[var(--subtext)]">静寂と深淵の勢力</div>
+                        </div>
+                    </div>
+                </label>
+            </div>
+
             <input id="edit-name-input" type="text"
-                class="w-full bg-[var(--border)]/30 rounded-xl border border-[var(--border)] p-3 mb-4 font-bold outline-none focus:border-[var(--text)] transition text-[var(--text)]"
-                placeholder="表示名 (例: Haruto)">
-            <button onclick="saveProfile()" class="w-full btn-primary py-3">開始</button>
+                class="w-full bg-[var(--border)]/30 rounded-xl border border-[var(--border)] p-4 mb-4 font-bold outline-none focus:border-[var(--text)] transition text-[var(--text)]"
+                placeholder="表示名を入力 (例: Haruto)">
+            <button onclick="saveProfile()"
+                class="w-full btn-primary py-4 text-lg font-black tracking-widest shadow-xl hover:scale-105 transition transform">世界へ降り立つ</button>
+        </div>
+    </div>
+
+    <!-- LoG Market Modal -->
+    <div id="market-modal" class="modal-overlay hidden fixed inset-0 z-50 flex items-center justify-center p-4">
+        <div
+            class="bg-[var(--card)] p-6 rounded-3xl w-full max-w-md shadow-2xl border border-[var(--border)] relative overflow-hidden flex flex-col max-h-[90vh]">
+            <!-- Header -->
+            <div class="flex justify-between items-center mb-6">
+                <div class="flex items-center gap-3">
+                    <div
+                        class="w-12 h-12 rounded-full bg-emerald-500/20 flex items-center justify-center text-emerald-400">
+                        <span class="material-icons-round text-2xl">storefront</span>
+                    </div>
+                    <div>
+                        <h2 class="text-2xl font-black text-emerald-400">LoG Market</h2>
+                        <div class="text-[10px] font-bold text-[var(--subtext)]">所持: <span
+                                class="text-[var(--text)] text-sm ml-1" id="market-my-xp">0</span> XP</div>
+                    </div>
+                </div>
+                <button onclick="document.getElementById('market-modal').classList.add('hidden')"
+                    class="text-[var(--subtext)] hover:text-white transition"><span
+                        class="material-icons-round">close</span></button>
+            </div>
+
+            <!-- Content Scroll Area -->
+            <div class="flex-1 overflow-y-auto pr-2 space-y-6">
+
+                <!-- Section 1: Titles -->
+                <div>
+                    <h3 class="text-sm font-bold text-[var(--subtext)] uppercase tracking-wider mb-3">プレミアム称号</h3>
+                    <div class="grid grid-cols-1 gap-3">
+                        <div class="glass-panel p-4 flex justify-between items-center">
+                            <div>
+                                <span
+                                    class="title-badge bg-gradient-to-r from-purple-500 to-pink-500 text-white font-bold px-2 py-0.5 rounded text-xs">Pioneer</span>
+                                <div class="text-[10px] text-[var(--subtext)] mt-1">最初期参加者の証</div>
+                            </div>
+                            <button onclick="buyItem('title', 'Pioneer', 500)"
+                                class="btn-primary py-1 px-4 text-xs font-bold! tracking-wider flex items-center gap-1 justify-center"><span
+                                    class="material-icons-round text-[14px]">local_atm</span> 500</button>
+                        </div>
+                        <div class="glass-panel p-4 flex justify-between items-center">
+                            <div>
+                                <span
+                                    class="title-badge bg-gradient-to-r from-yellow-500 to-orange-500 text-white font-bold px-2 py-0.5 rounded text-xs">Whale</span>
+                                <div class="text-[10px] text-[var(--subtext)] mt-1">富豪の証</div>
+                            </div>
+                            <button onclick="buyItem('title', 'Whale', 5000)"
+                                class="btn-primary py-1 px-4 text-xs font-bold! tracking-wider flex items-center gap-1 justify-center"><span
+                                    class="material-icons-round text-[14px]">local_atm</span> 5k</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section 2: Faction War -->
+                <div>
+                    <h3 class="text-sm font-bold text-[var(--subtext)] uppercase tracking-wider mb-3">陣営支援物資</h3>
+                    <div class="grid grid-cols-1 gap-3">
+                        <div class="glass-panel p-4 flex gap-4 items-center">
+                            <div class="w-12 h-12 bg-[var(--border)] rounded-xl flex items-center justify-center">
+                                <span class="material-icons-round text-yellow-500">campaign</span>
+                            </div>
+                            <div class="flex-1">
+                                <div class="font-bold text-sm">陣営プロパガンダ</div>
+                                <div class="text-[10px] text-[var(--subtext)]">自陣営に +100 Point</div>
+                            </div>
+                            <button onclick="buyItem('faction_boost', 100, 150)"
+                                class="btn-primary py-1 px-3 text-xs flex flex-col items-center">
+                                <span>買う</span>
+                                <span class="text-[8px] opacity-70">150 XP</span>
+                            </button>
+                        </div>
+                        <div class="glass-panel p-4 flex gap-4 items-center">
+                            <div class="w-12 h-12 bg-[var(--border)] rounded-xl flex items-center justify-center">
+                                <span class="material-icons-round text-red-500">local_fire_department</span>
+                            </div>
+                            <div class="flex-1">
+                                <div class="font-bold text-sm">総攻撃司令</div>
+                                <div class="text-[10px] text-[var(--subtext)]">自陣営に +1000 Point</div>
+                            </div>
+                            <button onclick="buyItem('faction_boost', 1000, 1200)"
+                                class="btn-primary py-1 px-3 text-xs flex flex-col items-center">
+                                <span>買う</span>
+                                <span class="text-[8px] opacity-70">1.2k XP</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
         </div>
     </div>
 
@@ -762,8 +979,27 @@
             document.getElementById('profile-uid').innerText = "@" + currentUser.uid.slice(0, 8);
             document.getElementById('streak-count').innerText = myProfile.streak || 0;
             document.getElementById('profile-xp').innerText = myProfile.xp || 0;
-            document.getElementById('profile-rank').innerText = getRank(myProfile.xp).name;
-            document.getElementById('profile-rank').className = `font-bold text-lg ${getRank(myProfile.xp).class}`;
+
+            const fBadge = document.getElementById('profile-faction-badge');
+            if (myProfile.faction) {
+                fBadge.classList.remove('hidden');
+                fBadge.classList.add('flex');
+                const fIcon = document.getElementById('profile-faction-icon');
+                const fName = document.getElementById('profile-faction-name');
+                if (myProfile.faction === 'neon') {
+                    fBadge.className = 'flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold border border-pink-500/50 bg-pink-500/10 text-pink-500';
+                    fIcon.innerText = 'whatshot'; fName.innerText = 'Neon';
+                } else if (myProfile.faction === 'cyber') {
+                    fBadge.className = 'flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold border border-blue-500/50 bg-blue-500/10 text-blue-500';
+                    fIcon.innerText = 'memory'; fName.innerText = 'Cyber';
+                } else {
+                    fBadge.className = 'flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold border border-gray-400/50 bg-gray-500/10 text-gray-300';
+                    fIcon.innerText = 'nightlight_round'; fName.innerText = 'Void';
+                }
+            } else {
+                fBadge.classList.add('hidden');
+                fBadge.classList.remove('flex');
+            }
 
             const tEl = document.getElementById('profile-title');
             if (myProfile.title) { tEl.innerText = myProfile.title; tEl.classList.remove('hidden'); }
@@ -1066,6 +1302,35 @@
             showToast(`称号GET: [${newTitle}]`);
         };
 
+        // --- LoG Market ---
+        window.buyItem = async (type, itemData, cost) => {
+            if (!requireAuth()) return;
+            if ((myProfile.xp || 0) < cost) return showToast(`XP不足 (${cost}必要)`);
+            if (!confirm(`${cost} XP消費しますか？`)) return;
+
+            if (type === 'title') {
+                if (myProfile.title === itemData) return showToast("既に装備中です");
+                await updateDoc(doc(db, "users", currentUser.uid), { xp: increment(-cost), title: itemData });
+                myProfile.xp -= cost; myProfile.title = itemData; updateMyProfileUI();
+                showToast(`称号GET: [${itemData}]`);
+            } else if (type === 'faction_boost') {
+                if (!myProfile.faction) return showToast("陣営に所属していません");
+                await updateDoc(doc(db, "users", currentUser.uid), { xp: increment(-cost) });
+
+                // Add points to a global faction document (e.g. 'universe/factions')
+                await setDoc(doc(db, "universe", "factions"), {
+                    [myProfile.faction]: increment(itemData)
+                }, { merge: true });
+
+                myProfile.xp -= cost; updateMyProfileUI();
+                showToast(`${myProfile.faction} 陣営に ${itemData} Point 貢献しました🔥`);
+            }
+
+            // UI更新
+            const xpDisplay = document.getElementById('market-my-xp');
+            if (xpDisplay) xpDisplay.innerText = myProfile.xp;
+        };
+
         // --- Chat ---
         window.openChat = (uid, name) => {
             if (!requireAuth()) return;
@@ -1081,21 +1346,272 @@
         document.getElementById('chat-send-btn').onclick = async () => { const t = document.getElementById('chat-input').value; if (!t.trim()) return; await addDoc(collection(db, "chats", [currentUser.uid, currentChatUser].sort().join("_"), "messages"), { text: t, senderId: currentUser.uid, createdAt: serverTimestamp(), expireAt: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000) }); document.getElementById('chat-input').value = ""; };
 
         // --- Common ---
-        window.saveProfile = async () => { const n = document.getElementById('edit-name-input').value; if (!n) return; await setDoc(doc(db, "users", currentUser.uid), { name: n, icon: `https://api.dicebear.com/7.x/notionists/svg?seed=${currentUser.uid}`, xp: 0, expireAt: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000) }, { merge: true }); location.reload(); };
+        window.saveProfile = async () => {
+            const n = document.getElementById('edit-name-input').value;
+            if (!n) return;
+
+            let faction = 'void';
+            const factions = document.getElementsByName('faction');
+            for (let i = 0; i < factions.length; i++) {
+                if (factions[i].checked) {
+                    faction = factions[i].value;
+                    break;
+                }
+            }
+
+            await setDoc(doc(db, "users", currentUser.uid), {
+                name: n,
+                icon: `https://api.dicebear.com/7.x/notionists/svg?seed=${currentUser.uid}`,
+                xp: 100, // Initial 100 XP to start economy
+                faction: faction,
+                expireAt: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000)
+            }, { merge: true });
+            location.reload();
+        };
         window.toggleDarkMode = () => { document.body.classList.toggle('dark'); localStorage.setItem('theme', document.body.classList.contains('dark') ? 'dark' : 'light'); };
         window.openSettings = () => document.getElementById('settings-modal').classList.remove('hidden');
         window.signOutApp = () => { signOut(auth); document.getElementById('settings-modal').classList.add('hidden'); };
 
+        // --- LoG Space 2D Engine ---
+        const spaceCanvas = document.getElementById('space-canvas');
+        const ctx = spaceCanvas.getContext('2d');
+        let spaceActive = false;
+        let players = {};
+        let mySpacePos = { x: 0, y: 0 };
+        const keys = {};
+
+        function resizeCanvas() {
+            spaceCanvas.width = spaceCanvas.clientWidth;
+            spaceCanvas.height = spaceCanvas.clientHeight;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        function drawSpace() {
+            if (!spaceActive) return;
+
+            // 仮想空間の描画クリア
+            ctx.clearRect(0, 0, spaceCanvas.width, spaceCanvas.height);
+
+            // 背景グリッド描画
+            ctx.strokeStyle = "rgba(255, 255, 255, 0.05)";
+            ctx.lineWidth = 1;
+            const gridSize = 50;
+            const offsetX = mySpacePos.x % gridSize;
+            const offsetY = mySpacePos.y % gridSize;
+            ctx.beginPath();
+            for (let x = -offsetX; x < spaceCanvas.width; x += gridSize) {
+                ctx.moveTo(x, 0); ctx.lineTo(x, spaceCanvas.height);
+            }
+            for (let y = -offsetY; y < spaceCanvas.height; y += gridSize) {
+                ctx.moveTo(0, y); ctx.lineTo(spaceCanvas.width, y);
+            }
+            ctx.stroke();
+
+            // 他プレイヤー描画
+            const cx = spaceCanvas.width / 2;
+            const cy = spaceCanvas.height / 2;
+
+            for (let pid in players) {
+                if (pid === currentUser?.uid) continue;
+                const p = players[pid];
+                const screenX = cx + (p.x - mySpacePos.x);
+                const screenY = cy + (p.y - mySpacePos.y);
+
+                // 画面外なら計算スキップ
+                if (screenX < -50 || screenX > spaceCanvas.width + 50 || screenY < -50 || screenY > spaceCanvas.height + 50) continue;
+
+                // 所属陣営によるエフェクト色
+                let tColor = 'white';
+                if (p.faction === 'neon') tColor = '#ec4899';
+                else if (p.faction === 'cyber') tColor = '#3b82f6';
+                else if (p.faction === 'void') tColor = '#d1d5db';
+
+                // アバター画像 (簡略化で丸を描画)
+                ctx.beginPath();
+                ctx.arc(screenX, screenY, 15, 0, Math.PI * 2);
+                ctx.fillStyle = tColor;
+                ctx.fill();
+
+                // ネームタグ
+                ctx.fillStyle = "rgba(255, 255, 255, 0.8)";
+                ctx.font = "10px sans-serif";
+                ctx.textAlign = "center";
+                ctx.fillText(p.name || "User", screenX, screenY + 28);
+            }
+
+            // 空間ログ描画
+            for (let lid in spaceLogs) {
+                const log = spaceLogs[lid];
+                const screenX = cx + (log.x - mySpacePos.x);
+                const screenY = cy + (log.y - mySpacePos.y);
+
+                if (screenX < -100 || screenX > spaceCanvas.width + 100 || screenY < -100 || screenY > spaceCanvas.height + 100) continue;
+
+                let lColor = '#10b981'; // default emerald
+                if (log.faction === 'neon') lColor = '#ec4899';
+                else if (log.faction === 'cyber') lColor = '#3b82f6';
+                else if (log.faction === 'void') lColor = '#d1d5db';
+
+                ctx.fillStyle = lColor;
+                ctx.globalAlpha = 0.2;
+                ctx.beginPath();
+                ctx.arc(screenX, screenY, 20, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.globalAlpha = 1.0;
+
+                ctx.fillStyle = '#fff';
+                ctx.font = "bold 12px sans-serif";
+                ctx.textAlign = "center";
+                ctx.fillText(log.text, screenX, screenY - 5);
+
+                ctx.fillStyle = 'rgba(255,255,255,0.5)';
+                ctx.font = "8px sans-serif";
+                ctx.fillText(`- ${log.author}`, screenX, screenY + 8);
+            }
+
+            // 自プレイヤー描画（中心固定）
+            if (currentUser && myProfile) {
+                let myColor = 'white';
+                if (myProfile.faction === 'neon') myColor = '#ec4899';
+                else if (myProfile.faction === 'cyber') myColor = '#3b82f6';
+                else if (myProfile.faction === 'void') myColor = '#d1d5db';
+
+                // Glow Effect
+                ctx.shadowBlur = 15;
+                ctx.shadowColor = myColor;
+
+                ctx.beginPath();
+                ctx.arc(cx, cy, 15, 0, Math.PI * 2);
+                ctx.fillStyle = myColor;
+                ctx.fill();
+
+                ctx.shadowBlur = 0; // reset
+                ctx.fillStyle = "white";
+                ctx.font = "bold 10px sans-serif";
+                ctx.textAlign = "center";
+                ctx.fillText("You", cx, cy + 28);
+            }
+
+            requestAnimationFrame(drawSpace);
+        }
+
+        // 移動ロジック
+        function updateSpaceMovement() {
+            if (!spaceActive || !currentUser) return;
+            let dx = 0; let dy = 0;
+            const speed = 3;
+            if (keys['ArrowUp'] || keys['w']) dy -= speed;
+            if (keys['ArrowDown'] || keys['s']) dy += speed;
+            if (keys['ArrowLeft'] || keys['a']) dx -= speed;
+            if (keys['ArrowRight'] || keys['d']) dx += speed;
+
+            if (dx !== 0 || dy !== 0) {
+                mySpacePos.x += dx;
+                mySpacePos.y += dy;
+                // Firestoreへ位置を定期同期 (連投防ぐためスロットリングが必要だがここでは簡略化)
+                if (Math.random() < 0.2) { // 簡易的な同期頻度制限
+                    setDoc(doc(db, "universe_space", currentUser.uid), {
+                        x: mySpacePos.x, y: mySpacePos.y,
+                        name: myProfile.name, faction: myProfile.faction,
+                        lastActive: serverTimestamp()
+                    }, { merge: true });
+                }
+            }
+            setTimeout(updateSpaceMovement, 1000 / 60); // 60fps
+        }
+
+        window.addEventListener('keydown', e => keys[e.key] = true);
+        window.addEventListener('keyup', e => keys[e.key] = false);
+
+        // Firebase Sync
+        let unsubSpace = null;
+        let unsubLogs = null;
+        let spaceLogs = {};
+
+        function initSpaceSync() {
+            if (unsubSpace) return; // 既に監視中ならスキップ
+            // リアルタイム位置情報の購読
+            const lastHour = new Date(Date.now() - 60 * 60 * 1000);
+            unsubSpace = onSnapshot(query(collection(db, "universe_space"), where("lastActive", ">", lastHour)), (s) => {
+                players = {};
+                s.forEach(doc => {
+                    players[doc.id] = doc.data();
+                });
+            });
+
+            // 空間ログの購読 (直近100件など)
+            unsubLogs = onSnapshot(query(collection(db, "universe_logs"), orderBy("createdAt", "desc"), limit(100)), (s) => {
+                spaceLogs = {};
+                s.forEach(doc => {
+                    let d = doc.data();
+                    if (d.expireAt && d.expireAt.toDate() > new Date()) {
+                        spaceLogs[doc.id] = d;
+                    }
+                });
+            });
+        }
+
+        // Faction Points リスナー
+        onSnapshot(doc(db, "universe", "factions"), (docSnap) => {
+            if (docSnap.exists()) {
+                const data = docSnap.data();
+                const pNeon = document.getElementById('space-point-neon');
+                const pCyber = document.getElementById('space-point-cyber');
+                const pVoid = document.getElementById('space-point-void');
+                if (pNeon) pNeon.innerText = data.neon || 0;
+                if (pCyber) pCyber.innerText = data.cyber || 0;
+                if (pVoid) pVoid.innerText = data.void || 0;
+            }
+        });
+
+        window.dropLog = async () => {
+            if (!requireAuth()) return;
+            if ((myProfile.xp || 0) < 10) return showToast("XP不足 (10必要)");
+            const msg = prompt("この場所に看板を建てます（メッセージを入力）:");
+            if (!msg) return;
+
+            await updateDoc(doc(db, "users", currentUser.uid), { xp: increment(-10) });
+            myProfile.xp -= 10; updateMyProfileUI();
+
+            await addDoc(collection(db, "universe_logs"), {
+                x: mySpacePos.x, y: mySpacePos.y,
+                text: msg, author: myProfile.name, faction: myProfile.faction,
+                createdAt: serverTimestamp(), expireAt: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000)
+            });
+            showToast("座標 (" + Math.floor(mySpacePos.x) + ", " + Math.floor(mySpacePos.y) + ") にログを刻みました");
+        };
+
         window.switchTab = (t) => {
             // 通知とプロフィールタブはログイン必須にする
-            if ((t === 'notif' || t === 'profile') && !requireAuth()) return;
+            if ((t === 'notif' || t === 'profile' || t === 'space') && !requireAuth()) return;
 
-            ['home', 'explore', 'bottle', 'notif', 'profile', 'other-profile', 'chat'].forEach(x => document.getElementById(`tab-${x}`).classList.add('hidden'));
-            document.getElementById(`tab-${t}`).classList.remove('hidden');
+            ['home', 'explore', 'space', 'bottle', 'notif', 'profile', 'other-profile', 'chat'].forEach(x => {
+                const el = document.getElementById(`tab-${x}`);
+                if (el) el.classList.add('hidden');
+            });
+
+            const targetEl = document.getElementById(`tab-${t}`);
+            if (targetEl) targetEl.classList.remove('hidden');
+
             document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('nav-active'));
             const b = document.querySelector(`.nav-item[data-target="${t}"]`); if (b) b.classList.add('nav-active');
             if (t === 'notif') document.getElementById('nav-badge').style.display = 'none';
-            window.scrollTo({ top: 0, behavior: 'smooth' });
+
+            // SpaceエンジンのON/OFF
+            if (t === 'space') {
+                if (!spaceActive) {
+                    spaceActive = true;
+                    initSpaceSync();
+                    resizeCanvas();
+                    requestAnimationFrame(drawSpace);
+                    updateSpaceMovement();
+                }
+            } else {
+                spaceActive = false;
+            }
+
+            if (t !== 'space') window.scrollTo({ top: 0, behavior: 'smooth' });
         };
     </script>
 </body>
