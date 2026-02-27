@@ -1,154 +1,222 @@
 <!DOCTYPE html>
 <html lang="ja">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LoG Board</title>
+    <title>LoG Board | Premium</title>
+    <!-- OGP Meta Tags -->
+    <meta property="og:title" content="LoG Board">
+    <meta property="og:description" content="登録不要の完全匿名掲示板。思いついた瞬間に書き込めるミニマルな空間。">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://lo-g-8a620.web.app/board.html">
+    <meta property="og:image" content="https://lo-g-8a620.web.app/assets/ogp.jpg">
+    <meta name="twitter:card" content="summary_large_image">
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&family=Noto+Sans+JP:wght@400;700;900&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&family=Noto+Sans+JP:wght@400;700;900&display=swap"
+        rel="stylesheet">
+    <link href="assets/css/core.css" rel="stylesheet">
     <style>
-        body { font-family: 'Inter', 'Noto Sans JP', sans-serif; background-color: #f8fafc; color: #0f1419; }
-        .hidden { display: none !important; }
+        .hidden {
+            display: none !important;
+        }
     </style>
 </head>
-<body>
+
+<body class="theme-core-dark">
     <!-- Header -->
-    <header class="bg-white border-b border-gray-200 sticky top-0 z-10">
-        <div class="max-w-3xl mx-auto px-4 py-3 flex justify-between items-center">
+    <header class="bg-black/50 backdrop-blur-md border-b border-white/10 sticky top-0 z-50">
+        <div class="max-w-3xl mx-auto px-4 py-4 flex justify-between items-center">
             <div class="flex items-center gap-3">
-                <a href="index.html" class="text-gray-400 hover:text-black"><span class="material-icons-round">arrow_back</span></a>
-                <h1 class="text-xl font-black">LoG Board <span class="text-xs text-gray-400 font-normal">基礎版</span></h1>
+                <a href="index.html" class="text-gray-400 hover:text-white transition"><span
+                        class="material-icons-round">arrow_back</span></a>
+                <h1 class="text-xl font-black">LoG Board <span
+                        class="text-xs text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full font-bold ml-1">Cloud</span>
+                </h1>
             </div>
-            <button onclick="toggleThreadModal()" class="bg-black text-white px-4 py-1.5 rounded-full text-sm font-bold hover:opacity-80">スレッド作成</button>
+            <button onclick="toggleThreadModal()" class="btn-premium px-4 py-1.5 rounded-full text-sm">スレッド作成</button>
         </div>
     </header>
 
     <main class="max-w-3xl mx-auto p-4" id="thread-list">
-        <!-- スレッド一覧がここに表示される -->
+        <div class="text-center text-gray-400 mt-10 animate-pulse">読み込み中...</div>
     </main>
 
     <!-- スレッド作成モーダル -->
-    <div id="thread-modal" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-        <div class="bg-white rounded-2xl p-6 w-full max-w-md">
-            <h2 class="text-xl font-bold mb-4">新しいスレッドを作成</h2>
-            <input type="text" id="new-thread-title" class="w-full border border-gray-300 rounded-lg p-3 mb-4 outline-none focus:border-black" placeholder="スレッドのタイトル">
-            <textarea id="new-thread-desc" rows="3" class="w-full border border-gray-300 rounded-lg p-3 mb-4 outline-none focus:border-black resize-none" placeholder="最初のコメント"></textarea>
-            <div class="flex justify-end gap-2">
-                <button onclick="toggleThreadModal()" class="px-4 py-2 font-bold text-gray-500 hover:bg-gray-100 rounded-lg">キャンセル</button>
-                <button onclick="createThread()" class="px-4 py-2 font-bold bg-black text-white rounded-lg">作成</button>
+    <div id="thread-modal"
+        class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 z-50 fade-in">
+        <div class="glass-panel p-6 w-full max-w-md">
+            <h2 class="text-xl font-bold mb-4 text-white">新しいスレッドを作成</h2>
+            <input type="text" id="new-thread-title" class="w-full input-glass rounded-xl p-4 mb-4"
+                placeholder="スレッドのタイトル">
+            <textarea id="new-thread-desc" rows="3" class="w-full input-glass rounded-xl p-4 mb-4 resize-none"
+                placeholder="最初のコメント (任意)"></textarea>
+            <div class="flex justify-end gap-3 mt-2">
+                <button onclick="toggleThreadModal()"
+                    class="px-5 py-2 font-bold text-gray-400 hover:text-white transition">キャンセル</button>
+                <button onclick="createThread()" class="px-6 py-2 btn-premium rounded-full">作成</button>
             </div>
         </div>
     </div>
 
     <!-- スレッド詳細（コメント画面） -->
-    <div id="thread-view" class="hidden fixed inset-0 bg-white z-40 flex flex-col">
-        <header class="bg-white border-b border-gray-200 p-3 flex items-center gap-3">
-            <button onclick="closeThread()" class="text-gray-400 hover:text-black"><span class="material-icons-round">arrow_back</span></button>
-            <h2 id="view-title" class="font-bold truncate flex-1"></h2>
+    <div id="thread-view" class="hidden fixed inset-0 bg-[var(--bg-dark)] z-40 flex flex-col fade-in">
+        <header class="bg-black/50 backdrop-blur-md border-b border-white/10 p-4 flex items-center gap-3 sticky top-0">
+            <button onclick="closeThread()" class="text-gray-400 hover:text-white transition"><span
+                    class="material-icons-round">arrow_back</span></button>
+            <h2 id="view-title" class="font-bold truncate flex-1 text-lg"></h2>
         </header>
-        <div id="comment-list" class="flex-1 overflow-y-auto p-4 bg-gray-50 space-y-3">
+        <div id="comment-list" class="flex-1 overflow-y-auto p-4 space-y-4 pb-32">
             <!-- コメントがここに表示される -->
         </div>
-        <div class="border-t border-gray-200 p-3 bg-white flex gap-2">
-            <input type="text" id="comment-input" class="flex-1 bg-gray-100 rounded-full px-4 py-2 outline-none" placeholder="コメントを入力（匿名）">
-            <button onclick="addComment()" class="bg-black text-white px-4 py-2 rounded-full font-bold">送信</button>
+        <div class="fixed bottom-0 w-full border-t border-white/10 p-4 bg-black/80 backdrop-blur-md flex gap-3">
+            <div class="max-w-3xl mx-auto w-full flex gap-3">
+                <input type="text" id="comment-input" class="flex-1 input-glass rounded-full px-5 py-3"
+                    placeholder="コメントを入力（完全匿名）">
+                <button onclick="addComment()"
+                    class="btn-premium px-6 py-3 rounded-full flex items-center justify-center">
+                    <span class="material-icons-round">send</span>
+                </button>
+            </div>
         </div>
     </div>
 
-    <script>
-        // ※この基礎版ではLocalStorageを使ってデータを保存します
-        let threads = JSON.parse(localStorage.getItem('log_board_threads')) || [];
+    <script type="module">
+        let boards = JSON.parse(localStorage.getItem('logsns_boards') || '[]');
         let currentThreadId = null;
 
-        function save() { localStorage.setItem('log_board_threads', JSON.stringify(threads)); }
-        function toggleThreadModal() { document.getElementById('thread-modal').classList.toggle('hidden'); }
+        function saveBoards() {
+            localStorage.setItem('logsns_boards', JSON.stringify(boards));
+        }
+
+        window.toggleThreadModal = () => { document.getElementById('thread-modal').classList.toggle('hidden'); };
 
         function renderThreads() {
             const list = document.getElementById('thread-list');
             list.innerHTML = '';
-            if(threads.length === 0) list.innerHTML = '<p class="text-center text-gray-400 mt-10">まだスレッドがありません。</p>';
-            
-            // 新しい順
-            [...threads].reverse().forEach(t => {
+            if (boards.length === 0) {
+                list.innerHTML = '<p class="text-center text-gray-500 mt-10">まだスレッドはありません。</p>';
+                return;
+            }
+
+            let index = 0;
+            // sort by createdAt desc
+            const sorted = [...boards].sort((a, b) => b.createdAt - a.createdAt);
+            sorted.forEach(t => {
+                const dateStr = new Date(t.createdAt).toLocaleDateString();
                 list.innerHTML += `
-                    <div onclick="openThread('${t.id}')" class="bg-white p-4 rounded-xl shadow-sm border border-gray-100 mb-3 cursor-pointer hover:border-gray-300 transition">
-                        <h3 class="font-bold text-lg mb-1">${t.title}</h3>
-                        <p class="text-sm text-gray-500 truncate">${t.comments[0] ? t.comments[0].text : 'コメントなし'}</p>
-                        <div class="text-xs text-gray-400 mt-2 flex justify-between">
-                            <span>${t.comments.length} コメント</span>
-                            <span>${new Date(t.createdAt).toLocaleDateString()}</span>
+                    <div onclick="openThread('${t.id}', '${t.title.replace(/'/g, "\\'")}')" class="glass-panel p-5 mb-4 cursor-pointer hover:border-white/30 transition group">
+                        <h3 class="font-bold text-lg mb-2 text-white group-hover:text-emerald-400 transition">${t.title}</h3>
+                        <p class="text-sm text-gray-400 truncate">${t.lastComment || 'コメントなし'}</p>
+                        <div class="text-xs text-gray-500 mt-3 flex justify-between items-center">
+                            <span class="bg-white/5 px-2 py-1 rounded flex items-center gap-1"><span class="material-icons-round text-[12px]">chat_bubble_outline</span> ${t.comments ? t.comments.length : 0}</span>
+                            <span>${dateStr}</span>
                         </div>
                     </div>
                 `;
+                index++;
+                if (index % 5 === 0) {
+                    list.innerHTML += `
+                        <div class="glass-panel p-4 mb-4 text-center fade-in">
+                            <span class="text-[10px] font-bold text-gray-500 uppercase tracking-wider block mb-2">Advertisement</span>
+                            <div class="w-full bg-white/5 rounded-xl h-[90px] flex items-center justify-center text-xs text-gray-500">
+                                <ins class="adsbygoogle" style="display:block" data-ad-format="fluid" data-ad-layout-key="-fb+5w+4e-db+86" data-ad-client="ca-pub-1539164935971262" data-ad-slot="1234567890"></ins>
+                            </div>
+                        </div>
+                    `;
+                }
             });
+            setTimeout(() => {
+                try {
+                    const ads = document.querySelectorAll('.adsbygoogle');
+                    ads.forEach(ad => { if (ad.innerHTML === '') (window.adsbygoogle = window.adsbygoogle || []).push({}); });
+                } catch (e) { console.warn('AdSense config error', e); }
+            }, 100);
         }
 
-        function createThread() {
-            const title = document.getElementById('new-thread-title').value;
-            const desc = document.getElementById('new-thread-desc').value;
-            if(!title.trim()) return alert("タイトルを入力してください");
-            
+        window.createThread = () => {
+            const title = document.getElementById('new-thread-title').value.trim();
+            const desc = document.getElementById('new-thread-desc').value.trim();
+            if (!title) return alert("タイトルを入力してください");
+
             const newThread = {
-                id: Date.now().toString(),
+                id: 'board_' + Date.now(),
                 title: title,
+                lastComment: desc || "スレッドが作成されました",
                 createdAt: Date.now(),
-                comments: desc.trim() ? [{ text: desc, date: Date.now() }] : []
+                comments: desc ? [{ text: desc, createdAt: Date.now() }] : []
             };
-            threads.push(newThread);
-            save();
+            boards.push(newThread);
+            saveBoards();
             renderThreads();
             toggleThreadModal();
             document.getElementById('new-thread-title').value = '';
             document.getElementById('new-thread-desc').value = '';
-        }
+        };
 
-        function openThread(id) {
+        window.openThread = (id, title) => {
             currentThreadId = id;
-            const t = threads.find(x => x.id === id);
-            document.getElementById('view-title').innerText = t.title;
-            renderComments();
+            document.getElementById('view-title').innerText = title;
             document.getElementById('thread-view').classList.remove('hidden');
+            renderComments();
+        };
+
+        function renderComments() {
+            if (!currentThreadId) return;
+            const t = boards.find(b => b.id === currentThreadId);
+            if (!t) return;
+            const list = document.getElementById('comment-list');
+            list.innerHTML = '';
+            let index = 1;
+            t.comments.forEach(c => {
+                const timeStr = new Date(c.createdAt).toLocaleTimeString();
+                list.innerHTML += `
+                    <div class="glass-panel p-4">
+                        <div class="text-xs text-gray-500 mb-2 flex justify-between">
+                            <span class="text-emerald-400 font-bold">名無しさん [${index}]</span>
+                            <span>${timeStr}</span>
+                        </div>
+                        <div class="text-sm text-gray-200 whitespace-pre-wrap leading-relaxed">${c.text}</div>
+                    </div>
+                `;
+                index++;
+            });
+            setTimeout(() => list.scrollTop = list.scrollHeight, 50);
         }
 
-        function closeThread() {
+        window.closeThread = () => {
             currentThreadId = null;
             document.getElementById('thread-view').classList.add('hidden');
             renderThreads();
-        }
+        };
 
-        function renderComments() {
-            const t = threads.find(x => x.id === currentThreadId);
-            const list = document.getElementById('comment-list');
-            list.innerHTML = '';
-            t.comments.forEach((c, index) => {
-                list.innerHTML += `
-                    <div class="bg-white p-3 rounded-lg shadow-sm border border-gray-100">
-                        <div class="text-xs text-gray-400 mb-1 flex justify-between">
-                            <span>名無しさん [${index + 1}]</span>
-                            <span>${new Date(c.date).toLocaleTimeString()}</span>
-                        </div>
-                        <div class="text-sm whitespace-pre-wrap">${c.text}</div>
-                    </div>
-                `;
-            });
-            list.scrollTop = list.scrollHeight;
-        }
-
-        function addComment() {
+        window.addComment = () => {
             const input = document.getElementById('comment-input');
-            const text = input.value;
-            if(!text.trim() || !currentThreadId) return;
-            
-            const t = threads.find(x => x.id === currentThreadId);
-            t.comments.push({ text: text, date: Date.now() });
-            save();
-            renderComments();
-            input.value = '';
-        }
+            const text = input.value.trim();
+            if (!text || !currentThreadId) return;
 
-        // 初期表示
+            input.value = '';
+
+            const t = boards.find(b => b.id === currentThreadId);
+            if (t) {
+                t.comments.push({ text: text, createdAt: Date.now() });
+                t.lastComment = text;
+                saveBoards();
+                renderComments();
+                renderThreads();
+            }
+        };
+
+        document.getElementById('comment-input').addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') {
+                window.addComment();
+            }
+        });
+
         renderThreads();
     </script>
 </body>
+
 </html>
