@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>LoG Radio | Frequency Sync</title>
+
+    <meta property="og:title" content="LoG Radio">
+    <meta property="og:description" content="エコシステム全体で完全に同期された、手続き型アンビエント空間。">
+    <meta property="og:type" content="website">
+    <meta name="twitter:card" content="summary_large_image">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&family=Noto+Sans+JP:wght@400;700;900&display=swap"
+        rel="stylesheet">
+
+    <style>
+        body {
+            font-family: 'Inter', 'Noto Sans JP', sans-serif;
+            background-color: #030303;
+            color: white;
+            overflow: hidden;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .visualizer-ring {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            border-radius: 50%;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.1s ease-out;
+            pointer-events: none;
+        }
+
+        @keyframes pulseOrbit {
+            0% {
+                transform: rotate(0deg) scale(1);
+            }
+
+            50% {
+                transform: rotate(180deg) scale(1.05);
+            }
+
+            100% {
+                transform: rotate(360deg) scale(1);
+            }
+        }
+
+        .orbit {
+            animation: pulseOrbit 20s linear infinite;
+        }
+    </style>
+</head>
+
+<body class="h-screen w-screen flex flex-col relative overflow-hidden bg-black">
+
+    <!-- Header -->
+    <div class="fixed top-6 left-6 z-40 bg-black/40 backdrop-blur-md border border-white/10 rounded-2xl p-2 pr-4 inline-flex items-center shadow-lg hover:bg-black/60 transition cursor-pointer"
+        onclick="window.location.href='index.html'">
+        <div class="flex items-center gap-2 text-white">
+            <span class="material-icons-round text-xl">arrow_back</span>
+            <span class="text-sm font-bold tracking-wider uppercase">HUB</span>
+        </div>
+    </div>
+
+    <!-- Active Listeners Sync UI -->
+    <div
+        class="fixed top-6 right-6 z-40 bg-black/40 backdrop-blur-md border border-white/10 rounded-2xl p-4 shadow-lg text-right pointer-events-none">
+        <div class="flex justify-end items-center gap-2 text-emerald-400 mb-1">
+            <span class="material-icons-round text-xs animate-pulse">satellite_alt</span>
+            <span class="text-[10px] font-black tracking-widest uppercase">Global Sync</span>
+        </div>
+        <div class="text-xs text-gray-500 font-mono" id="sync-time">00:00:00:000</div>
+    </div>
+
+    <!-- Visualizer Background -->
+    <div id="visualizer-container"
+        class="absolute inset-0 z-0 flex items-center justify-center opacity-0 transition-opacity duration-1000">
+        <!-- Generative Rings -->
+        <div class="visualizer-ring w-[200px] h-[200px]" id="ring-1"></div>
+        <div class="visualizer-ring w-[300px] h-[300px]" id="ring-2"></div>
+        <div class="visualizer-ring w-[400px] h-[400px]" id="ring-3"></div>
+        <div class="visualizer-ring w-[600px] h-[600px] border-dashed border-white/5 orbit"></div>
+
+        <div class="absolute w-full h-full bg-[radial-gradient(circle_at_center,transparent_0%,black_70%)]"></div>
+    </div>
+
+    <!-- Main UI -->
+    <div class="relative z-10 flex-1 flex flex-col items-center justify-center p-4">
+
+        <div id="play-button"
+            class="w-24 h-24 rounded-full border border-white/20 bg-white/5 backdrop-blur-sm flex items-center justify-center cursor-pointer hover:bg-white/10 hover:scale-110 transition duration-300 group shadow-[0_0_30px_rgba(255,255,255,0.05)]">
+            <span class="material-icons-round text-4xl text-white ml-2 group-hover:text-emerald-400 transition"
+                id="play-icon">play_arrow</span>
+        </div>
+
+        <div class="mt-8 text-center" id="status-container">
+            <h1 class="text-2xl md:text-4xl font-black tracking-widest uppercase mb-2">LoG Radio</h1>
+            <p class="text-gray-500 text-sm tracking-[0.2em] uppercase" id="status-text">Generative Ambient Space</p>
+            <p class="text-gray-600 text-xs mt-4 max-w-sm mx-auto leading-relaxed">
+                世界時間（UTC）に完全同期して生成されるプロシージャル・アンビエント。<br>
+                今この瞬間、同じ波長を聴いている誰かが宇宙のどこかにいます。
+            </p>
+        </div>
+
+        <!-- Faction Theme Switcher (Optional aesthetic) -->
+        <div class="absolute bottom-10 flex gap-4 opacity-0 transition-opacity duration-1000" id="theme-controls">
+            <button onclick="setTheme('neon')"
+                class="w-3 h-3 rounded-full bg-pink-500 outline-none focus:ring-2 focus:ring-pink-500/50 hover:scale-150 transition"></button>
+            <button onclick="setTheme('cyber')"
+                class="w-3 h-3 rounded-full bg-blue-500 outline-none focus:ring-2 focus:ring-blue-500/50 hover:scale-150 transition"></button>
+            <button onclick="setTheme('void')"
+                class="w-3 h-3 rounded-full bg-gray-300 outline-none focus:ring-2 focus:ring-gray-300/50 hover:scale-150 transition"></button>
+        </div>
+    </div>
+
+    <script>
+        let isPlaying = false;
+        let audioCtx;
+        let masterGain;
+        let oscs = [];
+
+        const playBtn = document.getElementById('play-button');
+        const playIcon = document.getElementById('play-icon');
+        const visualizer = document.getElementById('visualizer-container');
+        const statusText = document.getElementById('status-text');
+        const themeControls = document.getElementById('theme-controls');
+        const syncTimeEl = document.getElementById('sync-time');
+
+        const rings = [
+            document.getElementById('ring-1'),
+            document.getElementById('ring-2'),
+            document.getElementById('ring-3')
+        ];
+
+        let currentThemeColor = '255,255,255';
+
+        window.setTheme = (faction) => {
+            if (faction === 'neon') currentThemeColor = '236,72,153'; // pink-500
+            else if (faction === 'cyber') currentThemeColor = '59,130,246'; // blue-500
+            else currentThemeColor = '255,255,255';
+
+            rings.forEach(r => r.style.borderColor = `rgba(${currentThemeColor}, 0.2)`);
+            playIcon.style.color = `rgb(${currentThemeColor})`;
+            document.body.style.background = `radial-gradient(circle at center, rgba(${currentThemeColor}, 0.05) 0%, black 100%)`;
+        };
+
+        function initAudio() {
+            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            masterGain = audioCtx.createGain();
+
+            // Reverb/Delay simulation (simple feedback delay for spacey sound)
+            const delay = audioCtx.createDelay(5.0);
+            delay.delayTime.value = 1.5;
+            const feedback = audioCtx.createGain();
+            feedback.gain.value = 0.6;
+
+            masterGain.connect(delay);
+            delay.connect(feedback);
+            feedback.connect(delay);
+            delay.connect(audioCtx.destination);
+            masterGain.connect(audioCtx.destination);
+
+            // Master Volume
+            masterGain.gain.value = 0; // fade in
+
+            // Creates a generative chord cluster
+            // A minor / spacey frequencies
+            const baseFreqs = [55, 82.41, 110, 130.81, 164.81];
+
+            oscs = baseFreqs.map((f, i) => {
+                const osc = audioCtx.createOscillator();
+                osc.type = i % 2 === 0 ? 'sine' : 'triangle';
+                osc.frequency.value = f;
+
+                const lpf = audioCtx.createBiquadFilter();
+                lpf.type = 'lowpass';
+                lpf.frequency.value = 400;
+
+                const gain = audioCtx.createGain();
+                gain.gain.value = 0;
+
+                // Pan
+                const panner = audioCtx.createStereoPanner();
+                panner.pan.value = (i / baseFreqs.length) * 2 - 1; // spread across stereo
+
+                osc.connect(lpf);
+                lpf.connect(gain);
+                gain.connect(panner);
+                panner.connect(masterGain);
+
+                osc.start();
+                return { osc, gain, lpf, baseFreq: f, id: i };
+            });
+
+            masterGain.gain.setTargetAtTime(0.5, audioCtx.currentTime, 2); // Smooth fade in
+        }
+
+        function updateGenerativeAudio() {
+            if (!isPlaying) return;
+
+            // === TRUE SYNCHRONIZATION ===
+            // By using Date.now(), every client on Earth computes the exact same parameter values at the exact same moment.
+            const now = Date.now();
+            const t = now / 1000; // time in seconds
+
+            // Update UI Sync Clock
+            const d = new Date(now);
+            syncTimeEl.innerText = `${String(d.getUTCHours()).padStart(2, '0')}:${String(d.getUTCMinutes()).padStart(2, '0')}:${String(d.getUTCSeconds()).padStart(2, '0')}:${String(d.getUTCMilliseconds()).padStart(3, '0')}`;
+
+            let totalEnergy = 0;
+
+            oscs.forEach((node) => {
+                // 1. Slow evolving volume (LFO)
+                // Different offset and rate for each oscillator
+                const volLFO = Math.sin(t * (0.05 + node.id * 0.01) + node.id);
+                const targetVol = 0.05 + ((volLFO + 1) / 2) * 0.15;
+                node.gain.gain.setTargetAtTime(targetVol, audioCtx.currentTime, 0.1);
+                totalEnergy += targetVol;
+
+                // 2. Slow detune drift
+                const pitchLFO = Math.sin(t * (0.02 + node.id * 0.005));
+                node.osc.detune.setTargetAtTime(pitchLFO * 15, audioCtx.currentTime, 0.1);
+
+                // 3. Filter sweeps
+                const filterLFO = Math.sin(t * 0.03 + node.id);
+                node.lpf.frequency.setTargetAtTime(200 + ((filterLFO + 1) / 2) * 400, audioCtx.currentTime, 0.1);
+            });
+
+            // Visualizer update based on pure math (synced globally)
+            // Ring 1 pulse
+            const s1 = 1 + ((Math.sin(t * 0.5) + 1) / 2) * 0.2;
+            rings[0].style.transform = `translate(-50%, -50%) scale(${s1})`;
+            rings[0].style.opacity = totalEnergy * 2;
+
+            // Ring 2 pulse
+            const s2 = 1 + ((Math.cos(t * 0.3) + 1) / 2) * 0.15;
+            rings[1].style.transform = `translate(-50%, -50%) scale(${s2})`;
+            rings[1].style.opacity = totalEnergy * 1.5;
+
+            // Ring 3 pulse
+            const s3 = 1 + ((Math.sin(t * 0.1) + 1) / 2) * 0.1;
+            rings[2].style.transform = `translate(-50%, -50%) scale(${s3})`;
+            rings[2].style.opacity = totalEnergy;
+
+            requestAnimationFrame(updateGenerativeAudio);
+        }
+
+        playBtn.addEventListener('click', () => {
+            if (!isPlaying) {
+                if (!audioCtx) initAudio();
+                if (audioCtx.state === 'suspended') audioCtx.resume();
+
+                isPlaying = true;
+                playIcon.innerText = 'pause';
+                playIcon.classList.remove('ml-2');
+                visualizer.classList.remove('opacity-0');
+                themeControls.classList.remove('opacity-0');
+                statusText.innerText = "Synchronized";
+                statusText.classList.add('text-emerald-400');
+
+                updateGenerativeAudio();
+            } else {
+                isPlaying = false;
+                playIcon.innerText = 'play_arrow';
+                playIcon.classList.add('ml-2');
+                masterGain.gain.setTargetAtTime(0, audioCtx.currentTime, 1);
+
+                visualizer.classList.add('opacity-0');
+                themeControls.classList.add('opacity-0');
+                statusText.innerText = "Generative Ambient Space";
+                statusText.classList.remove('text-emerald-400');
+
+                setTimeout(() => { if (!isPlaying) audioCtx.suspend(); }, 1000);
+            }
+        });
+    </script>
+</body>
+
+</html>
