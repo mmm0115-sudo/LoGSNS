@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>LoG Glitch | Anomaly Raid</title>
+
+    <meta property="og:title" content="LoG Glitch">
+    <meta property="og:description" content="エコシステム全土を脅かす異常（グリッチ）。全陣営で協力・競争し、XPを使って排除せよ。">
+    <meta property="og:type" content="website">
+    <meta name="twitter:card" content="summary_large_image">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&family=Noto+Sans+JP:wght@400;700;900&display=swap"
+        rel="stylesheet">
+
+    <style>
+        body {
+            font-family: 'Inter', 'Noto Sans JP', sans-serif;
+            background-color: #030303;
+            color: white;
+            overflow: hidden;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .glitch-anim {
+            animation: textGlitch 0.3s cubic-bezier(.25, .46, .45, .94) both infinite;
+            color: #ef4444;
+            text-shadow: -2px 0 blue, 2px 0 green;
+        }
+
+        @keyframes textGlitch {
+            0% {
+                transform: translate(0)
+            }
+
+            20% {
+                transform: translate(-2px, 2px)
+            }
+
+            40% {
+                transform: translate(-2px, -2px)
+            }
+
+            60% {
+                transform: translate(2px, 2px)
+            }
+
+            80% {
+                transform: translate(2px, -2px)
+            }
+
+            100% {
+                transform: translate(0)
+            }
+        }
+
+        /* Boss Entity Visual */
+        @keyframes mutate {
+            0% {
+                border-radius: 30% 70% 70% 30% / 30% 30% 70% 70%
+            }
+
+            25% {
+                border-radius: 58% 42% 75% 25% / 76% 46% 54% 24%
+            }
+
+            50% {
+                border-radius: 50% 50% 33% 67% / 55% 27% 73% 45%
+            }
+
+            75% {
+                border-radius: 33% 67% 58% 42% / 63% 68% 32% 37%
+            }
+
+            100% {
+                border-radius: 30% 70% 70% 30% / 30% 30% 70% 70%
+            }
+        }
+
+        .boss-entity {
+            background: linear-gradient(45deg, #ef4444, #000000, #3b82f6);
+            background-size: 400% 400%;
+            animation: mutate 4s infinite linear, gradientMove 8s ease infinite;
+            box-shadow: 0 0 50px rgba(239, 68, 68, 0.4), inset 0 0 30px rgba(255, 255, 255, 0.2);
+        }
+
+        @keyframes gradientMove {
+            0% {
+                background-position: 0% 50%
+            }
+
+            50% {
+                background-position: 100% 50%
+            }
+
+            100% {
+                background-position: 0% 50%
+            }
+        }
+
+        /* Damage number popups */
+        @keyframes floatUpFade {
+            0% {
+                transform: translateY(0) scale(0.5);
+                opacity: 1;
+            }
+
+            100% {
+                transform: translateY(-100px) scale(1.5);
+                opacity: 0;
+            }
+        }
+
+        .dmg-popup {
+            position: absolute;
+            pointer-events: none;
+            color: white;
+            font-weight: 900;
+            font-size: 2rem;
+            animation: floatUpFade 1s cubic-bezier(0.1, 0.8, 0.1, 1) forwards;
+            text-shadow: 0 0 10px rgba(255, 0, 0, 0.8);
+            z-index: 50;
+        }
+
+        .glass-panel {
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 0, 0, 0.2);
+        }
+    </style>
+</head>
+
+<body class="h-screen w-screen flex flex-col relative overflow-hidden">
+
+    <!-- Header -->
+    <div class="fixed top-6 left-6 z-40 bg-black/40 backdrop-blur-md border border-white/10 rounded-2xl p-2 pr-4 inline-flex items-center shadow-lg hover:bg-black/60 transition cursor-pointer"
+        onclick="window.location.href='index.html'">
+        <div class="flex items-center gap-2 text-white">
+            <span class="material-icons-round text-xl">arrow_back</span>
+            <span class="text-sm font-bold tracking-wider uppercase">HUB</span>
+        </div>
+    </div>
+
+    <!-- User Status -->
+    <div class="fixed top-6 right-6 z-40 bg-black/80 backdrop-blur border border-red-500/30 rounded-2xl p-4 text-right">
+        <div class="text-[10px] uppercase font-bold text-gray-500 mb-2">Operator Status</div>
+        <div id="user-info" class="text-xs text-white font-bold opacity-50">Not Connected</div>
+        <div class="mt-2 text-2xl font-black text-emerald-400" id="user-xp">-- XP</div>
+        <button id="btn-login"
+            class="hidden mt-2 text-xs bg-white text-black px-4 py-1 rounded-full font-bold">LOGIN</button>
+    </div>
+
+    <!-- Active Raid UI -->
+    <div id="ui-raid"
+        class="hidden flex-1 flex flex-col items-center justify-center p-4 relative z-10 w-full max-w-4xl mx-auto">
+        <div class="absolute inset-0 z-0 flex items-center justify-center pb-20 pointer-events-none"
+            id="damage-container">
+            <div class="w-64 h-64 md:w-96 md:h-96 boss-entity transition-transform duration-75 relative"
+                id="boss-visual"></div>
+        </div>
+
+        <div class="relative z-10 w-full flex flex-col items-center pt-20">
+            <div
+                class="text-[10px] bg-red-600 text-white px-3 py-1 rounded-full uppercase tracking-widest font-bold mb-4 animate-pulse">
+                Critical Anomaly</div>
+            <h1 class="text-5xl md:text-7xl font-black tracking-tighter uppercase mb-2 glitch-anim" id="boss-name">
+                Loading...</h1>
+            <p class="text-red-400/80 text-sm md:text-base font-bold tracking-[0.3em] uppercase mb-12">Ecosystem
+                Destabilization Imminent</p>
+
+            <!-- HP Bar -->
+            <div
+                class="w-full max-w-2xl bg-red-950 rounded-full h-6 md:h-8 border-2 border-red-500/50 p-1 relative overflow-hidden mb-2 shadow-[0_0_30px_rgba(239,68,68,0.2)]">
+                <div id="boss-hp-bar"
+                    class="h-full bg-gradient-to-r from-red-600 to-red-400 rounded-full w-[100%] transition-all duration-300">
+                </div>
+                <div class="absolute inset-0 flex items-center justify-center text-xs md:text-sm font-black text-white drop-shadow-md tracking-widest"
+                    id="boss-hp-text">-- / --</div>
+            </div>
+
+            <!-- Faction Damage Leaderboard -->
+            <div class="w-full max-w-2xl grid grid-cols-3 gap-2 mt-4 text-center">
+                <div class="glass-panel rounded-xl p-3">
+                    <div class="text-[10px] text-pink-500 font-bold uppercase tracking-widest mb-1">Neon</div>
+                    <div class="text-lg font-black text-white" id="dmg-neon">0</div>
+                </div>
+                <div class="glass-panel rounded-xl p-3">
+                    <div class="text-[10px] text-blue-500 font-bold uppercase tracking-widest mb-1">Cyber</div>
+                    <div class="text-lg font-black text-white" id="dmg-cyber">0</div>
+                </div>
+                <div class="glass-panel rounded-xl p-3">
+                    <div class="text-[10px] text-gray-300 font-bold uppercase tracking-widest mb-1">Void</div>
+                    <div class="text-lg font-black text-white" id="dmg-void">0</div>
+                </div>
+            </div>
+
+            <!-- Attack Controls -->
+            <div class="mt-16 text-center">
+                <button id="btn-attack"
+                    class="bg-red-600 text-white px-12 py-5 rounded-full font-black text-2xl tracking-widest hover:bg-red-500 hover:scale-105 active:scale-95 transition shadow-[0_0_40px_rgba(239,68,68,0.6)] group disabled:opacity-50 disabled:grayscale disabled:cursor-not-allowed border-2 border-red-400">
+                    ATTACK
+                </button>
+                <div class="text-xs text-red-500 font-bold tracking-[0.2em] mt-4 uppercase">Cost: 100 XP <span
+                        class="mx-2">|</span> Damage: 50-300</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Defeated / Safe UI -->
+    <div id="ui-safe" class="hidden flex-1 flex flex-col items-center justify-center p-4 text-center z-10">
+        <span
+            class="material-icons-round text-8xl text-emerald-500 mb-6 drop-shadow-[0_0_30px_rgba(16,185,129,0.5)]">security</span>
+        <h1 class="text-4xl md:text-5xl font-black tracking-widest text-emerald-400 mb-4 uppercase">System Secure</h1>
+        <p class="text-gray-400 max-w-md mx-auto leading-relaxed">
+            現在、エコシステムに異常（Glitch）は検知されていません。<br>
+            平穏な時間が流れています。<br><br>
+            <span class="text-xs text-gray-600">※時折、強大なGlitchが襲来します。XPを貯めて備えてください。</span>
+        </p>
+
+        <!-- Dev Only: Spawn Boss Button (Hidden from normal users usually, but keeping it accessible for the demo) -->
+        <button onclick="spawnBossDev()"
+            class="mt-12 text-[10px] text-gray-700 hover:text-white border border-gray-800 px-4 py-2 rounded uppercase tracking-widest transition">[DEV]
+            FORCE SPAWN ANOMALY</button>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getFirestore, doc, getDoc, setDoc, onSnapshot, increment, runTransaction } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyCA4NQzxcz2gh8uaw3LKrKl_NEnE_fMybs",
+            authDomain: "lo-g-8a620.firebaseapp.com",
+            projectId: "lo-g-8a620",
+            storageBucket: "lo-g-8a620.firebasestorage.app",
+            messagingSenderId: "780857099698",
+            appId: "1:780857099698:web:b6cb359114da98ab3e50ab"
+        };
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        // State
+        let currentUser = null;
+        let myProfile = null;
+        let bossData = null;
+
+        // UI
+        const uiRaid = document.getElementById('ui-raid');
+        const uiSafe = document.getElementById('ui-safe');
+        const btnLogin = document.getElementById('btn-login');
+        const btnAttack = document.getElementById('btn-attack');
+
+        // Auth
+        btnLogin.onclick = () => signInWithPopup(auth, new GoogleAuthProvider());
+
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                currentUser = user;
+                btnLogin.classList.add('hidden');
+
+                // Realtime listen to user XP
+                onSnapshot(doc(db, "users", user.uid), (d) => {
+                    if (d.exists()) {
+                        myProfile = d.data();
+                        document.getElementById('user-info').innerText = `${myProfile.name} [${myProfile.faction || 'No Faction'}]`;
+                        document.getElementById('user-info').classList.remove('opacity-50');
+                        document.getElementById('user-xp').innerText = `${myProfile.xp} XP`;
+                        checkAttackAvailability();
+                    } else {
+                        // User exists in auth but no profile in SNS yet
+                        document.getElementById('user-info').innerText = `Profile missing. Visit SNS.`;
+                    }
+                });
+            } else {
+                currentUser = null;
+                myProfile = null;
+                btnLogin.classList.remove('hidden');
+                document.getElementById('user-info').innerText = `Not Connected`;
+                document.getElementById('user-info').classList.add('opacity-50');
+                document.getElementById('user-xp').innerText = `-- XP`;
+                checkAttackAvailability();
+            }
+        });
+
+        function checkAttackAvailability() {
+            if (!currentUser || !myProfile || !myProfile.faction || myProfile.xp < 100 || !bossData || bossData.hp <= 0) {
+                btnAttack.disabled = true;
+            } else {
+                btnAttack.disabled = false;
+            }
+        }
+
+        // Boss Listener
+        onSnapshot(doc(db, "universe", "glitch"), (docSnap) => {
+            if (docSnap.exists() && docSnap.data().active && docSnap.data().hp > 0) {
+                bossData = docSnap.data();
+                showRaidUI(bossData);
+            } else {
+                bossData = null;
+                uiRaid.classList.add('hidden');
+                uiSafe.classList.remove('hidden');
+                // Remove weird background glow
+                document.body.style.background = '#030303';
+            }
+            checkAttackAvailability();
+        });
+
+        function showRaidUI(data) {
+            uiSafe.classList.add('hidden');
+            uiRaid.classList.remove('hidden');
+
+            // Background effect
+            const hpPct = (data.hp / data.maxHp);
+            // More red when lower HP
+            document.body.style.background = `radial-gradient(circle at center, rgba(${255 * (1 - hpPct)}, 0, 0, 0.2) 0%, #030303 100%)`;
+
+            document.getElementById('boss-name').innerText = data.name;
+            document.getElementById('boss-hp-text').innerText = `${data.hp.toLocaleString()} / ${data.maxHp.toLocaleString()}`;
+            document.getElementById('boss-hp-bar').style.width = `${(hpPct * 100).toFixed(1)}%`;
+
+            document.getElementById('dmg-neon').innerText = (data.damageNeon || 0).toLocaleString();
+            document.getElementById('dmg-cyber').innerText = (data.damageCyber || 0).toLocaleString();
+            document.getElementById('dmg-void').innerText = (data.damageVoid || 0).toLocaleString();
+
+            const visual = document.getElementById('boss-visual');
+            visual.style.transform = `scale(${0.8 + (hpPct * 0.4)})`; // Shrink as it dies
+        }
+
+        // Attack Logic
+        btnAttack.addEventListener('click', async () => {
+            if (btnAttack.disabled) return;
+            btnAttack.disabled = true; // prevent spam
+
+            const damage = Math.floor(Math.random() * 251) + 50; // 50 to 300
+            const faction = myProfile.faction;
+
+            // Visual feedback
+            spawnDamageNumber(damage);
+            shakeBoss();
+
+            try {
+                // 1. Deduct user XP
+                await setDoc(doc(db, "users", currentUser.uid), { xp: increment(-100) }, { merge: true });
+
+                // 2. Damage Boss using Transaction to prevent negative HP or race conditions
+                await runTransaction(db, async (t) => {
+                    const bossRef = doc(db, "universe", "glitch");
+                    const bossDoc = await t.get(bossRef);
+                    if (!bossDoc.exists() || !bossDoc.data().active || bossDoc.data().hp <= 0) {
+                        return; // Boss already dead
+                    }
+
+                    const newHp = Math.max(0, bossDoc.data().hp - damage);
+                    const updateData = { hp: newHp };
+
+                    if (faction === 'neon') updateData.damageNeon = increment(damage);
+                    if (faction === 'cyber') updateData.damageCyber = increment(damage);
+                    if (faction === 'void') updateData.damageVoid = increment(damage);
+
+                    if (newHp === 0) {
+                        updateData.active = false;
+                        // Determine winner logic could be here, but for now we just kill it
+                    }
+
+                    t.update(bossRef, updateData);
+                });
+
+            } catch (err) {
+                console.error("Attack failed:", err);
+            } finally {
+                setTimeout(() => { checkAttackAvailability(); }, 500); // 0.5s cooldown
+            }
+        });
+
+        // Visuals
+        function spawnDamageNumber(dmg) {
+            const container = document.getElementById('damage-container');
+            const el = document.createElement('div');
+            el.className = 'dmg-popup';
+            el.innerText = `-${dmg}`;
+
+            // Random position around center
+            const x = (Math.random() - 0.5) * 200;
+            const y = (Math.random() - 0.5) * 100 - 50;
+            el.style.left = `calc(50% + ${x}px)`;
+            el.style.top = `calc(50% + ${y}px)`;
+
+            container.appendChild(el);
+            setTimeout(() => el.remove(), 1000);
+        }
+
+        function shakeBoss() {
+            const visual = document.getElementById('boss-visual');
+            visual.style.transform = `translate(${(Math.random() - 0.5) * 20}px, ${(Math.random() - 0.5) * 20}px) scale(${visual.style.transform.match(/scale\((.*?)\)/)?.[1] || 1})`;
+            setTimeout(() => {
+                visual.style.transform = `translate(0, 0) scale(${visual.style.transform.match(/scale\((.*?)\)/)?.[1] || 1})`;
+            }, 50);
+        }
+
+        // DEV TOOL: Spawn Boss
+        window.spawnBossDev = async () => {
+            const names = ["CORRUPTED_INDEX", "NULL_POINTER_ENTITY", "DATA_LEAK_PHANTOM", "THE_VOID_CORE"];
+            const rName = names[Math.floor(Math.random() * names.length)];
+
+            await setDoc(doc(db, "universe", "glitch"), {
+                active: true,
+                name: rName,
+                hp: 100000,
+                maxHp: 100000,
+                damageNeon: 0,
+                damageCyber: 0,
+                damageVoid: 0
+            });
+            alert("Anomaly forcefully spawned for testing.");
+        };
+    </script>
+</body>
+
+</html>
