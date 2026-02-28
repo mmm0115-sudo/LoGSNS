@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>LoG Whisper | Secure Transmission</title>
+
+    <meta property="og:title" content="LoG Whisper">
+    <meta property="og:description" content="読んだ瞬間に完全に消滅する、一度きりの極秘メッセージ。">
+    <meta property="og:type" content="website">
+    <meta name="twitter:card" content="summary_large_image">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&family=Noto+Sans+JP:wght@400;700;900&display=swap"
+        rel="stylesheet">
+
+    <style>
+        body {
+            font-family: 'Inter', 'Noto Sans JP', sans-serif;
+            background-color: #030303;
+            color: white;
+            overflow: hidden;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        @keyframes burnAway {
+            0% {
+                filter: blur(0px) brightness(1);
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
+
+            50% {
+                filter: blur(5px) brightness(2) sepia(1) hue-rotate(-50deg);
+                opacity: 0.8;
+                transform: scale(1.05) translateY(-5px);
+                color: #ff8c00;
+            }
+
+            100% {
+                filter: blur(10px) brightness(0);
+                opacity: 0;
+                transform: scale(1.1) translateY(-20px);
+                color: #ff0000;
+            }
+        }
+
+        .burning {
+            animation: burnAway 3s forwards;
+            pointer-events: none;
+        }
+
+        @keyframes cinderFloat {
+            0% {
+                transform: translateY(0) rotate(0deg);
+                opacity: 0;
+            }
+
+            50% {
+                opacity: 1;
+            }
+
+            100% {
+                transform: translateY(-100px) rotate(180deg);
+                opacity: 0;
+            }
+        }
+
+        .cinder {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: #ff4500;
+            border-radius: 50%;
+            box-shadow: 0 0 5px #ff4500;
+            animation: cinderFloat 2s forwards;
+            pointer-events: none;
+        }
+
+        /* Custom Input */
+        textarea {
+            resize: none;
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: rgba(255, 255, 255, 0.5);
+        }
+    </style>
+</head>
+
+<body
+    class="h-screen w-screen flex flex-col relative overflow-hidden bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-zinc-900 to-[#030303]">
+    <!-- Header -->
+    <div class="fixed top-6 left-6 z-40 bg-black/40 backdrop-blur-md border border-white/10 rounded-2xl p-2 pr-4 inline-flex items-center shadow-lg hover:bg-black/60 transition cursor-pointer"
+        onclick="window.location.href='index.html'">
+        <div class="flex items-center gap-2 text-white">
+            <span class="material-icons-round text-xl">arrow_back</span>
+            <span class="text-sm font-bold tracking-wider uppercase">HUB</span>
+        </div>
+    </div>
+
+    <!-- UI: Create a Whisper -->
+    <div id="ui-create"
+        class="flex-1 flex flex-col items-center justify-center p-4 max-w-2xl mx-auto w-full z-10 transition-all duration-500">
+        <div class="text-center mb-8">
+            <span
+                class="material-icons-round text-6xl text-orange-500/50 mb-2 drop-shadow-[0_0_15px_rgba(249,115,22,0.5)]">local_fire_department</span>
+            <h1 class="text-5xl md:text-6xl font-black tracking-tighter mb-4">WHISPER</h1>
+            <p class="text-gray-400 text-sm md:text-base leading-relaxed">
+                読まれた瞬間に燃え尽き、サーバーから完全に消滅する。<br>
+                一度きりの「ささやき」を生成します。
+            </p>
+        </div>
+
+        <div class="w-full relative group">
+            <div
+                class="absolute -inset-1 bg-gradient-to-r from-orange-600 to-red-600 rounded-3xl blur opacity-25 group-hover:opacity-50 transition duration-1000 group-hover:duration-200">
+            </div>
+            <div class="relative w-full glass-panel rounded-3xl p-6">
+                <textarea id="whisper-text" rows="5"
+                    class="w-full bg-transparent text-white text-lg placeholder-gray-600 focus:outline-none"
+                    placeholder="誰にも残したくない秘密を入力..."></textarea>
+                <div class="flex justify-between items-center mt-4 pt-4 border-t border-white/10">
+                    <span
+                        class="text-xs font-bold text-orange-500 bg-orange-500/10 px-3 py-1 rounded-full border border-orange-500/20 uppercase tracking-widest flex items-center gap-1"><span
+                            class="material-icons-round text-[10px]">warning</span> Auto-destruct enabled</span>
+                    <button id="btn-generate"
+                        class="bg-white text-black px-6 py-2 rounded-full font-bold hover:scale-105 transition shadow-[0_0_20px_rgba(255,255,255,0.2)]">封をする</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="link-result"
+            class="hidden w-full mt-8 bg-black/50 border border-green-500/30 rounded-2xl p-6 text-center">
+            <h3 class="text-green-400 font-bold mb-2">生成完了。このリンクを相手に送ってください。</h3>
+            <div class="flex items-center gap-2 bg-white/5 rounded-xl p-3 border border-white/10 mt-4">
+                <input type="text" id="whisper-link" readonly
+                    class="bg-transparent flex-1 text-gray-300 text-sm outline-none" value="https://...">
+                <button id="btn-copy" class="bg-white/10 hover:bg-white/20 text-white p-2 rounded-lg transition"><span
+                        class="material-icons-round text-sm">content_copy</span></button>
+            </div>
+            <p class="text-xs text-gray-500 mt-4">※ 一度誰かが開いた時点でリンクは無効になります。</p>
+        </div>
+    </div>
+
+    <!-- UI: Receive a Whisper (Gate) -->
+    <div id="ui-receive-gate"
+        class="hidden flex-1 flex flex-col items-center justify-center p-4 max-w-xl mx-auto w-full z-10">
+        <div class="glass-panel p-10 rounded-3xl text-center shadow-2xl border border-orange-500/30">
+            <span
+                class="material-icons-round text-8xl text-orange-500/80 mb-6 drop-shadow-[0_0_20px_rgba(249,115,22,0.8)] animate-pulse">lock</span>
+            <h2 class="text-3xl font-black mb-4">極秘のささやき</h2>
+            <p class="text-gray-400 mb-8 max-w-sm mx-auto leading-relaxed">
+                あなた宛の使い捨てメッセージが届いています。<br>
+                開いた瞬間から自己崩壊プロセスが開始され、<br>二度と読むことはできません。
+            </p>
+            <button id="btn-reveal"
+                class="w-full bg-gradient-to-r from-orange-600 to-red-600 text-white px-8 py-4 rounded-full font-black text-xl tracking-widest hover:scale-105 transition shadow-[0_0_30px_rgba(249,115,22,0.4)]">
+                開封する (開くと消滅します)
+            </button>
+        </div>
+    </div>
+
+    <!-- UI: Reveal a Whisper (Read) -->
+    <div id="ui-reveal"
+        class="hidden flex-1 flex flex-col items-center justify-center p-4 max-w-3xl mx-auto w-full z-10 relative">
+        <div id="read-content-container" class="w-full transition-all duration-1000">
+            <h3 class="text-xs text-orange-500 font-bold tracking-[0.3em] uppercase mb-4 text-center">Decrypted Message
+            </h3>
+            <div id="revealed-text"
+                class="text-2xl md:text-4xl font-black text-white leading-relaxed text-center whitespace-pre-wrap">
+            </div>
+        </div>
+
+        <div id="burn-notice"
+            class="hidden absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-center w-full">
+            <span class="material-icons-round text-9xl text-gray-800">delete_forever</span>
+            <h2 class="text-2xl font-black text-gray-600 tracking-widest mt-4">ASHES TO ASHES.</h2>
+            <p class="text-gray-500 mt-2">この記録は宇宙から完全に消去されました。</p>
+            <button onclick="window.location.href='whisper.html'"
+                class="mt-8 text-xs text-gray-400 hover:text-white border px-4 py-2 rounded-full border-gray-700 tracking-widest uppercase transition">自分も作成する</button>
+        </div>
+    </div>
+
+    <!-- UI: Invalid / Already Burned -->
+    <div id="ui-invalid" class="hidden flex-1 flex flex-col items-center justify-center p-4 text-center z-10">
+        <span class="material-icons-round text-6xl text-gray-700 mb-4">error_outline</span>
+        <h2 class="text-2xl font-black text-gray-500 tracking-widest mb-2">NOT FOUND</h2>
+        <p class="text-gray-600 max-w-md mx-auto">指定されたメッセージは存在しないか、既に誰かに読まれて燃え尽きました。</p>
+        <button onclick="window.location.href='index.html'"
+            class="mt-8 text-sm text-white bg-white/10 px-6 py-2 rounded-full hover:bg-white/20 transition tracking-widest">RETURN
+            TO HUB</button>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getFirestore, collection, addDoc, doc, getDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyCA4NQzxcz2gh8uaw3LKrKl_NEnE_fMybs",
+            authDomain: "lo-g-8a620.firebaseapp.com",
+            projectId: "lo-g-8a620",
+            storageBucket: "lo-g-8a620.firebasestorage.app",
+            messagingSenderId: "780857099698",
+            appId: "1:780857099698:web:b6cb359114da98ab3e50ab"
+        };
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        // UI Management
+        const uiCreate = document.getElementById('ui-create');
+        const uiReceiveGate = document.getElementById('ui-receive-gate');
+        const uiReveal = document.getElementById('ui-reveal');
+        const uiInvalid = document.getElementById('ui-invalid');
+
+        function showUI(element) {
+            [uiCreate, uiReceiveGate, uiReveal, uiInvalid].forEach(el => el.classList.add('hidden'));
+            element.classList.remove('hidden');
+        }
+
+        // Logic
+        const urlParams = new URLSearchParams(window.location.search);
+        const whisperId = urlParams.get('id');
+
+        window.onload = async () => {
+            // Sign in anonymously to interact with DB securely if needed
+            try { await signInAnonymously(auth); } catch (e) { }
+
+            if (whisperId) {
+                // Check if it exists BEFORE letting them click reveal
+                showUI(uiReceiveGate);
+            } else {
+                showUI(uiCreate);
+            }
+        };
+
+        // Generation
+        document.getElementById('btn-generate').addEventListener('click', async () => {
+            const text = document.getElementById('whisper-text').value.trim();
+            if (!text) return alert("メッセージを入力してください。");
+
+            const btn = document.getElementById('btn-generate');
+            const originalText = btn.innerText;
+            btn.innerText = "暗号化中..."; btn.disabled = true;
+
+            try {
+                const docRef = await addDoc(collection(db, "whispers"), {
+                    text: text,
+                    createdAt: new Date().getTime() // simple expiration could be added via Cloud Functions, but manual deletion works
+                });
+
+                const link = `${window.location.origin}/whisper.html?id=${docRef.id}`;
+                document.getElementById('whisper-link').value = link;
+                document.getElementById('link-result').classList.remove('hidden');
+                document.getElementById('whisper-text').value = ''; // clear input
+            } catch (err) {
+                console.error(err);
+                alert("生成に失敗しました。");
+            } finally {
+                btn.innerText = "さらに作成"; btn.disabled = false;
+            }
+        });
+
+        document.getElementById('btn-copy').addEventListener('click', () => {
+            const input = document.getElementById('whisper-link');
+            input.select();
+            document.execCommand('copy');
+            const btn = document.getElementById('btn-copy');
+            btn.innerHTML = '<span class="material-icons-round text-sm text-green-400">check</span>';
+            setTimeout(() => btn.innerHTML = '<span class="material-icons-round text-sm">content_copy</span>', 2000);
+        });
+
+        // Reading / Burning
+        document.getElementById('btn-reveal').addEventListener('click', async () => {
+            if (!whisperId) return;
+            const btn = document.getElementById('btn-reveal');
+            btn.innerText = "復号化中..."; btn.disabled = true;
+
+            try {
+                const docRef = doc(db, "whispers", whisperId);
+                const docSnap = await getDoc(docRef);
+
+                if (docSnap.exists()) {
+                    const data = docSnap.data();
+
+                    // IMMEDIATELY DELETE IT FROM FIRESTORE
+                    await deleteDoc(docRef);
+
+                    // Show it
+                    showUI(uiReveal);
+                    document.getElementById('revealed-text').innerText = data.text;
+
+                    // Trigger the burn effect after reading time (e.g. 5 seconds + length factor)
+                    const readingTimeMs = Math.max(5000, data.text.length * 100);
+
+                    setTimeout(() => {
+                        triggerBurnEffect();
+                    }, readingTimeMs);
+
+                } else {
+                    showUI(uiInvalid);
+                }
+            } catch (err) {
+                console.error(err);
+                showUI(uiInvalid);
+            }
+        });
+
+        function triggerBurnEffect() {
+            const container = document.getElementById('read-content-container');
+            container.classList.add('burning');
+
+            // Generate cinders
+            for (let i = 0; i < 30; i++) {
+                const cinder = document.createElement('div');
+                cinder.className = 'cinder';
+                cinder.style.left = `${Math.random() * 100}%`;
+                cinder.style.top = `${Math.random() * 100}%`;
+                cinder.style.animationDelay = `${Math.random() * 2}s`;
+                container.appendChild(cinder);
+            }
+
+            // Remove and show ashes notice
+            setTimeout(() => {
+                container.classList.add('hidden');
+                document.getElementById('burn-notice').classList.remove('hidden');
+            }, 3000); // 3 seconds for the burning CSS animation
+        }
+
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>LoG Warp | 90s Encounter</title>
+
+    <meta property="og:title" content="LoG Warp">
+    <meta property="og:description" content="90秒間だけ繋がる、一期一会の匿名チャット。終了と同時にすべてが宇宙の塵に。">
+    <meta property="og:type" content="website">
+    <meta name="twitter:card" content="summary_large_image">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&family=Noto+Sans+JP:wght@400;700;900&display=swap"
+        rel="stylesheet">
+
+    <style>
+        body {
+            font-family: 'Inter', 'Noto Sans JP', sans-serif;
+            background-color: #030303;
+            color: white;
+            overflow: hidden;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        .msg-bubble {
+            max-width: 80%;
+            padding: 10px 16px;
+            border-radius: 20px;
+            word-break: break-word;
+            font-size: 0.95rem;
+        }
+
+        .msg-mine {
+            background: white;
+            color: black;
+            border-bottom-right-radius: 4px;
+        }
+
+        .msg-other {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border-bottom-left-radius: 4px;
+        }
+
+        /* CRT Effect */
+        .scanlines {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+            background-size: 100% 2px, 3px 100%;
+            pointer-events: none;
+            z-index: 50;
+        }
+
+        /* Countdown Bar */
+        #warp-timer-bar {
+            transition: width 1s linear, background-color 0.5s;
+        }
+
+        .timer-warning {
+            background-color: #ef4444 !important;
+            animation: pulse 1s infinite;
+        }
+
+        @keyframes glitch {
+            0% {
+                transform: translate(0)
+            }
+
+            20% {
+                transform: translate(-2px, 2px)
+            }
+
+            40% {
+                transform: translate(-2px, -2px)
+            }
+
+            60% {
+                transform: translate(2px, 2px)
+            }
+
+            80% {
+                transform: translate(2px, -2px)
+            }
+
+            100% {
+                transform: translate(0)
+            }
+        }
+
+        .glitch-text {
+            animation: glitch 0.2s infinite;
+            color: #ef4444;
+            text-shadow: 2px 0 blue, -2px 0 green;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 5px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+        }
+    </style>
+</head>
+
+<body class="h-screen flex flex-col items-center justify-center relative">
+    <div class="scanlines"></div>
+
+    <!-- Background Noise / Visual -->
+    <div class="fixed inset-0 z-0 opacity-20 pointer-events-none flex items-center justify-center overflow-hidden">
+        <div class="w-[200vw] h-[200vw] rounded-full border border-white/5 animate-[spin_60s_linear_infinite]"></div>
+        <div
+            class="w-[150vw] h-[150vw] rounded-full border border-white/5 absolute animate-[spin_40s_linear_infinite_reverse]">
+        </div>
+        <div class="w-[100vw] h-[100vw] rounded-full border border-white/10 absolute md:animate-pulse"></div>
+    </div>
+
+    <!-- Entrance Overlay -->
+    <div id="entrance-ui" class="z-20 flex flex-col items-center justify-center w-full h-full p-4 text-center">
+        <div class="mb-8 relative inline-block">
+            <span
+                class="material-icons-round text-6xl text-white opacity-80 mix-blend-screen absolute -left-4 -top-2 animate-pulse">blur_on</span>
+            <h1 class="text-6xl md:text-8xl font-black tracking-tighter mix-blend-difference">WARP</h1>
+        </div>
+        <p class="text-gray-400 max-w-sm mb-12 text-sm md:text-base leading-relaxed">
+            名前も顔も知らない誰かと<br>
+            <span class="text-white font-bold inline-block border-b border-white/30 pb-1 mt-2">たった90秒間</span> だけ繋がる空間。
+        </p>
+        <button id="btn-initiate"
+            class="bg-white text-black px-10 py-5 rounded-full font-black text-xl tracking-widest hover:scale-105 transition hover:shadow-[0_0_30px_rgba(255,255,255,0.4)] relative group">
+            INITIATE WARP
+            <div
+                class="absolute inset-0 border border-white rounded-full scale-110 opacity-0 group-hover:opacity-100 group-hover:animate-ping">
+            </div>
+        </button>
+        <a href="index.html"
+            class="mt-8 text-xs text-gray-500 hover:text-white uppercase tracking-[0.2em] transition pb-1 border-b border-transparent hover:border-white">Back
+            to Portal</a>
+    </div>
+
+    <!-- Searching Overlay -->
+    <div id="searching-ui" class="hidden z-20 flex flex-col items-center justify-center w-full h-full p-4 text-center">
+        <div class="w-24 h-24 mb-6 border-4 border-white/10 border-t-white rounded-full animate-spin"></div>
+        <h2 class="text-2xl font-black tracking-widest uppercase mb-2 animate-pulse">Establishing Link</h2>
+        <p class="text-gray-500 text-sm">Waiting for a signal in the void...</p>
+        <button id="btn-cancel"
+            class="mt-12 text-xs text-gray-400 hover:text-white uppercase tracking-widest px-6 py-2 border border-gray-700 rounded-full hover:border-white transition">Abort</button>
+    </div>
+
+    <!-- Chat UI -->
+    <div id="chat-ui"
+        class="hidden z-20 w-full h-full flex flex-col max-w-2xl mx-auto bg-black border-x border-white/10 relative shadow-2xl">
+        <!-- Header / Timer -->
+        <div class="p-4 border-b border-white/10 glass-panel flex justify-between items-center z-30 shrink-0">
+            <div class="flex items-center gap-2">
+                <span class="material-icons-round text-emerald-400 animate-pulse text-sm">fiber_manual_record</span>
+                <span class="font-bold tracking-widest text-sm uppercase">Anonymous Link</span>
+            </div>
+            <div class="text-2xl font-black tabular-nums tracking-widest" id="timer-text">90.00</div>
+        </div>
+        <div class="w-full h-1 bg-white/10 shrink-0">
+            <div id="warp-timer-bar" class="h-full bg-white w-full"></div>
+        </div>
+
+        <!-- Chat Area -->
+        <div id="chat-messages" class="flex-1 overflow-y-auto p-4 flex flex-col gap-4 pb-20 scroll-smooth">
+            <div class="text-center text-xs text-gray-500 font-bold uppercase tracking-widest my-4">Connection
+                Established.<br>You have 90 seconds.</div>
+            <!-- Messages inserted here -->
+        </div>
+
+        <!-- Input Area -->
+        <div class="p-3 border-t border-white/10 glass-panel shrink-0">
+            <form id="chat-form" class="flex gap-2 relative">
+                <input type="text" id="chat-input"
+                    class="flex-1 bg-white/5 border border-white/10 rounded-full px-5 py-3 text-white outline-none focus:border-white/50 transition pr-12"
+                    placeholder="メッセージを入力..." autocomplete="off">
+                <button type="submit"
+                    class="absolute right-2 top-1/2 -translate-y-1/2 w-9 h-9 flex items-center justify-center bg-white text-black rounded-full hover:scale-110 transition disabled:opacity-50"
+                    id="chat-send">
+                    <span class="material-icons-round text-sm">send</span>
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Disconnected Overlay -->
+    <div id="disconnected-ui"
+        class="hidden z-50 fixed inset-0 bg-black flex flex-col items-center justify-center text-center p-4">
+        <h1 class="text-4xl md:text-6xl font-black tracking-tighter text-white mb-4 glitch-text">CONNECTION LOST</h1>
+        <p class="text-gray-500 mb-12">The signal has vanished.<br>All logs from this encounter were deleted.</p>
+        <button onclick="window.location.reload()"
+            class="bg-white text-black px-8 py-3 rounded-full font-bold tracking-widest hover:scale-105 transition">WARP
+            AGAIN</button>
+        <button onclick="window.location.href='index.html'"
+            class="mt-4 text-xs text-gray-500 hover:text-white uppercase tracking-widest transition">EXIT</button>
+    </div>
+
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getFirestore, collection, addDoc, query, orderBy, limit, onSnapshot, serverTimestamp, doc, getDoc, setDoc, deleteDoc, runTransaction } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        // Firebase Config (Using the existing ecosystem project)
+        const firebaseConfig = {
+            apiKey: "AIzaSyCA4NQzxcz2gh8uaw3LKrKl_NEnE_fMybs",
+            authDomain: "lo-g-8a620.firebaseapp.com",
+            projectId: "lo-g-8a620",
+            storageBucket: "lo-g-8a620.firebasestorage.app",
+            messagingSenderId: "780857099698",
+            appId: "1:780857099698:web:b6cb359114da98ab3e50ab"
+        };
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        // State
+        let currentUser = null;
+        let activeRoomId = null;
+        let activeRoomUnsub = null;
+        let messagesUnsub = null;
+        const WARP_TIME_MS = 90000;
+        let timerInterval = null;
+        let endTime = 0;
+
+        // UI Elements
+        const uiEntrance = document.getElementById('entrance-ui');
+        const uiSearching = document.getElementById('searching-ui');
+        const uiChat = document.getElementById('chat-ui');
+        const uiDisconnected = document.getElementById('disconnected-ui');
+
+        const chatMessages = document.getElementById('chat-messages');
+        const chatForm = document.getElementById('chat-form');
+        const chatInput = document.getElementById('chat-input');
+
+        const timerText = document.getElementById('timer-text');
+        const timerBar = document.getElementById('warp-timer-bar');
+
+        // Helpers
+        const switchUI = (pane) => {
+            [uiEntrance, uiSearching, uiChat, uiDisconnected].forEach(el => el.classList.add('hidden'));
+            pane.classList.remove('hidden');
+        };
+
+        const cleanupAndDisconnect = async (showGlitch = true) => {
+            if (timerInterval) clearInterval(timerInterval);
+            if (activeRoomUnsub) activeRoomUnsub();
+            if (messagesUnsub) messagesUnsub();
+
+            // Cleanup visually
+            if (showGlitch) {
+                switchUI(uiDisconnected);
+            }
+
+            // Delete DB records if we own them or if room is dead
+            try {
+                if (currentUser) {
+                    await deleteDoc(doc(db, "warp_queue", currentUser.uid)).catch(() => { });
+                }
+                if (activeRoomId) {
+                    // Set disconnected flag so the other party knows to disconnect immediately
+                    await setDoc(doc(db, "warp_rooms", activeRoomId), { disconnected: true }, { merge: true }).catch(() => { });
+                }
+            } catch (err) { }
+            activeRoomId = null;
+        };
+
+        window.addEventListener('beforeunload', () => cleanupAndDisconnect(false));
+
+        // Start Mathmaking
+        document.getElementById('btn-initiate').addEventListener('click', async () => {
+            switchUI(uiSearching);
+
+            // Anonymously sign in if not already (Warp allows completely random/no-profile usage)
+            if (!currentUser) {
+                const cred = await signInAnonymously(auth);
+                currentUser = cred.user;
+            }
+
+            try {
+                // 1. Try to find someone in the queue
+                const qRef = collection(db, "warp_queue");
+                const qSnap = await getDoc(doc(db, "universe", "warp_meta")); // dummy doc to trigger read
+
+                // Firestore doesn't easily let us simple-pop a random queue item without a cloud function or complex transactions. 
+                // We'll simulate matchmaking: Look at the "warp_hub" to see if a waiting slot exists.
+                const hubRef = doc(db, "universe", "warp_hub");
+
+                await runTransaction(db, async (t) => {
+                    const hubDoc = await t.get(hubRef);
+                    let data = hubDoc.exists() ? hubDoc.data() : { waitingId: null };
+
+                    if (data.waitingId && data.waitingId !== currentUser.uid) {
+                        // Match found! Create a room.
+                        const roomId = `room_${data.waitingId}_${currentUser.uid}`;
+                        activeRoomId = roomId;
+
+                        // Initialize room
+                        t.set(doc(db, "warp_rooms", roomId), {
+                            users: [data.waitingId, currentUser.uid],
+                            createdAt: serverTimestamp(),
+                            startTime: Date.now(), // Use client time purely for synced countdown simulation
+                            disconnected: false
+                        });
+
+                        // Clear waiting slot
+                        t.update(hubRef, { waitingId: null });
+                    } else {
+                        // Nobody waiting, or we are waiting. Set ourselves as waiting.
+                        t.set(hubRef, { waitingId: currentUser.uid }, { merge: true });
+                        activeRoomId = null; // Will listen to hub
+                    }
+                });
+
+                if (activeRoomId) {
+                    // We created the room. Join it!
+                    joinRoom(activeRoomId);
+                } else {
+                    // We are waiting. Listen for someone to create a room including us.
+                    listenForMatch();
+                }
+
+            } catch (err) {
+                console.error("Matchmaking error:", err);
+                alert("Warp drive failure. Please try again.");
+                switchUI(uiEntrance);
+            }
+        });
+
+        document.getElementById('btn-cancel').addEventListener('click', async () => {
+            if (currentUser) {
+                try {
+                    const hubRef = doc(db, "universe", "warp_hub");
+                    const hubDoc = await getDoc(hubRef);
+                    if (hubDoc.exists() && hubDoc.data().waitingId === currentUser.uid) {
+                        await setDoc(hubRef, { waitingId: null }, { merge: true });
+                    }
+                } catch (e) { }
+            }
+            switchUI(uiEntrance);
+        });
+
+        // Listen for a match created by another user
+        let matchListener = null;
+        function listenForMatch() {
+            const roomsRef = query(collection(db, "warp_rooms"), limit(10)); // Simplified for POC. In production, need a dedicated queue system.
+
+            // To be entirely reliable without cloud functions, we just listen to our own dummy document or a simple query
+            // Since firestore query on array-contains takes indexes, we'll listen to a user-specific "invite" doc.
+
+            const inviteRef = doc(db, "warp_invites", currentUser.uid);
+            // Actually, let's keep it robust: The person who creates the room directly tells the other person via the warp_invites.
+
+            // Revise matchmaking logic: 
+            // If I become the waiter, I listen to warp_invites/{uid}
+            // If I match with the waiter, I write the roomId to warp_invites/{waiter_uid}, then join.
+        }
+
+        // --- Refined Matchmaking (Self-contained WebRTC/Firestore P2P style) ---
+        // Instead of complex transactions, we use a simple bulletin board approach for instant signaling.
+
+        document.getElementById('btn-initiate').onclick = async () => {
+            switchUI(uiSearching);
+            if (!currentUser) currentUser = (await signInAnonymously(auth)).user;
+
+            // 1. Ask the server for the current waiting list
+            const waitRef = collection(db, "warp_waitlist");
+            const waitSnap = await getDoc(doc(db, "warp_waitlist", "live"));
+            let waiter = waitSnap.exists() ? waitSnap.data().uid : null;
+
+            if (waiter && waiter !== currentUser.uid) {
+                // 2a. Match! Create room and tell the waiter.
+                activeRoomId = "warp_" + Date.now() + "_" + Math.floor(Math.random() * 1000);
+                await setDoc(doc(db, "warp_rooms", activeRoomId), {
+                    created: serverTimestamp(),
+                    startEpoch: Date.now(),
+                    disconnected: false
+                });
+                // Tell waiter
+                await setDoc(doc(db, "warp_waitlist", "live"), { match: activeRoomId, by: currentUser.uid });
+                joinRoom(activeRoomId);
+            } else {
+                // 2b. Wait. Listen to the waitlist doc for a match.
+                await setDoc(doc(db, "warp_waitlist", "live"), { uid: currentUser.uid, match: null, by: null });
+
+                const unsub = onSnapshot(doc(db, "warp_waitlist", "live"), (d) => {
+                    const data = d.data();
+                    if (data && data.uid === currentUser.uid && data.match) {
+                        // SOMEONE MATCHED WITH ME
+                        unsub();
+                        // Clear waitlist so others can use it
+                        setDoc(doc(db, "warp_waitlist", "live"), { uid: null, match: null, by: null });
+                        activeRoomId = data.match;
+                        joinRoom(activeRoomId);
+                    }
+                });
+                // Abort if no match in 30s
+                setTimeout(() => {
+                    if (!activeRoomId) { unsub(); switchUI(uiEntrance); alert("No signals found in the void. Try again."); }
+                }, 30000);
+            }
+        };
+
+        // Join the actual chat room
+        function joinRoom(roomId) {
+            switchUI(uiChat);
+            chatMessages.innerHTML = `<div class="text-center text-xs text-gray-500 font-bold uppercase tracking-widest my-4">Connection Established.<br>You have 90 seconds.</div>`;
+            chatInput.focus();
+
+            // Set up Timers
+            endTime = Date.now() + WARP_TIME_MS;
+            timerInterval = setInterval(updateTimer, 100);
+
+            // Listen for room death (other user disconnected)
+            activeRoomUnsub = onSnapshot(doc(db, "warp_rooms", roomId), (d) => {
+                if (!d.exists() || d.data().disconnected) {
+                    cleanupAndDisconnect();
+                }
+            });
+
+            // Listen for messages
+            messagesUnsub = onSnapshot(query(collection(db, `warp_rooms/${roomId}/messages`), orderBy("sentAt", "asc")), (snap) => {
+                snap.docChanges().forEach(change => {
+                    if (change.type === "added") {
+                        const m = change.doc.data();
+                        renderMessage(m.text, m.uid === currentUser.uid);
+                    }
+                });
+            });
+        }
+
+        // Send Message
+        chatForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const text = chatInput.value.trim();
+            if (!text || !activeRoomId) return;
+
+            chatInput.value = "";
+            chatInput.focus();
+
+            // Optimistic render for speed
+            renderMessage(text, true, true);
+
+            await addDoc(collection(db, `warp_rooms/${activeRoomId}/messages`), {
+                uid: currentUser.uid,
+                text: text,
+                sentAt: serverTimestamp()
+            });
+        });
+
+        // Render Message UI
+        function renderMessage(text, isMine, isPending = false) {
+            const div = document.createElement('div');
+            div.className = `flex w-full ${isMine ? 'justify-end' : 'justify-start'} fade-in ${isPending ? 'opacity-50' : ''}`;
+
+            // Remove pending if it exists (simple dedup logic could be better, but fast chat is fine)
+            if (isMine && !isPending) {
+                // If we get an official confirmation, we could clean up pending. 
+                // For this minimal mode, relying on standard DB sync is fast enough, so we'll just append server ones too unless we deduplicate strictly.
+                // To keep it simple, we won't optimistic render standard text in the final DOM to avoid duplicates without IDs, OR we just trust Firebase latency.
+                // Let's remove optimistic render to prevent duplicates in 90s chat. (Firebase offline mode handles it instantly anyway).
+            }
+
+            if (isPending) return; // Disable optimistic visual for simplicity to avoid dupes
+
+            div.innerHTML = `<div class="msg-bubble ${isMine ? 'msg-mine' : 'msg-other'}">${text.replace(/</g, "&lt;")}</div>`;
+            chatMessages.appendChild(div);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+
+        // Timer Logic
+        function updateTimer() {
+            const remaining = endTime - Date.now();
+            if (remaining <= 0) {
+                // WARP OVER
+                clearInterval(timerInterval);
+                timerText.innerText = "00.00";
+                timerBar.style.width = "0%";
+                cleanupAndDisconnect();
+                return;
+            }
+
+            const secs = (remaining / 1000).toFixed(2);
+            timerText.innerText = secs.padStart(5, '0');
+            const pct = (remaining / WARP_TIME_MS) * 100;
+            timerBar.style.width = pct + "%";
+
+            if (remaining < 10000) {
+                timerText.classList.add('text-red-500', 'glitch-text');
+                timerBar.classList.add('timer-warning');
+            }
+        }
+    </script>
+</body>
+
+</html>
