@@ -20,8 +20,6 @@
     <meta property="og:image" content="https://lo-g-8a620.web.app/assets/ogp.jpg">
     <meta name="twitter:card" content="summary_large_image">
 
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1539164935971262"
-        crossorigin="anonymous"></script>
     <!-- Libraries -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
@@ -1083,29 +1081,9 @@
         function loadTimeline() {
             onSnapshot(query(collection(db, "logs"), orderBy("createdAt", "desc"), limit(50)), (snap) => {
                 const c = document.getElementById('timeline'); c.innerHTML = "";
-                let index = 0;
                 snap.forEach(d => {
                     c.innerHTML += buildPostHTML(d.id, d.data());
-                    index++;
-                    // Inject AdSense every 7 posts
-                    if (index % 7 === 0) {
-                        c.innerHTML += `
-                            <div class="p-4 border-b border-[var(--border)] bg-[var(--border)]/5 text-center fade-in">
-                                <span class="text-[10px] font-bold text-[var(--subtext)] uppercase tracking-wider block mb-2">Advertisement</span>
-                                <div class="w-full bg-[var(--border)]/20 rounded-xl h-[100px] flex items-center justify-center text-xs text-[var(--subtext)] font-medium">
-                                    <ins class="adsbygoogle" style="display:block" data-ad-format="fluid" data-ad-layout-key="-fb+5w+4e-db+86" data-ad-client="ca-pub-1539164935971262" data-ad-slot="1234567890"></ins>
-                                </div>
-                            </div>
-                        `;
-                    }
                 });
-                // Initialize Ads
-                setTimeout(() => {
-                    try {
-                        const ads = document.querySelectorAll('.adsbygoogle');
-                        ads.forEach(ad => { if (ad.innerHTML === '') (window.adsbygoogle = window.adsbygoogle || []).push({}); });
-                    } catch (e) { console.warn('AdSense failed to push', e); }
-                }, 100);
             });
             if (currentUser) loadMyPosts();
         }

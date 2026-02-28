@@ -13,10 +13,6 @@
     <meta property="og:image" content="https://lo-g-8a620.web.app/assets/ogp.jpg">
     <meta name="twitter:card" content="summary_large_image">
 
-    <!-- Google AdSense -->
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1539164935971262"
-        crossorigin="anonymous"></script>
-
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
     <link
@@ -121,24 +117,7 @@
                         </div>
                     </div>
                 `;
-                index++;
-                if (index % 5 === 0) {
-                    list.innerHTML += `
-                        <div class="glass-panel p-4 mb-4 text-center fade-in">
-                            <span class="text-[10px] font-bold text-gray-500 uppercase tracking-wider block mb-2">Advertisement</span>
-                            <div class="w-full bg-white/5 rounded-xl h-[90px] flex items-center justify-center text-xs text-gray-500">
-                                <ins class="adsbygoogle" style="display:block" data-ad-format="fluid" data-ad-layout-key="-fb+5w+4e-db+86" data-ad-client="ca-pub-1539164935971262" data-ad-slot="1234567890"></ins>
-                            </div>
-                        </div>
-                    `;
-                }
             });
-            setTimeout(() => {
-                try {
-                    const ads = document.querySelectorAll('.adsbygoogle');
-                    ads.forEach(ad => { if (ad.innerHTML === '') (window.adsbygoogle = window.adsbygoogle || []).push({}); });
-                } catch (e) { console.warn('AdSense config error', e); }
-            }, 100);
         }
 
         window.createThread = () => {
