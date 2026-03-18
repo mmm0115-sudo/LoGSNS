@@ -29,20 +29,58 @@
 <body class="theme-core-dark">
     <!-- Header -->
     <header class="bg-black/50 backdrop-blur-md border-b border-white/10 sticky top-0 z-50">
-        <div class="max-w-3xl mx-auto px-4 py-4 flex justify-between items-center">
-            <div class="flex items-center gap-3">
-                <a href="index.html" class="text-gray-400 hover:text-white transition"><span
+        <div class="max-w-3xl mx-auto px-4 py-4 flex justify-between items-center gap-4">
+            <div class="flex items-center gap-3 min-w-0">
+                <a href="index.html" class="text-gray-400 hover:text-white transition shrink-0"><span
                         class="material-icons-round">arrow_back</span></a>
-                <h1 class="text-xl font-black">LoG Board <span
-                        class="text-xs text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full font-bold ml-1">Cloud</span>
-                </h1>
+                <div class="min-w-0">
+                    <h1 class="text-xl font-black truncate">LoG Board <span
+                            class="text-xs text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full font-bold ml-1">Realtime</span>
+                    </h1>
+                    <p class="text-xs text-gray-500 mt-1">登録不要・匿名・リアルタイム同期のスレッド空間</p>
+                </div>
             </div>
-            <button onclick="toggleThreadModal()" class="btn-premium px-4 py-1.5 rounded-full text-sm">スレッド作成</button>
+            <button onclick="toggleThreadModal()" class="btn-premium px-4 py-1.5 rounded-full text-sm shrink-0">スレッド作成</button>
         </div>
     </header>
 
-    <main class="max-w-3xl mx-auto p-4" id="thread-list">
-        <div class="text-center text-gray-400 mt-10 animate-pulse">読み込み中...</div>
+    <main class="max-w-3xl mx-auto p-4 space-y-4">
+        <section class="glass-panel p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+            <div>
+                <p class="text-sm text-white font-bold">LoG Board は全員で共有する匿名掲示板です。</p>
+                <p class="text-xs text-gray-400 mt-1">スレッドとコメントはリアルタイムで同期されます。短く、読みやすく、ノイズ少なめに。</p>
+            </div>
+            <div class="text-xs">
+                <span id="board-status"
+                    class="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-white/5 text-gray-300 border border-white/10">
+                    <span class="material-icons-round text-[14px]">cloud_sync</span>
+                    接続中...
+                </span>
+            </div>
+        </section>
+
+        <section class="grid grid-cols-2 sm:grid-cols-4 gap-3" id="board-stats">
+            <div class="glass-panel p-4">
+                <div class="text-gray-500 text-xs uppercase tracking-widest">Threads</div>
+                <div id="stat-threads" class="text-2xl font-black mt-2">0</div>
+            </div>
+            <div class="glass-panel p-4">
+                <div class="text-gray-500 text-xs uppercase tracking-widest">Comments</div>
+                <div id="stat-comments" class="text-2xl font-black mt-2">0</div>
+            </div>
+            <div class="glass-panel p-4">
+                <div class="text-gray-500 text-xs uppercase tracking-widest">Mode</div>
+                <div class="text-lg font-black mt-2">Anonymous</div>
+            </div>
+            <div class="glass-panel p-4">
+                <div class="text-gray-500 text-xs uppercase tracking-widest">Sync</div>
+                <div id="stat-sync" class="text-lg font-black mt-2">--</div>
+            </div>
+        </section>
+
+        <section id="thread-list" class="space-y-4">
+            <div class="text-center text-gray-400 mt-10 animate-pulse">読み込み中...</div>
+        </section>
     </main>
 
     <!-- スレッド作成モーダル -->
@@ -50,14 +88,16 @@
         class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 z-50 fade-in">
         <div class="glass-panel p-6 w-full max-w-md">
             <h2 class="text-xl font-bold mb-4 text-white">新しいスレッドを作成</h2>
-            <input type="text" id="new-thread-title" class="w-full input-glass rounded-xl p-4 mb-4"
-                placeholder="スレッドのタイトル">
-            <textarea id="new-thread-desc" rows="3" class="w-full input-glass rounded-xl p-4 mb-4 resize-none"
-                placeholder="最初のコメント (任意)"></textarea>
+            <input type="text" id="new-thread-title" maxlength="60" class="w-full input-glass rounded-xl p-4 mb-2"
+                placeholder="スレッドのタイトル（60文字以内）">
+            <div class="text-right text-xs text-gray-500 mb-4"><span id="title-count">0</span>/60</div>
+            <textarea id="new-thread-desc" rows="3" maxlength="280" class="w-full input-glass rounded-xl p-4 mb-2 resize-none"
+                placeholder="最初のコメント（任意 / 280文字以内）"></textarea>
+            <div class="text-right text-xs text-gray-500 mb-4"><span id="desc-count">0</span>/280</div>
             <div class="flex justify-end gap-3 mt-2">
                 <button onclick="toggleThreadModal()"
                     class="px-5 py-2 font-bold text-gray-400 hover:text-white transition">キャンセル</button>
-                <button onclick="createThread()" class="px-6 py-2 btn-premium rounded-full">作成</button>
+                <button id="create-thread-btn" onclick="createThread()" class="px-6 py-2 btn-premium rounded-full">作成</button>
             </div>
         </div>
     </div>
@@ -67,139 +107,348 @@
         <header class="bg-black/50 backdrop-blur-md border-b border-white/10 p-4 flex items-center gap-3 sticky top-0">
             <button onclick="closeThread()" class="text-gray-400 hover:text-white transition"><span
                     class="material-icons-round">arrow_back</span></button>
-            <h2 id="view-title" class="font-bold truncate flex-1 text-lg"></h2>
+            <div class="min-w-0 flex-1">
+                <h2 id="view-title" class="font-bold truncate text-lg"></h2>
+                <p id="view-meta" class="text-xs text-gray-500 mt-1">匿名スレッド</p>
+            </div>
         </header>
         <div id="comment-list" class="flex-1 overflow-y-auto p-4 space-y-4 pb-32">
-            <!-- コメントがここに表示される -->
+            <div class="text-center text-gray-500 mt-10">スレッドを読み込み中...</div>
         </div>
         <div class="fixed bottom-0 w-full border-t border-white/10 p-4 bg-black/80 backdrop-blur-md flex gap-3">
-            <div class="max-w-3xl mx-auto w-full flex gap-3">
-                <input type="text" id="comment-input" class="flex-1 input-glass rounded-full px-5 py-3"
-                    placeholder="コメントを入力（完全匿名）">
-                <button onclick="addComment()"
-                    class="btn-premium px-6 py-3 rounded-full flex items-center justify-center">
-                    <span class="material-icons-round">send</span>
-                </button>
+            <div class="max-w-3xl mx-auto w-full space-y-2">
+                <div class="flex gap-3">
+                    <input type="text" id="comment-input" maxlength="280" class="flex-1 input-glass rounded-full px-5 py-3"
+                        placeholder="コメントを入力（完全匿名 / 280文字以内）">
+                    <button id="send-comment-btn" onclick="addComment()"
+                        class="btn-premium px-6 py-3 rounded-full flex items-center justify-center">
+                        <span class="material-icons-round">send</span>
+                    </button>
+                </div>
+                <div class="text-right text-xs text-gray-500"><span id="comment-count">0</span>/280</div>
             </div>
         </div>
     </div>
 
     <script type="module">
-        let boards = JSON.parse(localStorage.getItem('logsns_boards') || '[]');
-        let currentThreadId = null;
+        import {
+            auth,
+            db,
+            showToastText,
+            signInAnonymously,
+            onAuthStateChanged,
+            collection,
+            addDoc,
+            query,
+            orderBy,
+            limit,
+            onSnapshot,
+            serverTimestamp,
+            doc,
+            setDoc,
+            updateDoc,
+            increment
+        } from './assets/js/core.js';
 
-        function saveBoards() {
-            localStorage.setItem('logsns_boards', JSON.stringify(boards));
+        const THREADS_COLLECTION = 'board_threads';
+        const MAX_TITLE = 60;
+        const MAX_COMMENT = 280;
+
+        let currentThreadId = null;
+        let currentThreadTitle = '';
+        let threadUnsub = null;
+        let commentsUnsub = null;
+        let isReady = false;
+        let threads = [];
+
+        const threadListEl = document.getElementById('thread-list');
+        const commentListEl = document.getElementById('comment-list');
+        const boardStatusEl = document.getElementById('board-status');
+        const statThreadsEl = document.getElementById('stat-threads');
+        const statCommentsEl = document.getElementById('stat-comments');
+        const statSyncEl = document.getElementById('stat-sync');
+        const titleInput = document.getElementById('new-thread-title');
+        const descInput = document.getElementById('new-thread-desc');
+        const commentInput = document.getElementById('comment-input');
+        const createThreadBtn = document.getElementById('create-thread-btn');
+        const sendCommentBtn = document.getElementById('send-comment-btn');
+
+        function escapeHtml(text = '') {
+            return text.replace(/[&<>'"]/g, (char) => ({
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                "'": '&#39;'
+            }[char]));
         }
 
-        window.toggleThreadModal = () => { document.getElementById('thread-modal').classList.toggle('hidden'); };
+        function setBoardStatus(label, icon = 'cloud_sync', tone = 'neutral') {
+            const tones = {
+                neutral: 'bg-white/5 text-gray-300 border-white/10',
+                success: 'bg-emerald-500/10 text-emerald-300 border-emerald-500/20',
+                warning: 'bg-amber-500/10 text-amber-300 border-amber-500/20',
+                danger: 'bg-rose-500/10 text-rose-300 border-rose-500/20'
+            };
+            boardStatusEl.className = `inline-flex items-center gap-1 px-3 py-1 rounded-full border ${tones[tone] || tones.neutral}`;
+            boardStatusEl.innerHTML = `<span class="material-icons-round text-[14px]">${icon}</span>${escapeHtml(label)}`;
+            statSyncEl.textContent = label;
+        }
+
+        function updateCounter(input, counterElId, max) {
+            document.getElementById(counterElId).textContent = Math.min(input.value.length, max);
+        }
+
+        function formatDate(value) {
+            if (!value) return 'just now';
+            const date = value?.toDate ? value.toDate() : new Date(value);
+            return new Intl.DateTimeFormat('ja-JP', {
+                month: 'short',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            }).format(date);
+        }
+
+        function resetThreadForm() {
+            titleInput.value = '';
+            descInput.value = '';
+            updateCounter(titleInput, 'title-count', MAX_TITLE);
+            updateCounter(descInput, 'desc-count', MAX_COMMENT);
+        }
+
+        function updateStats() {
+            statThreadsEl.textContent = threads.length;
+            statCommentsEl.textContent = threads.reduce((sum, thread) => sum + (thread.commentCount || 0), 0);
+        }
 
         function renderThreads() {
-            const list = document.getElementById('thread-list');
-            list.innerHTML = '';
-            if (boards.length === 0) {
-                list.innerHTML = '<p class="text-center text-gray-500 mt-10">まだスレッドはありません。</p>';
+            updateStats();
+            if (!threads.length) {
+                threadListEl.innerHTML = `
+                    <div class="glass-panel p-8 text-center text-gray-400">
+                        <div class="text-lg font-bold text-white mb-2">まだスレッドはありません。</div>
+                        <p class="text-sm text-gray-500">最初の一言を投げて、LoG Board を始めましょう。</p>
+                    </div>
+                `;
                 return;
             }
 
-            let index = 0;
-            // sort by createdAt desc
-            const sorted = [...boards].sort((a, b) => b.createdAt - a.createdAt);
-            sorted.forEach(t => {
-                const dateStr = new Date(t.createdAt).toLocaleDateString();
-                list.innerHTML += `
-                    <div onclick="openThread('${t.id}', '${t.title.replace(/'/g, "\\'")}')" class="glass-panel p-5 mb-4 cursor-pointer hover:border-white/30 transition group">
-                        <h3 class="font-bold text-lg mb-2 text-white group-hover:text-emerald-400 transition">${t.title}</h3>
-                        <p class="text-sm text-gray-400 truncate">${t.lastComment || 'コメントなし'}</p>
-                        <div class="text-xs text-gray-500 mt-3 flex justify-between items-center">
-                            <span class="bg-white/5 px-2 py-1 rounded flex items-center gap-1"><span class="material-icons-round text-[12px]">chat_bubble_outline</span> ${t.comments ? t.comments.length : 0}</span>
-                            <span>${dateStr}</span>
+            threadListEl.innerHTML = threads.map((thread) => `
+                <button data-thread-id="${thread.id}" class="thread-card w-full text-left glass-panel p-5 cursor-pointer hover:border-white/30 transition group">
+                    <div class="flex items-start justify-between gap-4">
+                        <div class="min-w-0">
+                            <h3 class="font-bold text-lg mb-2 text-white group-hover:text-emerald-400 transition truncate">${escapeHtml(thread.title)}</h3>
+                            <p class="text-sm text-gray-400 leading-relaxed line-clamp-2">${escapeHtml(thread.lastComment || 'コメントなし')}</p>
                         </div>
+                        <span class="text-[10px] uppercase tracking-[0.2em] text-emerald-400 bg-emerald-500/10 px-2 py-1 rounded-full shrink-0">live</span>
                     </div>
-                `;
+                    <div class="text-xs text-gray-500 mt-4 flex flex-wrap justify-between items-center gap-2">
+                        <span class="bg-white/5 px-2 py-1 rounded flex items-center gap-1"><span class="material-icons-round text-[12px]">chat_bubble_outline</span> ${thread.commentCount || 0}</span>
+                        <span>更新: ${escapeHtml(formatDate(thread.updatedAt || thread.createdAt))}</span>
+                    </div>
+                </button>
+            `).join('');
+
+            document.querySelectorAll('.thread-card').forEach((button) => {
+                button.addEventListener('click', () => openThread(button.dataset.threadId));
             });
         }
 
-        window.createThread = () => {
-            const title = document.getElementById('new-thread-title').value.trim();
-            const desc = document.getElementById('new-thread-desc').value.trim();
-            if (!title) return alert("タイトルを入力してください");
-
-            const newThread = {
-                id: 'board_' + Date.now(),
-                title: title,
-                lastComment: desc || "スレッドが作成されました",
-                createdAt: Date.now(),
-                comments: desc ? [{ text: desc, createdAt: Date.now() }] : []
-            };
-            boards.push(newThread);
-            saveBoards();
-            renderThreads();
-            toggleThreadModal();
-            document.getElementById('new-thread-title').value = '';
-            document.getElementById('new-thread-desc').value = '';
-        };
-
-        window.openThread = (id, title) => {
-            currentThreadId = id;
-            document.getElementById('view-title').innerText = title;
-            document.getElementById('thread-view').classList.remove('hidden');
-            renderComments();
-        };
-
-        function renderComments() {
-            if (!currentThreadId) return;
-            const t = boards.find(b => b.id === currentThreadId);
-            if (!t) return;
-            const list = document.getElementById('comment-list');
-            list.innerHTML = '';
-            let index = 1;
-            t.comments.forEach(c => {
-                const timeStr = new Date(c.createdAt).toLocaleTimeString();
-                list.innerHTML += `
-                    <div class="glass-panel p-4">
-                        <div class="text-xs text-gray-500 mb-2 flex justify-between">
-                            <span class="text-emerald-400 font-bold">名無しさん [${index}]</span>
-                            <span>${timeStr}</span>
-                        </div>
-                        <div class="text-sm text-gray-200 whitespace-pre-wrap leading-relaxed">${c.text}</div>
+        function renderComments(comments = []) {
+            if (!comments.length) {
+                commentListEl.innerHTML = `
+                    <div class="glass-panel p-8 text-center text-gray-400">
+                        <div class="text-lg font-bold text-white mb-2">まだコメントはありません。</div>
+                        <p class="text-sm text-gray-500">このスレッドの最初の返信を送ってみましょう。</p>
                     </div>
                 `;
-                index++;
-            });
-            setTimeout(() => list.scrollTop = list.scrollHeight, 50);
+                return;
+            }
+
+            commentListEl.innerHTML = comments.map((comment, index) => `
+                <div class="glass-panel p-4">
+                    <div class="text-xs text-gray-500 mb-2 flex justify-between gap-3">
+                        <span class="text-emerald-400 font-bold">名無しさん [${index + 1}]</span>
+                        <span>${escapeHtml(formatDate(comment.createdAt))}</span>
+                    </div>
+                    <div class="text-sm text-gray-200 whitespace-pre-wrap leading-relaxed break-words">${escapeHtml(comment.text)}</div>
+                </div>
+            `).join('');
+
+            setTimeout(() => {
+                commentListEl.scrollTop = commentListEl.scrollHeight;
+            }, 50);
         }
 
-        window.closeThread = () => {
-            currentThreadId = null;
-            document.getElementById('thread-view').classList.add('hidden');
-            renderThreads();
+        function bindThreadFeed() {
+            if (threadUnsub) threadUnsub();
+            threadUnsub = onSnapshot(
+                query(collection(db, THREADS_COLLECTION), orderBy('updatedAt', 'desc'), limit(50)),
+                (snapshot) => {
+                    threads = snapshot.docs.map((threadDoc) => ({ id: threadDoc.id, ...threadDoc.data() }));
+                    renderThreads();
+                    setBoardStatus('同期済み', 'cloud_done', 'success');
+                },
+                (error) => {
+                    console.error(error);
+                    setBoardStatus('接続失敗', 'cloud_off', 'danger');
+                    threadListEl.innerHTML = '<div class="glass-panel p-8 text-center text-rose-300">Board の読み込みに失敗しました。時間をおいて再読み込みしてください。</div>';
+                    showToastText('Board の読み込みに失敗しました');
+                }
+            );
+        }
+
+        window.toggleThreadModal = () => {
+            document.getElementById('thread-modal').classList.toggle('hidden');
         };
 
-        window.addComment = () => {
-            const input = document.getElementById('comment-input');
-            const text = input.value.trim();
-            if (!text || !currentThreadId) return;
+        window.createThread = async () => {
+            const title = titleInput.value.trim();
+            const desc = descInput.value.trim();
 
-            input.value = '';
+            if (!isReady) return showToastText('接続準備中です。少し待ってください');
+            if (!title) return showToastText('タイトルを入力してください');
+            if (title.length > MAX_TITLE) return showToastText(`タイトルは${MAX_TITLE}文字以内です`);
+            if (desc.length > MAX_COMMENT) return showToastText(`コメントは${MAX_COMMENT}文字以内です`);
 
-            const t = boards.find(b => b.id === currentThreadId);
-            if (t) {
-                t.comments.push({ text: text, createdAt: Date.now() });
-                t.lastComment = text;
-                saveBoards();
-                renderComments();
-                renderThreads();
+            createThreadBtn.disabled = true;
+            createThreadBtn.classList.add('opacity-60');
+
+            try {
+                const threadRef = doc(collection(db, THREADS_COLLECTION));
+                const now = serverTimestamp();
+                await setDoc(threadRef, {
+                    title,
+                    lastComment: desc || 'スレッドが作成されました',
+                    commentCount: desc ? 1 : 0,
+                    createdAt: now,
+                    updatedAt: now
+                });
+
+                if (desc) {
+                    await addDoc(collection(db, THREADS_COLLECTION, threadRef.id, 'comments'), {
+                        text: desc,
+                        createdAt: serverTimestamp()
+                    });
+                }
+
+                resetThreadForm();
+                toggleThreadModal();
+                showToastText('スレッドを作成しました');
+            } catch (error) {
+                console.error(error);
+                showToastText('スレッド作成に失敗しました');
+            } finally {
+                createThreadBtn.disabled = false;
+                createThreadBtn.classList.remove('opacity-60');
             }
         };
 
-        document.getElementById('comment-input').addEventListener('keypress', function (e) {
+        window.openThread = (id) => {
+            currentThreadId = id;
+            const activeThread = threads.find((thread) => thread.id === id);
+            currentThreadTitle = activeThread?.title || 'LoG Thread';
+            document.getElementById('view-title').innerText = currentThreadTitle;
+            document.getElementById('view-meta').innerText = `${activeThread?.commentCount || 0} comments • anonymous live thread`;
+            document.getElementById('thread-view').classList.remove('hidden');
+            commentListEl.innerHTML = '<div class="text-center text-gray-500 mt-10">コメントを読み込み中...</div>';
+
+            if (commentsUnsub) commentsUnsub();
+            commentsUnsub = onSnapshot(
+                query(collection(db, THREADS_COLLECTION, id, 'comments'), orderBy('createdAt', 'asc'), limit(200)),
+                (snapshot) => {
+                    const comments = snapshot.docs.map((commentDoc) => ({ id: commentDoc.id, ...commentDoc.data() }));
+                    renderComments(comments);
+                    document.getElementById('view-meta').innerText = `${comments.length} comments • anonymous live thread`;
+                },
+                (error) => {
+                    console.error(error);
+                    commentListEl.innerHTML = '<div class="glass-panel p-8 text-center text-rose-300">コメントの読み込みに失敗しました。</div>';
+                    showToastText('コメントの読み込みに失敗しました');
+                }
+            );
+        };
+
+        window.closeThread = () => {
+            currentThreadId = null;
+            currentThreadTitle = '';
+            document.getElementById('thread-view').classList.add('hidden');
+            if (commentsUnsub) {
+                commentsUnsub();
+                commentsUnsub = null;
+            }
+        };
+
+        window.addComment = async () => {
+            const text = commentInput.value.trim();
+            if (!isReady) return showToastText('接続準備中です。少し待ってください');
+            if (!text || !currentThreadId) return;
+            if (text.length > MAX_COMMENT) return showToastText(`コメントは${MAX_COMMENT}文字以内です`);
+
+            sendCommentBtn.disabled = true;
+            sendCommentBtn.classList.add('opacity-60');
+
+            try {
+                await addDoc(collection(db, THREADS_COLLECTION, currentThreadId, 'comments'), {
+                    text,
+                    createdAt: serverTimestamp()
+                });
+                await updateDoc(doc(db, THREADS_COLLECTION, currentThreadId), {
+                    lastComment: text,
+                    commentCount: increment(1),
+                    updatedAt: serverTimestamp()
+                });
+                commentInput.value = '';
+                updateCounter(commentInput, 'comment-count', MAX_COMMENT);
+            } catch (error) {
+                console.error(error);
+                showToastText('コメント送信に失敗しました');
+            } finally {
+                sendCommentBtn.disabled = false;
+                sendCommentBtn.classList.remove('opacity-60');
+            }
+        };
+
+        titleInput.addEventListener('input', () => updateCounter(titleInput, 'title-count', MAX_TITLE));
+        descInput.addEventListener('input', () => updateCounter(descInput, 'desc-count', MAX_COMMENT));
+        commentInput.addEventListener('input', () => updateCounter(commentInput, 'comment-count', MAX_COMMENT));
+        commentInput.addEventListener('keypress', (e) => {
             if (e.key === 'Enter') {
+                e.preventDefault();
                 window.addComment();
             }
         });
 
-        renderThreads();
+        document.getElementById('thread-modal').addEventListener('click', (event) => {
+            if (event.target.id === 'thread-modal') {
+                toggleThreadModal();
+            }
+        });
+
+        updateCounter(titleInput, 'title-count', MAX_TITLE);
+        updateCounter(descInput, 'desc-count', MAX_COMMENT);
+        updateCounter(commentInput, 'comment-count', MAX_COMMENT);
+        setBoardStatus('匿名認証中...', 'shield', 'warning');
+
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                isReady = true;
+                bindThreadFeed();
+                return;
+            }
+
+            try {
+                await signInAnonymously(auth);
+                isReady = true;
+                bindThreadFeed();
+            } catch (error) {
+                console.error(error);
+                setBoardStatus('認証失敗', 'error', 'danger');
+                threadListEl.innerHTML = '<div class="glass-panel p-8 text-center text-rose-300">匿名認証に失敗しました。時間をおいて再読み込みしてください。</div>';
+                showToastText('匿名認証に失敗しました');
+            }
+        });
     </script>
 </body>
 
