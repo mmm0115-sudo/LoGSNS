@@ -21,7 +21,28 @@
     <meta name="twitter:card" content="summary_large_image">
 
     <!-- Libraries -->
-    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.tailwindcss.com">
+// ミッション更新ループ
+setInterval(() => {
+    const missionArea = document.getElementById('mission-list');
+    if (!missionArea) return;
+
+    if (Math.random() > 0.7) {
+        const m = generateNextMission();
+        const div = document.createElement('div');
+        div.className = "mission-card";
+        div.innerHTML = `
+            <div>
+                <div class="font-bold text-sm">${m.label}</div>
+                <div class="text-xs text-[var(--subtext)]">報酬 ${m.xp} XP</div>
+            </div>
+            <div class="text-emerald-400 font-black">NEW</div>
+        `;
+        missionArea.prepend(div);
+    }
+}, 45000);
+
+</script>
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
     <link
         href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&family=Noto+Sans+JP:wght@400;500;700;900&display=swap"
@@ -957,7 +978,12 @@
 
         // デモ用の管理者コード。公開HTMLでは読めてしまうので、本番ではFirebase Rules / Custom Claims側で守ってください。
         const ADMIN_CODE = "LOG-ADMIN-9999";
-        const MISSIONS = { login: { label: "ログイン", target: 1, xp: 50 }, like: { label: "3回いいね", target: 3, xp: 30 }, post: { label: "1回ポスト", target: 1, xp: 20 } };
+        const MISSIONS = {
+            login: { label: "ログイン", target: 1, xp: 150 },
+            like: { label: "5回いいね", target: 5, xp: 120 },
+            post: { label: "2回ポスト", target: 2, xp: 180 },
+            reply: { label: "3回リプライ", target: 3, xp: 220 }
+        };
         const TITLES = ["見習い", "住人", "詩人", "哲学", "虚無", "猫", "神", "富豪", "ニート", "将軍", "伝説", "歩行者", "空気", "勇者"];
         const PREMIUM_TITLES = ["Pioneer", "Whale", "Admin", "LoG Master", "創設者", "深海王"];
         const COSMETIC_ITEMS = [
@@ -965,6 +991,20 @@
             { id: 'cyber_frame', name: 'サイバーフレーム', kind: 'frame', className: 'profile-frame-cyber' },
             { id: 'gold_frame', name: 'ゴールドフレーム', kind: 'frame', className: 'profile-frame-gold' }
         ];
+
+        
+// ランダム追加ミッション
+const EXTRA_MISSIONS = [
+    { id:'speed', label:'10分以内に投稿', target:1, xp:250 },
+    { id:'combo', label:'10いいね獲得', target:10, xp:400 },
+    { id:'night', label:'深夜ログイン', target:1, xp:300 },
+    { id:'talk', label:'DMを5回送信', target:5, xp:280 }
+];
+
+function generateNextMission() {
+    return EXTRA_MISSIONS[Math.floor(Math.random() * EXTRA_MISSIONS.length)];
+}
+
 
         // Utils
         const showToast = (m) => { const t = document.getElementById('toast'); t.innerText = m; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 3000); };
@@ -1363,6 +1403,50 @@
                 </div>`;
         }
 
+        
+let currentReplyPost = null;
+
+window.openReply = (postId, authorName) => {
+    currentReplyPost = postId;
+    document.getElementById('reply-target').innerText = "@" + authorName + " に返信";
+    document.getElementById('reply-modal').classList.remove('hidden');
+};
+
+window.sendReply = async () => {
+    if (!currentReplyPost) return;
+
+    const text = document.getElementById('reply-input').value.trim();
+    if (!text) return;
+
+    const exp = new Date();
+    exp.setDate(exp.getDate() + 90);
+
+    await addDoc(collection(db, "logs"), {
+        text,
+        uid: currentUser.uid,
+        authorName: myProfile.name,
+        authorIcon: myProfile.icon,
+        authorTitle: myProfile.title || "",
+        createdAt: serverTimestamp(),
+        expireAt: exp,
+        likes: [],
+        replyTo: currentReplyPost,
+        isReply: true
+    });
+
+    await updateDoc(doc(db, "users", currentUser.uid), {
+        xp: increment(35)
+    });
+
+    myProfile.xp = (myProfile.xp || 0) + 35;
+
+    document.getElementById('reply-input').value = "";
+    document.getElementById('reply-modal').classList.add('hidden');
+
+    showToast("リプライを送信しました");
+};
+
+
         // --- Actions ---
         window.vote = async (id, idx) => {
             if (!requireAuth()) return;
@@ -1742,6 +1826,23 @@ window.safeScrollDM = function() {
     });
 };
 </script>
+
+
+<div id="reply-modal" class="modal-overlay hidden fixed inset-0 z-50 flex items-center justify-center p-4">
+    <div class="bg-[var(--card)] p-6 rounded-2xl w-full max-w-md shadow-2xl border border-[var(--border)]">
+        <h2 class="text-xl font-black mb-4">リプライ</h2>
+        <div id="reply-target" class="text-sm text-[var(--subtext)] mb-3"></div>
+        <textarea id="reply-input" rows="4"
+            class="w-full bg-[var(--border)]/30 rounded-xl p-3 mb-4 text-sm outline-none resize-none"
+            placeholder="返信を書く"></textarea>
+
+        <div class="flex gap-2">
+            <button onclick="document.getElementById('reply-modal').classList.add('hidden')"
+                class="flex-1 py-3 text-sm font-bold text-[var(--subtext)]">キャンセル</button>
+            <button onclick="sendReply()" class="flex-1 btn-primary py-3">送信</button>
+        </div>
+    </div>
+</div>
 
 </body>
 
