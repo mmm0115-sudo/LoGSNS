@@ -293,6 +293,58 @@
             opacity: 1;
             transform: translateX(-50%) translateY(0);
         }
+
+
+        .glass-panel {
+            background: rgba(128, 128, 128, 0.06);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+        }
+
+        .admin-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 3px 8px;
+            border-radius: 999px;
+            background: linear-gradient(90deg, rgba(250, 204, 21, 0.18), rgba(251, 113, 133, 0.18));
+            color: #f59e0b;
+            font-size: 10px;
+            font-weight: 900;
+            border: 1px solid rgba(245, 158, 11, 0.35);
+        }
+
+        .select-card {
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 12px;
+            background: rgba(128, 128, 128, 0.05);
+            transition: transform 0.15s, border-color 0.15s, background 0.15s;
+        }
+
+        .select-card:hover {
+            transform: translateY(-1px);
+            border-color: var(--accent);
+            background: rgba(29, 155, 240, 0.08);
+        }
+
+        .select-card.equipped {
+            border-color: var(--success);
+            background: rgba(0, 186, 124, 0.10);
+        }
+
+        .profile-frame-neon {
+            box-shadow: 0 0 0 2px #ec4899, 0 0 18px rgba(236, 72, 153, 0.65);
+        }
+
+        .profile-frame-cyber {
+            box-shadow: 0 0 0 2px #38bdf8, 0 0 18px rgba(56, 189, 248, 0.65);
+        }
+
+        .profile-frame-gold {
+            box-shadow: 0 0 0 2px #facc15, 0 0 18px rgba(250, 204, 21, 0.70);
+        }
+
     </style>
 </head>
 
@@ -446,7 +498,7 @@
                 </div>
 
                 <!-- LoG Market (Economy) -->
-                <div onclick="document.getElementById('market-modal').classList.remove('hidden')"
+                <div onclick="openMarket()"
                     class="mt-4 p-4 border border-[var(--border)] rounded-2xl cursor-pointer bg-gradient-to-r from-emerald-500/5 to-teal-500/5 hover:from-emerald-500/10 hover:to-teal-500/10 transition relative overflow-hidden group">
                     <div class="flex justify-between items-center relative z-10">
                         <div class="flex items-center gap-3">
@@ -461,6 +513,20 @@
                         </div>
                         <span
                             class="material-icons-round text-[var(--subtext)] group-hover:text-emerald-400 transition">chevron_right</span>
+                    </div>
+                </div>
+
+                <!-- Collection & Admin -->
+                <div class="grid grid-cols-2 gap-3 mt-3">
+                    <div onclick="openInventoryModal()"
+                        class="p-3 border border-[var(--border)] rounded-xl cursor-pointer hover:bg-[var(--border)]/50 transition">
+                        <div class="text-xs text-sky-500 font-bold mb-1 flex items-center gap-1"><span class="material-icons-round text-sm">inventory_2</span>コレクション</div>
+                        <div class="text-[10px] text-[var(--subtext)]">称号・アイテムを選択</div>
+                    </div>
+                    <div onclick="openAdminModal()"
+                        class="p-3 border border-[var(--border)] rounded-xl cursor-pointer hover:bg-[var(--border)]/50 transition">
+                        <div class="text-xs text-amber-500 font-bold mb-1 flex items-center gap-1"><span class="material-icons-round text-sm">admin_panel_settings</span>管理者</div>
+                        <div id="profile-admin-status" class="text-[10px] text-[var(--subtext)]">コード未入力</div>
                     </div>
                 </div>
 
@@ -761,6 +827,46 @@
                     </div>
                 </div>
 
+                <!-- Section 3: Cosmetics -->
+                <div>
+                    <h3 class="text-sm font-bold text-[var(--subtext)] uppercase tracking-wider mb-3">装備アイテム</h3>
+                    <div class="grid grid-cols-1 gap-3">
+                        <div class="glass-panel p-4 flex gap-4 items-center">
+                            <div class="w-12 h-12 bg-pink-500/15 rounded-xl flex items-center justify-center">
+                                <span class="material-icons-round text-pink-500">auto_awesome</span>
+                            </div>
+                            <div class="flex-1">
+                                <div class="font-bold text-sm">ネオンフレーム</div>
+                                <div class="text-[10px] text-[var(--subtext)]">プロフィール画像にピンク発光枠</div>
+                            </div>
+                            <button onclick="buyItem('cosmetic', {id:'neon_frame', name:'ネオンフレーム', kind:'frame'}, 300)"
+                                class="btn-primary py-1 px-3 text-xs flex flex-col items-center"><span>買う</span><span class="text-[8px] opacity-70">300 XP</span></button>
+                        </div>
+                        <div class="glass-panel p-4 flex gap-4 items-center">
+                            <div class="w-12 h-12 bg-blue-500/15 rounded-xl flex items-center justify-center">
+                                <span class="material-icons-round text-blue-500">data_object</span>
+                            </div>
+                            <div class="flex-1">
+                                <div class="font-bold text-sm">サイバーフレーム</div>
+                                <div class="text-[10px] text-[var(--subtext)]">プロフィール画像に青い電子枠</div>
+                            </div>
+                            <button onclick="buyItem('cosmetic', {id:'cyber_frame', name:'サイバーフレーム', kind:'frame'}, 450)"
+                                class="btn-primary py-1 px-3 text-xs flex flex-col items-center"><span>買う</span><span class="text-[8px] opacity-70">450 XP</span></button>
+                        </div>
+                        <div class="glass-panel p-4 flex gap-4 items-center">
+                            <div class="w-12 h-12 bg-yellow-500/15 rounded-xl flex items-center justify-center">
+                                <span class="material-icons-round text-yellow-500">workspace_premium</span>
+                            </div>
+                            <div class="flex-1">
+                                <div class="font-bold text-sm">ゴールドフレーム</div>
+                                <div class="text-[10px] text-[var(--subtext)]">王者っぽい金色フレーム</div>
+                            </div>
+                            <button onclick="buyItem('cosmetic', {id:'gold_frame', name:'ゴールドフレーム', kind:'frame'}, 900)"
+                                class="btn-primary py-1 px-3 text-xs flex flex-col items-center"><span>買う</span><span class="text-[8px] opacity-70">900 XP</span></button>
+                        </div>
+                    </div>
+                </div>
+
             </div>
         </div>
     </div>
@@ -770,10 +876,55 @@
             <button onclick="toggleDarkMode()"
                 class="w-full flex justify-between items-center p-3 font-bold mb-2 rounded-lg hover:bg-[var(--border)]/50 transition">ダークモード
                 <span class="material-icons-round">dark_mode</span></button>
+            <button onclick="openInventoryModal()"
+                class="w-full flex justify-between items-center p-3 font-bold mb-2 rounded-lg hover:bg-[var(--border)]/50 transition">称号・アイテム選択
+                <span class="material-icons-round">inventory_2</span></button>
+            <button onclick="openAdminModal()"
+                class="w-full flex justify-between items-center p-3 font-bold mb-2 rounded-lg hover:bg-[var(--border)]/50 transition">管理者コード
+                <span class="material-icons-round">admin_panel_settings</span></button>
             <button onclick="signOutApp()"
                 class="w-full text-left p-3 text-[var(--danger)] font-bold rounded-lg hover:bg-red-500/10 transition">ログアウト</button>
             <button onclick="document.getElementById('settings-modal').classList.add('hidden')"
                 class="mt-4 w-full py-2 text-sm font-bold text-[var(--subtext)]">閉じる</button>
+        </div>
+    </div>
+
+    <div id="admin-modal" class="modal-overlay hidden fixed inset-0 z-50 flex items-center justify-center p-4">
+        <div class="bg-[var(--card)] p-6 rounded-3xl w-full max-w-sm shadow-2xl border border-[var(--border)]">
+            <div class="flex justify-between items-center mb-4">
+                <div>
+                    <h2 class="text-xl font-black text-amber-500">Admin Gate</h2>
+                    <p class="text-xs text-[var(--subtext)]">管理者コードで無料購入モードを解放</p>
+                </div>
+                <button onclick="document.getElementById('admin-modal').classList.add('hidden')" class="text-[var(--subtext)]"><span class="material-icons-round">close</span></button>
+            </div>
+            <div id="admin-current-state" class="mb-3 text-xs font-bold text-[var(--subtext)]">未解放</div>
+            <input id="admin-code-input" type="password" placeholder="管理者コード"
+                class="w-full bg-[var(--border)]/30 rounded-xl border border-[var(--border)] p-4 mb-3 font-bold outline-none focus:border-amber-500 transition text-[var(--text)]">
+            <button onclick="activateAdminMode()" class="w-full btn-primary py-3 mb-2">コードを適用</button>
+            <button onclick="disableAdminMode()" class="w-full py-2 text-xs font-bold text-[var(--subtext)]">管理者モードをOFF</button>
+        </div>
+    </div>
+
+    <div id="inventory-modal" class="modal-overlay hidden fixed inset-0 z-50 flex items-center justify-center p-4">
+        <div class="bg-[var(--card)] p-6 rounded-3xl w-full max-w-md shadow-2xl border border-[var(--border)] flex flex-col max-h-[90vh]">
+            <div class="flex justify-between items-center mb-5">
+                <div>
+                    <h2 class="text-2xl font-black">コレクション</h2>
+                    <p class="text-xs text-[var(--subtext)]">持っている称号・アイテムを選択</p>
+                </div>
+                <button onclick="document.getElementById('inventory-modal').classList.add('hidden')" class="text-[var(--subtext)]"><span class="material-icons-round">close</span></button>
+            </div>
+            <div class="flex-1 overflow-y-auto space-y-6 pr-1">
+                <section>
+                    <h3 class="text-sm font-black text-[var(--subtext)] mb-3 uppercase tracking-wider">称号</h3>
+                    <div id="owned-title-list" class="grid grid-cols-1 gap-2"></div>
+                </section>
+                <section>
+                    <h3 class="text-sm font-black text-[var(--subtext)] mb-3 uppercase tracking-wider">装備アイテム</h3>
+                    <div id="owned-item-list" class="grid grid-cols-1 gap-2"></div>
+                </section>
+            </div>
         </div>
     </div>
 
@@ -806,13 +957,40 @@
 
         let currentUser = null, myProfile = null, quoteData = null, isPoll = false;
         let currentProfileTab = 'posts', currentChatUser = null;
+        let isAdminMode = localStorage.getItem('log_admin_mode') === 'true';
 
+        // デモ用の管理者コード。公開HTMLでは読めてしまうので、本番ではFirebase Rules / Custom Claims側で守ってください。
+        const ADMIN_CODE = "LOG-ADMIN-9999";
         const MISSIONS = { login: { label: "ログイン", target: 1, xp: 50 }, like: { label: "3回いいね", target: 3, xp: 30 }, post: { label: "1回ポスト", target: 1, xp: 20 } };
         const TITLES = ["見習い", "住人", "詩人", "哲学", "虚無", "猫", "神", "富豪", "ニート", "将軍", "伝説", "歩行者", "空気", "勇者"];
+        const PREMIUM_TITLES = ["Pioneer", "Whale", "Admin", "LoG Master", "創設者", "深海王"];
+        const COSMETIC_ITEMS = [
+            { id: 'neon_frame', name: 'ネオンフレーム', kind: 'frame', className: 'profile-frame-neon' },
+            { id: 'cyber_frame', name: 'サイバーフレーム', kind: 'frame', className: 'profile-frame-cyber' },
+            { id: 'gold_frame', name: 'ゴールドフレーム', kind: 'frame', className: 'profile-frame-gold' }
+        ];
 
         // Utils
         const showToast = (m) => { const t = document.getElementById('toast'); t.innerText = m; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 3000); };
         const authErr = (e) => showToast("Error: " + e.message);
+        const hasAdminPass = () => isAdminMode || !!(myProfile && myProfile.adminMode);
+        const normalizeArray = (v) => Array.isArray(v) ? v : [];
+        const escapeHtml = (v = '') => String(v).replace(/[&<>'"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[c]));
+        const escapeAttr = (v = '') => String(v)
+            .replace(/&/g, '&amp;')
+            .replace(/"/g, '&quot;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/\\/g, '\\\\')
+            .replace(/'/g, "\\'")
+            .replace(/\n/g, ' ');
+        const formatPostTime = (timestamp) => {
+            if (!timestamp) return 'たった今';
+            const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
+            if (Number.isNaN(date.getTime())) return '日時不明';
+            return new Intl.DateTimeFormat('ja-JP', { month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' }).format(date);
+        };
+        const getFrameClass = (frameId) => (COSMETIC_ITEMS.find(i => i.id === frameId) || {}).className || '';
 
         // ログイン要求ガード (未ログインならモーダルを出してfalseを返す)
         window.requireAuth = () => {
@@ -840,6 +1018,9 @@
                 if (d.exists()) {
                     myProfile = d.data();
                     if (!myProfile.following) myProfile.following = [];
+                    if (!myProfile.ownedTitles) myProfile.ownedTitles = myProfile.title ? [myProfile.title] : [];
+                    if (!myProfile.ownedItems) myProfile.ownedItems = [];
+                    if (myProfile.adminMode) { isAdminMode = true; localStorage.setItem('log_admin_mode', 'true'); }
                     await checkStreak();
                     await checkMissions('login');
                     initApp(true);
@@ -961,7 +1142,17 @@
             }
 
             const tEl = document.getElementById('profile-title');
-            if (myProfile.title) { tEl.innerText = myProfile.title; tEl.classList.remove('hidden'); }
+            if (myProfile.title) { tEl.innerText = myProfile.title; tEl.classList.remove('hidden'); } else { tEl.innerText = ''; tEl.classList.add('hidden'); }
+
+            const profileIcon = document.getElementById('profile-big-icon');
+            profileIcon.className = `w-20 h-20 rounded-full border-4 border-[var(--bg)] bg-[var(--bg)] object-cover shadow-sm ${getFrameClass(myProfile.equippedFrame)}`;
+            document.getElementById('header-icon').className = `w-8 h-8 rounded-full object-cover border border-[var(--border)] cursor-pointer bg-gray-100 ${getFrameClass(myProfile.equippedFrame)}`;
+            document.getElementById('input-icon').className = `w-10 h-10 rounded-full bg-gray-100 object-cover ${getFrameClass(myProfile.equippedFrame)}`;
+
+            const adminStatus = document.getElementById('profile-admin-status');
+            if (adminStatus) adminStatus.innerText = hasAdminPass() ? 'FREE MODE ON' : 'コード未入力';
+            const marketXp = document.getElementById('market-my-xp');
+            if (marketXp) marketXp.innerText = hasAdminPass() ? '∞' : (myProfile.xp || 0);
 
             if (myProfile.pinnedId) loadPinned(myProfile.pinnedId);
 
@@ -1059,7 +1250,7 @@
             if (!text.trim() && !p1) return;
 
             const exp = new Date(); exp.setDate(exp.getDate() + 90);
-            const data = { text, uid: currentUser.uid, authorName: myProfile.name, authorIcon: myProfile.icon, authorTitle: myProfile.title || "", createdAt: serverTimestamp(), expireAt: exp, likes: [] };
+            const data = { text, uid: currentUser.uid, authorName: myProfile.name, authorIcon: myProfile.icon || `https://api.dicebear.com/7.x/notionists/svg?seed=${currentUser.uid}`, authorTitle: myProfile.title || "", authorFrame: myProfile.equippedFrame || "", createdAt: serverTimestamp(), expireAt: exp, likes: [] };
             if (isPoll && p1 && p2) data.poll = { total: 0, options: [{ id: 0, txt: p1, votes: [] }, { id: 1, txt: p2, votes: [] }] };
             if (quoteData) data.quote = quoteData;
 
@@ -1115,12 +1306,20 @@
             // currentUserがnull（未ログイン）の場合のエラーを防ぐため、安全なチェックを行う
             const isLiked = currentUser && d.likes && d.likes.includes(currentUser.uid);
             const isMine = currentUser && d.uid === currentUser.uid;
+            const postTime = formatPostTime(d.createdAt);
+            const iconFrame = getFrameClass(d.authorFrame || '');
+            const safeText = escapeHtml(d.text || '');
+            const safeAuthor = escapeHtml(d.authorName || '名無し');
+            const safeTitle = escapeHtml(d.authorTitle || '');
+            const safeUid = escapeHtml((d.uid || '').slice(0, 8));
+            const quoteText = escapeAttr(d.text || '');
+            const quoteName = escapeAttr(d.authorName || '名無し');
             let pollUI = "";
             if (d.poll) {
                 pollUI = `<div class="poll-container">`;
                 d.poll.options.forEach((o, i) => {
                     const pct = d.poll.total ? Math.round((o.votes.length / d.poll.total) * 100) : 0;
-                    pollUI += `<div onclick="event.stopPropagation();vote('${id}',${i})" class="poll-option hover:bg-[var(--border)]/20"><div class="poll-fill" style="width:${pct}%"></div><span class="z-10 text-sm font-bold">${o.txt}</span><span class="z-10 text-xs font-bold">${pct}%</span></div>`;
+                    pollUI += `<div onclick="event.stopPropagation();vote('${id}',${i})" class="poll-option hover:bg-[var(--border)]/20"><div class="poll-fill" style="width:${pct}%"></div><span class="z-10 text-sm font-bold">${escapeHtml(o.txt)}</span><span class="z-10 text-xs font-bold">${pct}%</span></div>`;
                 });
                 pollUI += `</div>`;
             }
@@ -1128,22 +1327,27 @@
 
             return `
                 <div class="post-card flex gap-3">
-                    <img src="${d.authorIcon}" class="w-10 h-10 rounded-full object-cover flex-shrink-0 cursor-pointer" onclick="${profileClick}">
+                    <img src="${d.authorIcon}" class="w-10 h-10 rounded-full object-cover flex-shrink-0 cursor-pointer ${iconFrame}" onclick="${profileClick}">
                     <div class="flex-1 min-w-0">
-                        <div class="flex justify-between items-baseline">
-                            <div class="flex items-center gap-1 overflow-hidden">
-                                <span class="font-bold text-[15px] truncate cursor-pointer hover:underline" onclick="${profileClick}">${d.authorName}</span>
-                                ${d.authorTitle ? `<span class="title-badge">${d.authorTitle}</span>` : ''}
-                                <span class="text-[var(--subtext)] text-sm truncate">@${d.uid.slice(0, 8)}</span>
+                        <div class="flex justify-between items-start gap-2">
+                            <div class="min-w-0">
+                                <div class="flex items-center gap-1 overflow-hidden">
+                                    <span class="font-bold text-[15px] truncate cursor-pointer hover:underline" onclick="${profileClick}">${safeAuthor}</span>
+                                    ${safeTitle ? `<span class="title-badge">${safeTitle}</span>` : ''}
+                                    <span class="text-[var(--subtext)] text-sm truncate">@${safeUid}</span>
+                                </div>
+                                <div class="text-[11px] text-[var(--subtext)] mt-0.5 flex items-center gap-1">
+                                    <span class="material-icons-round text-[13px]">schedule</span><span>${postTime}</span>
+                                </div>
                             </div>
                             ${isMine && !isPin ? `<div class="relative group"><button class="text-[var(--subtext)]">•••</button><div class="hidden group-hover:block absolute right-0 bg-[var(--card)] border border-[var(--border)] shadow-lg rounded p-1 z-10 w-24"><button onclick="pin('${id}')" class="w-full text-left text-xs p-2 hover:bg-[var(--border)]">固定</button><button onclick="del('${id}')" class="w-full text-left text-xs p-2 text-[var(--danger)] hover:bg-[var(--border)]">削除</button></div></div>` : ''}
                         </div>
-                        <p class="text-[15px] mt-1 whitespace-pre-wrap leading-relaxed break-words">${d.text}</p>
+                        <p class="text-[15px] mt-2 whitespace-pre-wrap leading-relaxed break-words">${safeText}</p>
                         ${pollUI}
-                        ${d.quote ? `<div class="p-3 mt-2 rounded-xl border border-[var(--border)] text-sm"><div class="font-bold">${d.quote.name}</div><div class="text-[var(--subtext)] truncate">${d.quote.text}</div></div>` : ''}
+                        ${d.quote ? `<div class="p-3 mt-2 rounded-xl border border-[var(--border)] text-sm"><div class="font-bold">${escapeHtml(d.quote.name)}</div><div class="text-[var(--subtext)] truncate">${escapeHtml(d.quote.text)}</div></div>` : ''}
                         <div class="flex justify-between mt-3 max-w-sm text-[var(--subtext)] pr-4">
-                            <button onclick="event.stopPropagation();setQuote('${d.text.replace(/'/g, "\\'").replace(/\n/g, " ")}','${d.authorName}')" class="btn-ghost"><span class="material-icons-round text-lg">cached</span></button>
-                            <button onclick="event.stopPropagation(); window.sharePost('${d.text.replace(/'/g, "\\'").replace(/\n/g, " ")}', '${d.authorName}')" class="btn-ghost hover:text-[#1da1f2] transition"><svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 22.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"></path></svg></button>
+                            <button onclick="event.stopPropagation();setQuote('${quoteText}','${quoteName}')" class="btn-ghost"><span class="material-icons-round text-lg">cached</span></button>
+                            <button onclick="event.stopPropagation(); window.sharePost('${quoteText}', '${quoteName}')" class="btn-ghost hover:text-[#1da1f2] transition"><svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 22.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"></path></svg></button>
                             <button onclick="event.stopPropagation();like('${id}','${d.uid}')" class="btn-ghost ${isLiked ? 'like-active like-anim text-[#f91880]' : ''}"><span class="material-icons-round text-lg">${isLiked ? 'favorite' : 'favorite_border'}</span> <span class="text-xs ml-1">${d.likes ? d.likes.length : 0}</span></button>
                         </div>
                     </div>
@@ -1245,41 +1449,167 @@
         // --- Gacha ---
         window.spinGacha = async () => {
             if (!requireAuth()) return;
-            if ((myProfile.xp || 0) < 50) return showToast("XP不足 (50必要)");
-            if (!confirm("50 XP消費しますか？")) return;
+            const admin = hasAdminPass();
+            if (!admin && (myProfile.xp || 0) < 50) return showToast("XP不足 (50必要)");
+            if (!confirm(admin ? "管理者モードで無料ガチャを回しますか？" : "50 XP消費しますか？")) return;
             const newTitle = TITLES[Math.floor(Math.random() * TITLES.length)];
-            await updateDoc(doc(db, "users", currentUser.uid), { xp: increment(-50), title: newTitle });
-            myProfile.xp -= 50; myProfile.title = newTitle; updateMyProfileUI();
-            showToast(`称号GET: [${newTitle}]`);
+            const updates = { title: newTitle, ownedTitles: arrayUnion(newTitle) };
+            if (!admin) updates.xp = increment(-50);
+            await updateDoc(doc(db, "users", currentUser.uid), updates);
+            if (!admin) myProfile.xp -= 50;
+            myProfile.title = newTitle;
+            myProfile.ownedTitles = [...new Set([...normalizeArray(myProfile.ownedTitles), newTitle])];
+            updateMyProfileUI();
+            renderInventory();
+            showToast(`称号GET: [${newTitle}]${admin ? ' FREE' : ''}`);
         };
 
         // --- LoG Market ---
+        window.openMarket = () => {
+            if (!requireAuth()) return;
+            document.getElementById('market-modal').classList.remove('hidden');
+            const xpDisplay = document.getElementById('market-my-xp');
+            if (xpDisplay) xpDisplay.innerText = hasAdminPass() ? '∞' : (myProfile.xp || 0);
+        };
+
         window.buyItem = async (type, itemData, cost) => {
             if (!requireAuth()) return;
-            if ((myProfile.xp || 0) < cost) return showToast(`XP不足 (${cost}必要)`);
-            if (!confirm(`${cost} XP消費しますか？`)) return;
+            const admin = hasAdminPass();
+            if (!admin && (myProfile.xp || 0) < cost) return showToast(`XP不足 (${cost}必要)`);
+            if (!confirm(admin ? "管理者モードなので無料で入手しますか？" : `${cost} XP消費しますか？`)) return;
+
+            const updates = {};
+            if (!admin) updates.xp = increment(-cost);
 
             if (type === 'title') {
                 if (myProfile.title === itemData) return showToast("既に装備中です");
-                await updateDoc(doc(db, "users", currentUser.uid), { xp: increment(-cost), title: itemData });
-                myProfile.xp -= cost; myProfile.title = itemData; updateMyProfileUI();
-                showToast(`称号GET: [${itemData}]`);
+                updates.title = itemData;
+                updates.ownedTitles = arrayUnion(itemData);
+                await updateDoc(doc(db, "users", currentUser.uid), updates);
+                if (!admin) myProfile.xp -= cost;
+                myProfile.title = itemData;
+                myProfile.ownedTitles = [...new Set([...normalizeArray(myProfile.ownedTitles), itemData])];
+                updateMyProfileUI();
+                renderInventory();
+                showToast(`称号GET: [${itemData}]${admin ? ' FREE' : ''}`);
+            } else if (type === 'cosmetic') {
+                const item = itemData;
+                if (normalizeArray(myProfile.ownedItems).includes(item.id)) return showToast("既に所持しています");
+                updates.ownedItems = arrayUnion(item.id);
+                if (item.kind === 'frame') updates.equippedFrame = item.id;
+                await updateDoc(doc(db, "users", currentUser.uid), updates);
+                if (!admin) myProfile.xp -= cost;
+                myProfile.ownedItems = [...new Set([...normalizeArray(myProfile.ownedItems), item.id])];
+                if (item.kind === 'frame') myProfile.equippedFrame = item.id;
+                updateMyProfileUI();
+                renderInventory();
+                showToast(`アイテムGET: ${item.name}${admin ? ' FREE' : ''}`);
             } else if (type === 'faction_boost') {
                 if (!myProfile.faction) return showToast("陣営に所属していません");
-                await updateDoc(doc(db, "users", currentUser.uid), { xp: increment(-cost) });
+                if (Object.keys(updates).length) await updateDoc(doc(db, "users", currentUser.uid), updates);
 
                 // Add points to a global faction document (e.g. 'universe/factions')
                 await setDoc(doc(db, "universe", "factions"), {
                     [myProfile.faction]: increment(itemData)
                 }, { merge: true });
 
-                myProfile.xp -= cost; updateMyProfileUI();
-                showToast(`${myProfile.faction} 陣営に ${itemData} Point 貢献しました🔥`);
+                if (!admin) myProfile.xp -= cost;
+                updateMyProfileUI();
+                showToast(`${myProfile.faction} 陣営に ${itemData} Point 貢献しました${admin ? ' FREE' : ''}🔥`);
             }
 
             // UI更新
             const xpDisplay = document.getElementById('market-my-xp');
-            if (xpDisplay) xpDisplay.innerText = myProfile.xp;
+            if (xpDisplay) xpDisplay.innerText = hasAdminPass() ? '∞' : myProfile.xp;
+        };
+
+        window.openInventoryModal = () => {
+            if (!requireAuth()) return;
+            renderInventory();
+            document.getElementById('inventory-modal').classList.remove('hidden');
+        };
+
+        function renderInventory() {
+            if (!myProfile) return;
+            const titleList = document.getElementById('owned-title-list');
+            const itemList = document.getElementById('owned-item-list');
+            if (!titleList || !itemList) return;
+
+            const ownedTitles = [...new Set([...normalizeArray(myProfile.ownedTitles), ...(myProfile.title ? [myProfile.title] : []), ...(hasAdminPass() ? [...TITLES, ...PREMIUM_TITLES] : [])])];
+            titleList.innerHTML = ownedTitles.length ? '' : `<div class="text-xs text-[var(--subtext)] p-3 border border-[var(--border)] rounded-xl">まだ称号がありません。ガチャかマーケットでGET。</div>`;
+            ownedTitles.forEach(title => {
+                const equipped = myProfile.title === title;
+                titleList.innerHTML += `<button onclick="equipTitle('${escapeAttr(title)}')" class="select-card text-left ${equipped ? 'equipped' : ''}"><div class="flex justify-between items-center"><span class="title-badge">${escapeHtml(title)}</span><span class="text-[10px] font-bold text-[var(--subtext)]">${equipped ? '装備中' : '選択'}</span></div></button>`;
+            });
+
+            const ownedItems = hasAdminPass() ? COSMETIC_ITEMS.map(i => i.id) : normalizeArray(myProfile.ownedItems);
+            itemList.innerHTML = `<button onclick="equipFrame('')" class="select-card text-left ${!myProfile.equippedFrame ? 'equipped' : ''}"><div class="flex justify-between items-center"><span class="font-bold text-sm">フレームなし</span><span class="text-[10px] font-bold text-[var(--subtext)]">${!myProfile.equippedFrame ? '装備中' : '選択'}</span></div></button>`;
+            const items = COSMETIC_ITEMS.filter(item => ownedItems.includes(item.id));
+            if (!items.length && !hasAdminPass()) itemList.innerHTML += `<div class="text-xs text-[var(--subtext)] p-3 border border-[var(--border)] rounded-xl">まだアイテムがありません。マーケットで買えます。</div>`;
+            items.forEach(item => {
+                const equipped = myProfile.equippedFrame === item.id;
+                itemList.innerHTML += `<button onclick="equipFrame('${item.id}')" class="select-card text-left ${equipped ? 'equipped' : ''}"><div class="flex justify-between items-center"><span class="font-bold text-sm ${item.className} px-2 py-1 rounded-full">${item.name}</span><span class="text-[10px] font-bold text-[var(--subtext)]">${equipped ? '装備中' : '選択'}</span></div></button>`;
+            });
+        }
+
+        window.equipTitle = async (title) => {
+            if (!requireAuth()) return;
+            const owned = normalizeArray(myProfile.ownedTitles).includes(title) || hasAdminPass() || myProfile.title === title;
+            if (!owned) return showToast('未所持の称号です');
+            await updateDoc(doc(db, "users", currentUser.uid), { title });
+            myProfile.title = title;
+            myProfile.ownedTitles = [...new Set([...normalizeArray(myProfile.ownedTitles), title])];
+            updateMyProfileUI();
+            renderInventory();
+            showToast(`称号を [${title}] に変更しました`);
+        };
+
+        window.equipFrame = async (frameId) => {
+            if (!requireAuth()) return;
+            const owned = !frameId || normalizeArray(myProfile.ownedItems).includes(frameId) || hasAdminPass();
+            if (!owned) return showToast('未所持のアイテムです');
+            await updateDoc(doc(db, "users", currentUser.uid), { equippedFrame: frameId });
+            myProfile.equippedFrame = frameId;
+            updateMyProfileUI();
+            renderInventory();
+            showToast(frameId ? 'フレームを変更しました' : 'フレームを外しました');
+        };
+
+        window.openAdminModal = () => {
+            if (!requireAuth()) return;
+            const modal = document.getElementById('admin-modal');
+            modal.classList.remove('hidden');
+            const state = document.getElementById('admin-current-state');
+            if (state) state.innerText = hasAdminPass() ? 'FREE MODE ON：マーケットとガチャが無料です' : '未解放：管理者コードを入力してください';
+        };
+
+        window.activateAdminMode = async () => {
+            if (!requireAuth()) return;
+            const input = document.getElementById('admin-code-input');
+            const code = (input.value || '').trim();
+            if (code !== ADMIN_CODE) return showToast('管理者コードが違います');
+            isAdminMode = true;
+            localStorage.setItem('log_admin_mode', 'true');
+            await setDoc(doc(db, "users", currentUser.uid), { adminMode: true, title: myProfile.title || 'Admin', ownedTitles: arrayUnion('Admin') }, { merge: true });
+            myProfile.adminMode = true;
+            myProfile.ownedTitles = [...new Set([...normalizeArray(myProfile.ownedTitles), 'Admin'])];
+            if (!myProfile.title) myProfile.title = 'Admin';
+            updateMyProfileUI();
+            renderInventory();
+            document.getElementById('admin-current-state').innerText = 'FREE MODE ON：マーケットとガチャが無料です';
+            showToast('管理者モードを解放しました');
+        };
+
+        window.disableAdminMode = async () => {
+            if (!requireAuth()) return;
+            isAdminMode = false;
+            localStorage.removeItem('log_admin_mode');
+            await setDoc(doc(db, "users", currentUser.uid), { adminMode: false }, { merge: true });
+            myProfile.adminMode = false;
+            updateMyProfileUI();
+            renderInventory();
+            document.getElementById('admin-current-state').innerText = '未解放：管理者コードを入力してください';
+            showToast('管理者モードをOFFにしました');
         };
 
         // --- Chat ---
@@ -1315,6 +1645,11 @@
                 icon: `https://api.dicebear.com/7.x/notionists/svg?seed=${currentUser.uid}`,
                 xp: 100, // Initial 100 XP to start economy
                 faction: faction,
+                ownedTitles: ["見習い"],
+                ownedItems: [],
+                title: "見習い",
+                equippedFrame: "",
+                adminMode: false,
                 expireAt: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000)
             }, { merge: true });
             location.reload();
