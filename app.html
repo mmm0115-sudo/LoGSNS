@@ -404,6 +404,15 @@ setInterval(() => {
             word-break: break-word;
         }
 
+
+        .post-card .btn-ghost {
+            min-width: 44px;
+            min-height: 36px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
 </style>
 </head>
 
@@ -1391,13 +1400,24 @@ function generateNextMission() {
                             </div>
                             ${canDelete && !isPin ? `<div class="relative group"><button class="text-[var(--subtext)]">•••</button><div class="hidden group-hover:block absolute right-0 bg-[var(--card)] border border-[var(--border)] shadow-lg rounded p-1 z-10 w-24"><button onclick="pin('${id}')" class="w-full text-left text-xs p-2 hover:bg-[var(--border)]">固定</button><button onclick="del('${id}')" class="w-full text-left text-xs p-2 text-[var(--danger)] hover:bg-[var(--border)]">削除</button></div></div>` : ''}
                         </div>
+                        ${d.isReply ? `<div class="text-xs text-blue-400 font-bold mt-2 mb-1">↪ ${escapeHtml(d.replyToName || 'ポスト')} へのリプライ</div>` : ''}
                         <p class="text-[15px] mt-2 whitespace-pre-wrap leading-relaxed break-words">${safeText}</p>
                         ${pollUI}
                         ${d.quote ? `<div class="p-3 mt-2 rounded-xl border border-[var(--border)] text-sm"><div class="font-bold">${escapeHtml(d.quote.name)}</div><div class="text-[var(--subtext)] truncate">${escapeHtml(d.quote.text)}</div></div>` : ''}
-                        <div class="flex justify-between mt-3 max-w-sm text-[var(--subtext)] pr-4">
-                            <button onclick="event.stopPropagation();setQuote('${quoteText}','${quoteName}')" class="btn-ghost"><span class="material-icons-round text-lg">cached</span></button>
-                            
-                            <button onclick="event.stopPropagation();like('${id}','${d.uid}')" class="btn-ghost ${isLiked ? 'like-active like-anim text-[#f91880]' : ''}"><span class="material-icons-round text-lg">${isLiked ? 'favorite' : 'favorite_border'}</span> <span class="text-xs ml-1">${d.likes ? d.likes.length : 0}</span></button>
+                        <div class="flex justify-between items-center mt-3 max-w-sm text-[var(--subtext)] pr-4">
+                            <button onclick="event.stopPropagation();openReply('${id}','${quoteName}')" class="btn-ghost flex items-center gap-1" title="リプライ" aria-label="リプライ">
+                                <span class="material-icons-round text-lg leading-none">reply</span>
+                                <span class="text-xs font-bold">リプ</span>
+                            </button>
+
+                            <button onclick="event.stopPropagation();setQuote('${quoteText}','${quoteName}')" class="btn-ghost flex items-center gap-1" title="引用" aria-label="引用">
+                                <span class="material-icons-round text-lg leading-none">cached</span>
+                            </button>
+
+                            <button onclick="event.stopPropagation();like('${id}','${d.uid}')" class="btn-ghost flex items-center gap-1 ${isLiked ? 'like-active like-anim text-[#f91880]' : ''}" title="いいね" aria-label="いいね">
+                                <span class="material-icons-round text-lg leading-none">${isLiked ? 'favorite' : 'favorite_border'}</span>
+                                <span class="text-xs ml-1">${d.likes ? d.likes.length : 0}</span>
+                            </button>
                         </div>
                     </div>
                 </div>`;
@@ -1413,6 +1433,7 @@ window.openReply = (postId, authorName) => {
 };
 
 window.sendReply = async () => {
+    if (!requireAuth()) return;
     if (!currentReplyPost) return;
 
     const text = document.getElementById('reply-input').value.trim();
@@ -1421,16 +1442,22 @@ window.sendReply = async () => {
     const exp = new Date();
     exp.setDate(exp.getDate() + 90);
 
+    const parentRef = doc(db, "logs", currentReplyPost);
+    const parentSnap = await getDoc(parentRef);
+    const parentData = parentSnap.exists() ? parentSnap.data() : null;
+
     await addDoc(collection(db, "logs"), {
         text,
         uid: currentUser.uid,
         authorName: myProfile.name,
         authorIcon: myProfile.icon,
         authorTitle: myProfile.title || "",
+        authorFrame: myProfile.equippedFrame || "",
         createdAt: serverTimestamp(),
         expireAt: exp,
         likes: [],
         replyTo: currentReplyPost,
+        replyToName: parentData ? (parentData.authorName || "") : "",
         isReply: true
     });
 
@@ -1439,6 +1466,19 @@ window.sendReply = async () => {
     });
 
     myProfile.xp = (myProfile.xp || 0) + 35;
+    updateMyProfileUI();
+    await checkMissions('reply');
+
+    if (parentData && parentData.uid && parentData.uid !== currentUser.uid) {
+        await addDoc(collection(db, "notif"), {
+            to: parentData.uid,
+            from: myProfile.name,
+            type: 'reply',
+            read: false,
+            createdAt: serverTimestamp(),
+            expireAt: exp
+        });
+    }
 
     document.getElementById('reply-input').value = "";
     document.getElementById('reply-modal').classList.add('hidden');
@@ -1501,7 +1541,7 @@ window.sendReply = async () => {
                 s.forEach(d => {
                     const n = d.data();
                     if (!n.read) unread = true;
-                    l.innerHTML += `<div class="p-4 flex gap-3 ${!n.read ? 'bg-[var(--accent)]/10' : ''}"><span class="material-icons-round text-[var(--accent)]">${n.type === 'like' ? 'favorite' : (n.type === 'follow' ? 'person_add' : 'reply')}</span><div class="text-sm"><span class="font-bold">${n.from}</span>さんが${n.type === 'like' ? 'いいね' : (n.type === 'follow' ? 'フォロー' : (n.type === 'dm' ? 'DM' : (n.type === 'post' ? '新しく投稿' : '反応')))}しました</div></div>`;
+                    l.innerHTML += `<div class="p-4 flex gap-3 ${!n.read ? 'bg-[var(--accent)]/10' : ''}"><span class="material-icons-round text-[var(--accent)]">${n.type === 'like' ? 'favorite' : (n.type === 'follow' ? 'person_add' : 'reply')}</span><div class="text-sm"><span class="font-bold">${n.from}</span>さんが${n.type === 'like' ? 'いいね' : (n.type === 'follow' ? 'フォロー' : (n.type === 'dm' ? 'DM' : (n.type === 'post' ? '新しく投稿' : (n.type === 'reply' ? 'リプライ' : '反応'))))}しました</div></div>`;
                     if (!n.read) updateDoc(doc(db, "notif", d.id), { read: true });
                 });
                 b.style.display = unread ? 'block' : 'none';
