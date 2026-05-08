@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover, user-scalable=no">
     <title>LoG SNS</title>
 
     <!-- PWA Config -->
@@ -51,14 +51,34 @@
             --nav-bg: rgba(0, 0, 0, 0.95);
         }
 
+        
         body {
             background-color: var(--bg);
             color: var(--text);
             font-family: 'Inter', 'Noto Sans JP', sans-serif;
             overflow-x: hidden;
+            width: 100%;
+            position: relative;
+            -webkit-overflow-scrolling: touch;
+            overscroll-behavior-x: none;
             -webkit-tap-highlight-color: transparent;
             transition: background 0.3s, color 0.3s;
         }
+
+        html {
+            overflow-x: hidden;
+            width: 100%;
+            max-width: 100%;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        img, div, section, main {
+            max-width: 100%;
+        }
+
 
         .hidden {
             display: none !important;
@@ -345,7 +365,25 @@
             box-shadow: 0 0 0 2px #facc15, 0 0 18px rgba(250, 204, 21, 0.70);
         }
 
-    </style>
+    
+        #chat-messages {
+            overflow-x: hidden !important;
+            word-break: break-word;
+            -webkit-overflow-scrolling: touch;
+            padding-bottom: 24px;
+        }
+
+        #chat-input {
+            min-width: 0;
+        }
+
+        .dm-bubble {
+            max-width: 78%;
+            overflow-wrap: break-word;
+            word-break: break-word;
+        }
+
+</style>
 </head>
 
 <body>
@@ -588,7 +626,7 @@
 
         <!-- Navigation -->
         <nav
-            class="fixed bottom-0 w-full max-w-xl bg-[var(--nav-bg)] border-t border-[var(--border)] flex justify-around py-3 z-50 backdrop-blur pb-6">
+            class="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-xl bg-[var(--nav-bg)] border-t border-[var(--border)] flex justify-around py-3 z-50 backdrop-blur pb-6">
             <button onclick="switchTab('home')" class="nav-item nav-active" data-target="home"><span
                     class="material-icons-round text-3xl">home</span></button>
             <button onclick="switchTab('explore')" class="nav-item" data-target="explore"><span
@@ -1677,6 +1715,34 @@
             window.scrollTo({ top: 0, behavior: 'smooth' });
         };
     </script>
+
+<script>
+// iPad Safari scroll stabilization
+document.addEventListener('gesturestart', function (e) {
+    e.preventDefault();
+});
+
+window.addEventListener('resize', () => {
+    document.body.style.width = window.innerWidth + 'px';
+});
+
+// Prevent sideways bounce scroll
+document.addEventListener('touchmove', function(e) {
+    if (Math.abs(e.touches[0].clientX) > window.innerWidth) {
+        e.preventDefault();
+    }
+}, { passive: false });
+
+// Auto scroll DM safely
+window.safeScrollDM = function() {
+    const el = document.getElementById('chat-messages');
+    if (!el) return;
+    requestAnimationFrame(() => {
+        el.scrollTop = el.scrollHeight;
+    });
+};
+</script>
+
 </body>
 
 </html>
