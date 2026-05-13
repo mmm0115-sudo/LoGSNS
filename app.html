@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+
 <html lang="ja">
 <head>
   <meta charset="UTF-8" />
@@ -8,237 +9,389 @@
   <meta name="theme-color" content="#ffffff" />
   <title>LoG SNS</title>
 
+  <!--
+    画像は、さっき作った / 添付したLoGロゴを使う想定。
+    GitHubに置く時は、同じ階層に以下の2枚を置くとそのまま動く。
+
+    logo-main.png  : 大きい筆記体LoGロゴ
+    logo-icon.png  : 四角いアプリアイコン
+
+    画像名を変えるなら、下の LOGO_MAIN と LOGO_ICON を変更。
+  -->
+
+  <link rel="icon" type="image/png" href="logo-icon.png" />
+  <link rel="apple-touch-icon" href="logo-icon.png" />
+
   <script src="https://cdn.tailwindcss.com"></script>
+
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&family=Noto+Sans+JP:wght@400;500;700;900&display=swap" rel="stylesheet" />
 
   <style>
-    :root{
-      --bg:#ffffff;
-      --text:#0f1419;
-      --card:#ffffff;
-      --border:#eff3f4;
-      --sub:#536471;
-      --accent:#1d9bf0;
-      --danger:#f4212e;
-      --success:#00ba7c;
-      --nav:rgba(255,255,255,.94);
+    :root {
+      --bg: #ffffff;
+      --text: #0f1419;
+      --card: #ffffff;
+      --border: #eff3f4;
+      --sub: #536471;
+      --accent: #1d9bf0;
+      --danger: #f4212e;
+      --success: #00ba7c;
+      --nav: rgba(255,255,255,.94);
     }
-    .dark{
-      --bg:#000000;
-      --text:#e7e9ea;
-      --card:#000000;
-      --border:#2f3336;
-      --sub:#71767b;
-      --nav:rgba(0,0,0,.94);
+
+    .dark {
+      --bg: #000000;
+      --text: #e7e9ea;
+      --card: #000000;
+      --border: #2f3336;
+      --sub: #71767b;
+      --nav: rgba(0,0,0,.94);
     }
-    html,body{
-      margin:0;
-      width:100%;
-      max-width:100%;
-      overflow-x:hidden;
-      background:var(--bg);
-      color:var(--text);
-      font-family:Inter,'Noto Sans JP',system-ui,sans-serif;
-      -webkit-text-size-adjust:100%;
-      -webkit-tap-highlight-color:transparent;
-      -webkit-overflow-scrolling:touch;
-      overscroll-behavior-x:none;
-      touch-action:pan-y;
+
+    html,
+    body {
+      margin: 0;
+      width: 100%;
+      max-width: 100%;
+      overflow-x: hidden;
+      background: var(--bg);
+      color: var(--text);
+      font-family: Inter, 'Noto Sans JP', system-ui, sans-serif;
+      -webkit-text-size-adjust: 100%;
+      -webkit-tap-highlight-color: transparent;
+      -webkit-overflow-scrolling: touch;
+      overscroll-behavior-x: none;
+      touch-action: pan-y;
     }
-    *{box-sizing:border-box}
-    button,input,textarea{font:inherit}
-    img,svg{max-width:100%}
-    .hidden{display:none!important}
-    .btn-primary{background:var(--text);color:var(--bg);border-radius:999px;padding:8px 16px;font-weight:900;font-size:.9rem}
-    .btn-soft{background:color-mix(in srgb,var(--border) 72%,transparent);color:var(--text);border-radius:999px;padding:8px 14px;font-weight:800;font-size:.85rem}
-    .btn-ghost{min-width:44px;min-height:38px;display:inline-flex;align-items:center;justify-content:center;gap:4px;color:var(--sub);border-radius:999px;padding:7px 10px}
-    .btn-ghost:active,.post:active{background:rgba(128,128,128,.08)}
-    .nav-item{color:var(--sub);padding:10px;border-radius:999px;position:relative;min-width:54px;display:grid;place-items:center}
-    .nav-active{color:var(--text);transform:scale(1.06)}
-    .nav-badge{position:absolute;top:9px;right:12px;width:9px;height:9px;background:var(--danger);border-radius:999px;display:none}
-    .post{border-bottom:1px solid var(--border);padding:14px 16px;cursor:pointer;contain:content;overflow-x:hidden;background:var(--bg)}
-    .badge{display:inline-block;border-radius:6px;padding:2px 6px;font-size:.62rem;font-weight:900;white-space:nowrap}
-    .title-badge{background:linear-gradient(135deg,#ffd54a,#ff8a00);color:#fff}
-    .gemini-badge{background:linear-gradient(135deg,#4285f4,#9b72cb,#d96570);color:#fff}
-    .admin-badge{background:linear-gradient(135deg,#111,#666);color:#fff}
-    .modal-overlay{background:rgba(0,0,0,.68);backdrop-filter:blur(6px)}
-    .toast{position:fixed;bottom:86px;left:50%;transform:translateX(-50%) translateY(18px);background:rgba(0,0,0,.84);color:#fff;padding:10px 18px;border-radius:999px;font-size:.86rem;font-weight:800;opacity:0;pointer-events:none;transition:.25s;z-index:200;white-space:nowrap;max-width:calc(100vw - 28px);overflow:hidden;text-overflow:ellipsis}
-    .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
-    .dm-bubble{max-width:78%;overflow-wrap:anywhere;word-break:break-word}
-    .live-dot{width:8px;height:8px;border-radius:999px;background:var(--success);display:inline-block;box-shadow:0 0 10px var(--success)}
-    #chat-messages,#thread-posts{-webkit-overflow-scrolling:touch;overflow-x:hidden}
+
+    * { box-sizing: border-box; }
+    button, input, textarea { font: inherit; }
+    img, svg { max-width: 100%; }
+    .hidden { display: none !important; }
+
+    .btn-primary {
+      background: var(--text);
+      color: var(--bg);
+      border-radius: 999px;
+      padding: 8px 16px;
+      font-weight: 900;
+      font-size: .9rem;
+    }
+
+    .btn-soft {
+      background: color-mix(in srgb, var(--border) 72%, transparent);
+      color: var(--text);
+      border-radius: 999px;
+      padding: 8px 14px;
+      font-weight: 800;
+      font-size: .85rem;
+    }
+
+    .btn-ghost {
+      min-width: 44px;
+      min-height: 38px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      color: var(--sub);
+      border-radius: 999px;
+      padding: 7px 10px;
+    }
+
+    .btn-ghost:active,
+    .post:active { background: rgba(128,128,128,.08); }
+
+    .nav-item {
+      color: var(--sub);
+      padding: 10px;
+      border-radius: 999px;
+      position: relative;
+      min-width: 54px;
+      display: grid;
+      place-items: center;
+    }
+
+    .nav-active {
+      color: var(--text);
+      transform: scale(1.06);
+    }
+
+    .nav-badge {
+      position: absolute;
+      top: 9px;
+      right: 12px;
+      width: 9px;
+      height: 9px;
+      background: var(--danger);
+      border-radius: 999px;
+      display: none;
+    }
+
+    .post {
+      border-bottom: 1px solid var(--border);
+      padding: 14px 16px;
+      cursor: pointer;
+      contain: content;
+      overflow-x: hidden;
+      background: var(--bg);
+    }
+
+    .badge {
+      display: inline-block;
+      border-radius: 6px;
+      padding: 2px 6px;
+      font-size: .62rem;
+      font-weight: 900;
+      white-space: nowrap;
+    }
+
+    .title-badge {
+      background: linear-gradient(135deg, #ffd54a, #ff8a00);
+      color: #fff;
+    }
+
+    .admin-badge {
+      background: linear-gradient(135deg, #111, #666);
+      color: #fff;
+    }
+
+    .modal-overlay {
+      background: rgba(0,0,0,.68);
+      backdrop-filter: blur(6px);
+    }
+
+    .toast {
+      position: fixed;
+      bottom: 86px;
+      left: 50%;
+      transform: translateX(-50%) translateY(18px);
+      background: rgba(0,0,0,.84);
+      color: #fff;
+      padding: 10px 18px;
+      border-radius: 999px;
+      font-size: .86rem;
+      font-weight: 800;
+      opacity: 0;
+      pointer-events: none;
+      transition: .25s;
+      z-index: 200;
+      white-space: nowrap;
+      max-width: calc(100vw - 28px);
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    .dm-bubble {
+      max-width: 78%;
+      overflow-wrap: anywhere;
+      word-break: break-word;
+    }
+
+    .live-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      background: var(--success);
+      display: inline-block;
+      box-shadow: 0 0 10px var(--success);
+    }
+
+    #chat-messages,
+    #thread-posts {
+      -webkit-overflow-scrolling: touch;
+      overflow-x: hidden;
+    }
   </style>
+
 </head>
 <body>
   <div id="toast" class="toast"></div>
 
   <div class="max-w-xl mx-auto min-h-screen bg-[var(--bg)] shadow-2xl relative pb-24 border-x border-[var(--border)] overflow-x-hidden">
     <header class="sticky top-0 bg-[var(--nav)] backdrop-blur-md z-40 border-b border-[var(--border)] px-4 py-3 flex justify-between items-center">
-      <img id="header-icon" src="https://api.dicebear.com/7.x/notionists/svg?seed=guest" class="w-9 h-9 rounded-full object-cover bg-gray-100 border border-[var(--border)]" onclick="switchTab('profile')" />
-      <button class="text-xl font-black tracking-tight" onclick="switchTab('home')">LoG</button>
-      <button onclick="reloadNewestPosts()" class="btn-soft text-xs flex items-center gap-1"><span class="material-icons-round text-base">refresh</span>更新</button>
+      <img id="header-icon" src="logo-icon.png" class="w-9 h-9 rounded-full object-cover bg-gray-100 border border-[var(--border)]" onclick="switchTab('profile')" />
+      <button class="flex items-center justify-center" onclick="switchTab('home')" aria-label="LoG Home">
+        <img id="header-logo" src="logo-main.png" alt="LoG" class="h-8 object-contain" />
+      </button>
+      <button onclick="reloadNewestPosts()" class="btn-soft text-xs flex items-center gap-1">
+        <span class="material-icons-round text-base">refresh</span>更新
+      </button>
     </header>
 
-    <main>
-      <section id="tab-home" class="pb-24">
-        <div class="p-4 border-b border-[var(--border)]">
-          <div class="flex gap-3">
-            <img id="input-icon" src="https://api.dicebear.com/7.x/notionists/svg?seed=guest" class="w-10 h-10 rounded-full bg-gray-100 object-cover flex-shrink-0" />
-            <div class="flex-1 min-w-0" onclick="requireAuth()">
-              <textarea id="post-text" rows="2" placeholder="いまどうしてる？" class="w-full text-lg resize-none bg-transparent outline-none placeholder-[var(--sub)]" readonly></textarea>
-              <div id="quote-preview" class="hidden mb-3 p-3 rounded-xl border border-[var(--border)] text-sm relative">
-                <button onclick="event.stopPropagation(); cancelQuote()" class="absolute top-1 right-2 text-[var(--sub)]">×</button>
-                <div class="font-bold mb-1" id="quote-target-name"></div>
-                <div class="truncate text-[var(--sub)]" id="quote-target-text"></div>
-              </div>
-              <div class="flex justify-between items-center pt-2 border-t border-[var(--border)]">
-                <button onclick="event.stopPropagation(); triggerAIPost(true)" class="btn-soft text-xs pointer-events-none" id="ai-post-btn">Geminiを呼ぶ</button>
-                <button id="post-btn" class="btn-primary pointer-events-none">ポスト</button>
-              </div>
-            </div>
+```
+<main>
+  <section id="tab-home" class="pb-24">
+    <div class="p-4 border-b border-[var(--border)]">
+      <div class="flex gap-3">
+        <img id="input-icon" src="logo-icon.png" class="w-10 h-10 rounded-full bg-gray-100 object-cover flex-shrink-0" />
+        <div class="flex-1 min-w-0" onclick="requireAuth()">
+          <textarea id="post-text" rows="2" placeholder="いまどうしてる？" class="w-full text-lg resize-none bg-transparent outline-none placeholder-[var(--sub)]" readonly></textarea>
+          <div id="quote-preview" class="hidden mb-3 p-3 rounded-xl border border-[var(--border)] text-sm relative">
+            <button onclick="event.stopPropagation(); cancelQuote()" class="absolute top-1 right-2 text-[var(--sub)]">×</button>
+            <div class="font-bold mb-1" id="quote-target-name"></div>
+            <div class="truncate text-[var(--sub)]" id="quote-target-text"></div>
+          </div>
+          <div class="flex justify-end items-center pt-2 border-t border-[var(--border)]">
+            <button id="post-btn" class="btn-primary pointer-events-none">ポスト</button>
           </div>
         </div>
-        <div id="new-post-notice" class="hidden mx-4 mt-3 p-3 rounded-2xl bg-blue-500/10 border border-blue-500/20 text-sm font-bold text-blue-500"></div>
-        <div class="p-3 border-b border-[var(--border)] flex gap-2">
-          <button onclick="reloadNewestPosts()" class="flex-1 btn-soft">新しいポストを読み込む</button>
-          <button onclick="loadMorePosts()" class="flex-1 btn-soft">さらに10件</button>
-        </div>
-        <div id="timeline"></div>
-      </section>
+      </div>
+    </div>
 
-      <section id="tab-explore" class="hidden pb-24">
-        <div class="p-3 border-b border-[var(--border)] sticky top-14 bg-[var(--bg)] z-30">
-          <div class="bg-[var(--border)]/50 rounded-full px-4 py-2 flex items-center text-[var(--sub)]">
-            <span class="material-icons-round mr-2 text-sm">search</span>
-            <input id="search-input" type="text" placeholder="ユーザー検索 / Gemini検索" class="bg-transparent w-full outline-none text-sm" onkeyup="searchUsers()" />
-          </div>
-        </div>
-        <div class="p-2 border-b border-[var(--border)] bg-[var(--border)]/10 text-xs font-bold text-[var(--sub)] text-center tracking-widest uppercase">Users & Gemini</div>
-        <div id="explore-list" class="divide-y divide-[var(--border)]"></div>
-      </section>
+    <div id="new-post-notice" class="hidden mx-4 mt-3 p-3 rounded-2xl bg-blue-500/10 border border-blue-500/20 text-sm font-bold text-blue-500"></div>
 
-      <section id="tab-dm" class="hidden p-4 pb-24">
-        <div class="flex justify-between items-center mb-4 gap-2">
-          <div>
-            <h2 class="text-2xl font-black">DM</h2>
-            <p class="text-xs text-[var(--sub)]"><span class="live-dot"></span> DMはリアルタイム。Geminiにも送れる。</p>
-          </div>
-          <button onclick="startDMListWatcher(true)" class="btn-soft flex-shrink-0">再接続</button>
-        </div>
-        <div id="ai-dm-shortcuts" class="grid grid-cols-3 gap-2 mb-4"></div>
-        <div id="dm-list" class="space-y-2"></div>
-      </section>
+    <div class="p-3 border-b border-[var(--border)] flex gap-2">
+      <button onclick="reloadNewestPosts()" class="flex-1 btn-soft">新しいポストを読み込む</button>
+      <button onclick="loadMorePosts()" class="flex-1 btn-soft">さらに10件</button>
+    </div>
 
-      <section id="tab-notif" class="hidden pb-24">
-        <div class="p-3 border-b border-[var(--border)] font-bold text-lg px-4 flex justify-between items-center">
-          <span>通知</span>
-          <button onclick="loadNotifications(true)" class="btn-soft text-xs">更新</button>
-        </div>
-        <div id="notif-list" class="divide-y divide-[var(--border)]"></div>
-      </section>
+    <div id="timeline"></div>
+  </section>
 
-      <section id="tab-profile" class="hidden pb-24">
-        <div class="px-4 py-6">
-          <div class="flex justify-between items-start mb-4">
-            <img id="profile-big-icon" src="" class="w-20 h-20 rounded-full border-4 border-[var(--bg)] bg-[var(--bg)] object-cover shadow-sm" />
-            <div class="flex gap-2">
-              <button onclick="rerollIcon()" class="btn-soft">アイコン変更</button>
-              <button onclick="openSettings()" class="btn-primary bg-transparent text-[var(--text)] border border-[var(--border)]">設定</button>
-            </div>
-          </div>
-          <h2 class="text-2xl font-black leading-tight flex items-center gap-2 flex-wrap">
-            <span id="profile-name"></span>
-            <span id="profile-title" class="badge title-badge hidden"></span>
-            <span id="profile-admin" class="badge admin-badge hidden">ADMIN</span>
-          </h2>
-          <p id="profile-uid" class="text-sm text-[var(--sub)] font-mono">@user</p>
-          <div class="flex items-center gap-4 mt-3">
-            <div><span class="font-bold" id="profile-xp">0</span> <span class="text-xs text-[var(--sub)]">XP</span></div>
-            <div id="profile-rank" class="text-sm font-black"></div>
-          </div>
-          <div class="mt-4 p-4 border border-[var(--border)] rounded-2xl">
-            <div class="flex justify-between items-center mb-3">
-              <div>
-                <div class="font-black text-sm">Gemini AI</div>
-                <div class="text-[10px] text-[var(--sub)]">本物のGeminiでポスト・DM返信</div>
-              </div>
-              <button onclick="triggerAIPost(true)" class="btn-soft text-xs">AI投稿</button>
-            </div>
-            <button onclick="testGemini()" class="w-full btn-soft">接続テスト</button>
-          </div>
-          <div class="mt-4 p-4 border border-[var(--border)] rounded-2xl">
-            <div class="font-black text-sm mb-3">Missions</div>
-            <div id="mission-list" class="space-y-2"></div>
-          </div>
-        </div>
-        <div class="flex border-y border-[var(--border)] sticky top-14 bg-[var(--bg)] z-20">
-          <button onclick="switchProfileSubTab('posts')" id="tab-btn-posts" class="flex-1 text-center py-3 font-bold border-b-2 border-[var(--text)]">ポスト</button>
-          <button onclick="switchProfileSubTab('likes')" id="tab-btn-likes" class="flex-1 text-center py-3 font-bold text-[var(--sub)]">いいね</button>
-        </div>
-        <div id="my-timeline" class="divide-y divide-[var(--border)]"></div>
-      </section>
+  <section id="tab-explore" class="hidden pb-24">
+    <div class="p-3 border-b border-[var(--border)] sticky top-14 bg-[var(--bg)] z-30">
+      <div class="bg-[var(--border)]/50 rounded-full px-4 py-2 flex items-center text-[var(--sub)]">
+        <span class="material-icons-round mr-2 text-sm">search</span>
+        <input id="search-input" type="text" placeholder="ユーザー検索" class="bg-transparent w-full outline-none text-sm" onkeyup="searchUsers()" />
+      </div>
+    </div>
+    <div class="p-2 border-b border-[var(--border)] bg-[var(--border)]/10 text-xs font-bold text-[var(--sub)] text-center tracking-widest uppercase">Users</div>
+    <div id="explore-list" class="divide-y divide-[var(--border)]"></div>
+  </section>
 
-      <section id="tab-other-profile" class="hidden pb-24">
-        <div class="p-3 border-b border-[var(--border)] flex items-center gap-4 sticky top-14 bg-[var(--bg)] z-30">
-          <button onclick="switchTab('explore')"><span class="material-icons-round">arrow_back</span></button>
-          <span class="font-bold">プロフィール</span>
-        </div>
-        <div class="px-4 py-6">
-          <div class="flex justify-between items-start mb-4">
-            <img id="other-icon" src="" class="w-20 h-20 rounded-full border-4 border-[var(--bg)] object-cover shadow-sm" />
-            <div class="flex gap-2">
-              <button id="other-dm-btn" class="btn-primary bg-transparent text-[var(--text)] border border-[var(--border)]"><span class="material-icons-round text-lg">mail</span></button>
-              <button id="other-follow-btn" class="btn-primary">フォロー</button>
-            </div>
-          </div>
-          <h2 class="text-2xl font-black leading-tight flex items-center gap-2 flex-wrap">
-            <span id="other-name"></span>
-            <span id="other-title" class="badge title-badge hidden"></span>
-            <span id="other-ai" class="badge gemini-badge hidden">Gemini</span>
-          </h2>
-          <p id="other-uid" class="text-sm text-[var(--sub)] font-mono"></p>
-          <div class="flex items-center gap-4 mt-3">
-            <div><span class="font-bold" id="other-xp">0</span> <span class="text-xs text-[var(--sub)]">XP</span></div>
-            <div id="other-rank" class="font-bold"></div>
-          </div>
-        </div>
-        <div class="border-b border-[var(--border)] font-bold px-4 py-2 text-sm">ポスト</div>
-        <div id="other-timeline" class="divide-y divide-[var(--border)]"></div>
-      </section>
+  <section id="tab-dm" class="hidden p-4 pb-24">
+    <div class="flex justify-between items-center mb-4 gap-2">
+      <div>
+        <h2 class="text-2xl font-black">DM</h2>
+        <p class="text-xs text-[var(--sub)]"><span class="live-dot"></span> DMはリアルタイム</p>
+      </div>
+      <button onclick="startDMListWatcher(true)" class="btn-soft flex-shrink-0">再接続</button>
+    </div>
+    <div id="dm-list" class="space-y-2"></div>
+  </section>
 
-      <section id="tab-chat" class="hidden h-[calc(100vh-130px)] flex flex-col overflow-hidden">
-        <div class="p-3 border-b border-[var(--border)] flex items-center justify-between sticky top-14 bg-[var(--bg)] z-10 px-4 gap-2">
-          <div class="flex items-center gap-3 min-w-0">
-            <button onclick="switchTab('dm')"><span class="material-icons-round text-2xl">arrow_back</span></button>
-            <span id="chat-target-name" class="font-bold text-lg truncate"></span>
-          </div>
-          <div class="text-[10px] text-[var(--sub)] flex items-center gap-1"><span class="live-dot"></span> LIVE</div>
-        </div>
-        <div id="chat-messages" class="flex-1 overflow-y-auto p-4 space-y-2 bg-[var(--bg)]"></div>
-        <div class="p-3 border-t border-[var(--border)] bg-[var(--bg)] flex gap-2 items-center pb-[calc(env(safe-area-inset-bottom)+12px)]">
-          <input id="chat-input" type="text" class="flex-1 min-w-0 bg-[var(--border)]/50 rounded-full px-4 py-2 text-sm outline-none" placeholder="メッセージを作成" />
-          <button id="chat-send-btn" class="text-blue-500 p-2 font-bold"><span class="material-icons-round">send</span></button>
-        </div>
-      </section>
-    </main>
+  <section id="tab-notif" class="hidden pb-24">
+    <div class="p-3 border-b border-[var(--border)] font-bold text-lg px-4 flex justify-between items-center">
+      <span>通知</span>
+      <button onclick="loadNotifications(true)" class="btn-soft text-xs">更新</button>
+    </div>
+    <div id="notif-list" class="divide-y divide-[var(--border)]"></div>
+  </section>
 
-    <nav class="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-xl bg-[var(--nav)] border-t border-[var(--border)] flex justify-around py-3 z-50 backdrop-blur pb-[calc(env(safe-area-inset-bottom)+12px)]">
-      <button onclick="switchTab('home')" class="nav-item nav-active" data-target="home"><span class="material-icons-round text-3xl">home</span></button>
-      <button onclick="switchTab('explore')" class="nav-item" data-target="explore"><span class="material-icons-round text-3xl">search</span></button>
-      <button onclick="switchTab('dm')" class="nav-item" data-target="dm"><span class="material-icons-round text-3xl">mail</span></button>
-      <button onclick="switchTab('notif')" class="nav-item" data-target="notif"><span class="material-icons-round text-3xl">notifications</span><div id="nav-badge" class="nav-badge"></div></button>
-      <button onclick="switchTab('profile')" class="nav-item" data-target="profile"><span class="material-icons-round text-3xl">person</span></button>
-    </nav>
+  <section id="tab-profile" class="hidden pb-24">
+    <div class="px-4 py-6">
+      <div class="flex justify-between items-start mb-4">
+        <img id="profile-big-icon" src="logo-icon.png" class="w-20 h-20 rounded-full border-4 border-[var(--bg)] bg-[var(--bg)] object-cover shadow-sm" />
+        <div class="flex gap-2">
+          <button onclick="rerollIcon()" class="btn-soft">アイコン変更</button>
+          <button onclick="openSettings()" class="btn-primary bg-transparent text-[var(--text)] border border-[var(--border)]">設定</button>
+        </div>
+      </div>
+
+      <h2 class="text-2xl font-black leading-tight flex items-center gap-2 flex-wrap">
+        <span id="profile-name"></span>
+        <span id="profile-title" class="badge title-badge hidden"></span>
+        <span id="profile-admin" class="badge admin-badge hidden">ADMIN</span>
+      </h2>
+
+      <p id="profile-uid" class="text-sm text-[var(--sub)] font-mono">@user</p>
+
+      <div class="flex items-center gap-4 mt-3">
+        <div><span class="font-bold" id="profile-xp">0</span> <span class="text-xs text-[var(--sub)]">XP</span></div>
+        <div id="profile-rank" class="text-sm font-black"></div>
+      </div>
+
+      <div class="mt-4 p-4 border border-[var(--border)] rounded-2xl">
+        <div class="font-black text-sm mb-3">Missions</div>
+        <div id="mission-list" class="space-y-2"></div>
+      </div>
+    </div>
+
+    <div class="flex border-y border-[var(--border)] sticky top-14 bg-[var(--bg)] z-20">
+      <button onclick="switchProfileSubTab('posts')" id="tab-btn-posts" class="flex-1 text-center py-3 font-bold border-b-2 border-[var(--text)]">ポスト</button>
+      <button onclick="switchProfileSubTab('likes')" id="tab-btn-likes" class="flex-1 text-center py-3 font-bold text-[var(--sub)]">いいね</button>
+    </div>
+    <div id="my-timeline" class="divide-y divide-[var(--border)]"></div>
+  </section>
+
+  <section id="tab-other-profile" class="hidden pb-24">
+    <div class="p-3 border-b border-[var(--border)] flex items-center gap-4 sticky top-14 bg-[var(--bg)] z-30">
+      <button onclick="switchTab('explore')"><span class="material-icons-round">arrow_back</span></button>
+      <span class="font-bold">プロフィール</span>
+    </div>
+
+    <div class="px-4 py-6">
+      <div class="flex justify-between items-start mb-4">
+        <img id="other-icon" src="" class="w-20 h-20 rounded-full border-4 border-[var(--bg)] object-cover shadow-sm" />
+        <div class="flex gap-2">
+          <button id="other-dm-btn" class="btn-primary bg-transparent text-[var(--text)] border border-[var(--border)]">
+            <span class="material-icons-round text-lg">mail</span>
+          </button>
+          <button id="other-follow-btn" class="btn-primary">フォロー</button>
+        </div>
+      </div>
+
+      <h2 class="text-2xl font-black leading-tight flex items-center gap-2 flex-wrap">
+        <span id="other-name"></span>
+        <span id="other-title" class="badge title-badge hidden"></span>
+      </h2>
+      <p id="other-uid" class="text-sm text-[var(--sub)] font-mono"></p>
+
+      <div class="flex items-center gap-4 mt-3">
+        <div><span class="font-bold" id="other-xp">0</span> <span class="text-xs text-[var(--sub)]">XP</span></div>
+        <div id="other-rank" class="font-bold"></div>
+      </div>
+    </div>
+
+    <div class="border-b border-[var(--border)] font-bold px-4 py-2 text-sm">ポスト</div>
+    <div id="other-timeline" class="divide-y divide-[var(--border)]"></div>
+  </section>
+
+  <section id="tab-chat" class="hidden h-[calc(100vh-130px)] flex flex-col overflow-hidden">
+    <div class="p-3 border-b border-[var(--border)] flex items-center justify-between sticky top-14 bg-[var(--bg)] z-10 px-4 gap-2">
+      <div class="flex items-center gap-3 min-w-0">
+        <button onclick="switchTab('dm')"><span class="material-icons-round text-2xl">arrow_back</span></button>
+        <span id="chat-target-name" class="font-bold text-lg truncate"></span>
+      </div>
+      <div class="text-[10px] text-[var(--sub)] flex items-center gap-1"><span class="live-dot"></span> LIVE</div>
+    </div>
+
+    <div id="chat-messages" class="flex-1 overflow-y-auto p-4 space-y-2 bg-[var(--bg)]"></div>
+
+    <div class="p-3 border-t border-[var(--border)] bg-[var(--bg)] flex gap-2 items-center pb-[calc(env(safe-area-inset-bottom)+12px)]">
+      <input id="chat-input" type="text" class="flex-1 min-w-0 bg-[var(--border)]/50 rounded-full px-4 py-2 text-sm outline-none" placeholder="メッセージを作成" />
+      <button id="chat-send-btn" class="text-blue-500 p-2 font-bold"><span class="material-icons-round">send</span></button>
+    </div>
+  </section>
+</main>
+
+<nav class="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-xl bg-[var(--nav)] border-t border-[var(--border)] flex justify-around py-3 z-50 backdrop-blur pb-[calc(env(safe-area-inset-bottom)+12px)]">
+  <button onclick="switchTab('home')" class="nav-item nav-active" data-target="home"><span class="material-icons-round text-3xl">home</span></button>
+  <button onclick="switchTab('explore')" class="nav-item" data-target="explore"><span class="material-icons-round text-3xl">search</span></button>
+  <button onclick="switchTab('dm')" class="nav-item" data-target="dm"><span class="material-icons-round text-3xl">mail</span></button>
+  <button onclick="switchTab('notif')" class="nav-item" data-target="notif"><span class="material-icons-round text-3xl">notifications</span><div id="nav-badge" class="nav-badge"></div></button>
+  <button onclick="switchTab('profile')" class="nav-item" data-target="profile"><span class="material-icons-round text-3xl">person</span></button>
+</nav>
+```
+
   </div>
 
   <div id="auth-modal" class="modal-overlay hidden fixed inset-0 z-50 flex items-center justify-center p-4">
     <div class="bg-[var(--card)] p-8 rounded-3xl w-full max-w-sm shadow-2xl border border-[var(--border)] text-center relative">
       <button onclick="closeAuthModal()" class="absolute top-4 right-4 text-[var(--sub)]"><span class="material-icons-round">close</span></button>
-      <h1 class="text-4xl font-black tracking-tighter mb-2">LoG</h1>
+      <img src="logo-main.png" alt="LoG" class="h-20 mx-auto mb-3 object-contain" />
       <p class="text-[var(--sub)] text-sm mb-8">ログインして開始。</p>
       <div class="space-y-4">
-        <button id="google-login-btn" class="w-full border border-[var(--border)] py-3 rounded-full font-bold flex justify-center items-center gap-3"><img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" class="w-5 h-5" />Googleで続行</button>
+        <button id="google-login-btn" class="w-full border border-[var(--border)] py-3 rounded-full font-bold flex justify-center items-center gap-3">
+          <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" class="w-5 h-5" />Googleで続行
+        </button>
         <div class="space-y-3 pt-4 border-t border-[var(--border)]">
           <input id="auth-email" type="email" placeholder="Email" class="w-full bg-[var(--border)]/30 border border-[var(--border)] rounded-xl p-3 outline-none" />
           <input id="auth-password" type="password" placeholder="Password" class="w-full bg-[var(--border)]/30 border border-[var(--border)] rounded-xl p-3 outline-none" />
@@ -291,642 +444,964 @@
   </div>
 
   <script type="module">
-    import{initializeApp}from"https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import{getAuth,GoogleAuthProvider,signInWithPopup,signOut,onAuthStateChanged,createUserWithEmailAndPassword,signInWithEmailAndPassword}from"https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-    import{getFirestore,collection,addDoc,query,orderBy,limit,getDocs,onSnapshot,serverTimestamp,doc,getDoc,setDoc,updateDoc,arrayUnion,arrayRemove,deleteDoc,increment,where}from"https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+    import { getFirestore, collection, addDoc, query, orderBy, limit, getDocs, onSnapshot, serverTimestamp, doc, getDoc, setDoc, updateDoc, arrayUnion, arrayRemove, deleteDoc, increment, where } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-    const GEMINI_API_KEY="AIzaSyButUyUT_kEzhMNK-VVca0O4tRoXWzbLus";
-    const GEMINI_MODEL="gemini-2.5-flash";
-    const ADMIN_CODE="LOG-ADMIN-9999";
+    const LOGO_MAIN = "logo-main.png";
+    const LOGO_ICON = "logo-icon.png";
+    const ADMIN_CODE = "LOG-ADMIN-9999";
 
-    const firebaseConfig={
-      apiKey:"AIzaSyCA4NQzxcz2gh8uaw3LKrKl_NEnE_fMybs",
-      authDomain:"lo-g-8a620.firebaseapp.com",
-      projectId:"lo-g-8a620",
-      storageBucket:"lo-g-8a620.firebasestorage.app",
-      messagingSenderId:"780857099698",
-      appId:"1:780857099698:web:b6cb359114da98ab3e50ab"
+    const firebaseConfig = {
+      apiKey: "AIzaSyCA4NQzxcz2gh8uaw3LKrKl_NEnE_fMybs",
+      authDomain: "lo-g-8a620.firebaseapp.com",
+      projectId: "lo-g-8a620",
+      storageBucket: "lo-g-8a620.firebasestorage.app",
+      messagingSenderId: "780857099698",
+      appId: "1:780857099698:web:b6cb359114da98ab3e50ab"
     };
 
-    const app=initializeApp(firebaseConfig);
-    const auth=getAuth(app);
-    const db=getFirestore(app);
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
 
-    let currentUser=null;
-    let myProfile=null;
-    let currentProfileTab="posts";
-    let currentChatUser=null;
-    let currentChatName="";
-    let currentReplyPost=null;
-    let currentReplyAuthor="";
-    let quoteData=null;
-    let postLimit=10;
-    let notificationTimer=null;
-    let dmRoomsUnsub=null;
-    let chatUnsub=null;
-    let postNoticeUnsub=null;
-    let lastSeenTopPostId=null;
-    let aiTimer=null;
+    let currentUser = null;
+    let myProfile = null;
+    let currentProfileTab = "posts";
+    let currentChatUser = null;
+    let currentChatName = "";
+    let currentReplyPost = null;
+    let currentReplyAuthor = "";
+    let quoteData = null;
+    let postLimit = 10;
+    let notificationTimer = null;
+    let dmRoomsUnsub = null;
+    let chatUnsub = null;
+    let postNoticeUnsub = null;
+    let lastSeenTopPostId = null;
 
-    const GEMINI_USERS=[
-      {uid:"gemini_sora_log",name:"ソラGemini",title:"Gemini AI",icon:"https://api.dicebear.com/7.x/bottts-neutral/svg?seed=sora",tone:"やさしく短く友達っぽく。"},
-      {uid:"gemini_nova_log",name:"ノヴァGemini",title:"Gemini AI",icon:"https://api.dicebear.com/7.x/bottts-neutral/svg?seed=nova",tone:"勢い強めで企画者っぽく短文。"},
-      {uid:"gemini_memo_log",name:"メモGemini",title:"Gemini AI",icon:"https://api.dicebear.com/7.x/bottts-neutral/svg?seed=memo",tone:"冷静に整理してメモっぽく短く。"}
+    const MISSIONS = [
+      { type: "post", label: "2回ポスト", target: 2, xp: 180 },
+      { type: "like", label: "5回いいね", target: 5, xp: 120 },
+      { type: "reply", label: "3回リプライ", target: 3, xp: 220 },
+      { type: "dm", label: "5回DM送信", target: 5, xp: 280 }
     ];
 
-    const FALLBACK_POSTS=[
-      "今日は短い投稿から始めよう。SNSは一行でも動く。",
-      "メモ: リプライがあると、投稿は会話に変わる。",
-      "LoG起動。今の気分をひとつ置いていこう。"
-    ];
+    const $ = id => document.getElementById(id);
 
-    const MISSIONS=[
-      {type:"post",label:"2回ポスト",target:2,xp:180},
-      {type:"like",label:"5回いいね",target:5,xp:120},
-      {type:"reply",label:"3回リプライ",target:3,xp:220},
-      {type:"dm",label:"5回DM送信",target:5,xp:280}
-    ];
-
-    const $=id=>document.getElementById(id);
-    const showToast=m=>{const t=$("toast");t.innerText=m;t.classList.add("show");setTimeout(()=>t.classList.remove("show"),2600)};
-    const authErr=e=>showToast("Error: "+(e.message||e));
-    const escapeHtml=(v="")=>String(v).replace(/[&<>"]/g,s=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"}[s]));
-    const escapeAttr=(v="")=>escapeHtml(v).replace(/'/g,"&#39;").replace(/`/g,"&#96;");
-    const roomIdFor=(a,b)=>[a,b].sort().join("_");
-    const toDate=ts=>ts?.toDate?ts.toDate():ts?new Date(ts):null;
-    const formatTime=ts=>{const d=toDate(ts);return!d||Number.isNaN(d.getTime())?"たった今":new Intl.DateTimeFormat("ja-JP",{month:"numeric",day:"numeric",hour:"2-digit",minute:"2-digit"}).format(d)};
-    const isGeminiUid=uid=>GEMINI_USERS.some(a=>a.uid===uid);
-    const getGeminiUser=uid=>GEMINI_USERS.find(a=>a.uid===uid);
-    const isAdmin=()=>!!myProfile?.adminMode;
-    const rank=xp=>xp>=1000?"Gold":xp>=400?"Silver":xp>=100?"Bronze":"Unranked";
-
-    async function callGemini(prompt,persona="短く自然な日本語で返すSNS住人"){
-      const res=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent`,{
-        method:"POST",
-        headers:{"Content-Type":"application/json","x-goog-api-key":GEMINI_API_KEY},
-        body:JSON.stringify({
-          systemInstruction:{parts:[{text:`あなたはLoG SNS内のAI住人。${persona} 80文字以内。危険・個人情報・性的内容は避ける。リンクは書かない。`}]},
-          contents:[{role:"user",parts:[{text:prompt}]}],
-          generationConfig:{temperature:.9,maxOutputTokens:120}
-        })
-      });
-      if(!res.ok)throw new Error("Gemini Error "+res.status);
-      const json=await res.json();
-      const text=json?.candidates?.[0]?.content?.parts?.map(p=>p.text||"").join("").trim();
-      if(!text)throw new Error("Gemini空返答");
-      return text.slice(0,220);
-    }
-
-    window.requireAuth=()=>currentUser?true:($("auth-modal").classList.remove("hidden"),false);
-    window.closeAuthModal=()=>$("auth-modal").classList.add("hidden");
-    $("google-login-btn").onclick=()=>signInWithPopup(auth,new GoogleAuthProvider()).catch(authErr);
-    window.emailAuth=t=>{
-      const e=$("auth-email").value.trim();
-      const p=$("auth-password").value;
-      if(!e||!p)return showToast("メールとパスワードを入力して");
-      (t==="login"?signInWithEmailAndPassword:createUserWithEmailAndPassword)(auth,e,p).catch(authErr);
+    const showToast = msg => {
+      const toast = $("toast");
+      toast.innerText = msg;
+      toast.classList.add("show");
+      setTimeout(() => toast.classList.remove("show"), 2600);
     };
 
-    onAuthStateChanged(auth,async u=>{
-      if(!u){
-        stopRealtime();currentUser=null;myProfile=null;initGuest();return;
+    const authErr = e => showToast("Error: " + (e.message || e));
+
+    const escapeHtml = (v = "") => String(v).replace(/[&<>"]/g, s => ({
+      "&": "&amp;",
+      "<": "&lt;",
+      ">": "&gt;",
+      "\"": "&quot;"
+    }[s]));
+
+    const escapeAttr = (v = "") => escapeHtml(v).replace(/'/g, "&#39;").replace(/`/g, "&#96;");
+    const roomIdFor = (a, b) => [a, b].sort().join("_");
+    const toDate = ts => ts?.toDate ? ts.toDate() : ts ? new Date(ts) : null;
+
+    const formatTime = ts => {
+      const d = toDate(ts);
+      if (!d || Number.isNaN(d.getTime())) return "たった今";
+      return new Intl.DateTimeFormat("ja-JP", {
+        month: "numeric",
+        day: "numeric",
+        hour: "2-digit",
+        minute: "2-digit"
+      }).format(d);
+    };
+
+    const isAdmin = () => !!myProfile?.adminMode;
+    const rank = xp => xp >= 1000 ? "Gold" : xp >= 400 ? "Silver" : xp >= 100 ? "Bronze" : "Unranked";
+
+    window.requireAuth = () => {
+      if (currentUser) return true;
+      $("auth-modal").classList.remove("hidden");
+      return false;
+    };
+
+    window.closeAuthModal = () => $("auth-modal").classList.add("hidden");
+
+    $("google-login-btn").onclick = () => signInWithPopup(auth, new GoogleAuthProvider()).catch(authErr);
+
+    window.emailAuth = mode => {
+      const email = $("auth-email").value.trim();
+      const password = $("auth-password").value;
+      if (!email || !password) return showToast("メールとパスワードを入力して");
+
+      if (mode === "login") {
+        signInWithEmailAndPassword(auth, email, password).catch(authErr);
+      } else {
+        createUserWithEmailAndPassword(auth, email, password).catch(authErr);
       }
-      currentUser=u;
+    };
+
+    onAuthStateChanged(auth, async user => {
+      if (!user) {
+        stopRealtime();
+        currentUser = null;
+        myProfile = null;
+        initGuest();
+        return;
+      }
+
+      currentUser = user;
       closeAuthModal();
-      await ensureGeminiProfiles();
-      const s=await getDoc(doc(db,"users",u.uid));
-      if(!s.exists()){
+
+      const snap = await getDoc(doc(db, "users", user.uid));
+      if (!snap.exists()) {
         initGuest();
         $("profile-modal").classList.remove("hidden");
         return;
       }
-      myProfile=normalizeProfile(s.data());
+
+      myProfile = normalizeProfile(snap.data());
       await ensureMissions();
       initLoggedIn();
     });
 
-    function normalizeProfile(p){return{following:[],xp:0,title:"見習い",adminMode:false,...p}}
-    function stopRealtime(){dmRoomsUnsub?.();chatUnsub?.();postNoticeUnsub?.();clearInterval(notificationTimer);clearInterval(aiTimer);dmRoomsUnsub=chatUnsub=postNoticeUnsub=null}
-    function initGuest(){
-      document.body.classList.toggle("dark",localStorage.getItem("theme")==="dark");
-      $("header-icon").src=$("input-icon").src="https://api.dicebear.com/7.x/notionists/svg?seed=guest";
-      $("post-text").setAttribute("readonly","true");
-      $("post-text").style.pointerEvents="none";
-      $("post-btn").style.pointerEvents="none";
-      $("ai-post-btn").style.pointerEvents="none";
-      loadTimeline();loadRanking();
+    function normalizeProfile(profile) {
+      return {
+        following: [],
+        xp: 0,
+        title: "見習い",
+        adminMode: false,
+        ...profile
+      };
     }
-    function initLoggedIn(){
-      document.body.classList.toggle("dark",localStorage.getItem("theme")==="dark");
-      $("post-text").removeAttribute("readonly");
-      $("post-text").style.pointerEvents="auto";
-      $("post-btn").style.pointerEvents="auto";
-      $("ai-post-btn").style.pointerEvents="auto";
-      updateMyProfileUI();
-      renderAIShortcuts();
-      loadTimeline();loadRanking();loadNotifications(false);startPostNoticeWatcher();startAIResidents();
+
+    function stopRealtime() {
+      dmRoomsUnsub?.();
+      chatUnsub?.();
+      postNoticeUnsub?.();
       clearInterval(notificationTimer);
-      notificationTimer=setInterval(()=>loadNotifications(false),30000);
+      dmRoomsUnsub = null;
+      chatUnsub = null;
+      postNoticeUnsub = null;
     }
 
-    async function ensureGeminiProfiles(){
-      await Promise.all(GEMINI_USERS.map(a=>setDoc(doc(db,"users",a.uid),{
-        name:a.name,title:a.title,icon:a.icon,xp:777,isGemini:true,following:[]
-      },{merge:true})));
-    }
-    function startAIResidents(){
-      clearInterval(aiTimer);
-      if(!currentUser)return;
-      aiTimer=setInterval(()=>triggerAIPost(false),120000);
-    }
-    window.triggerAIPost=async(manual=false)=>{
-      if(!requireAuth())return;
-      if(!manual){
-        const last=Number(localStorage.getItem("last_gemini_post_at")||0);
-        if(Date.now()-last<10*60*1000)return;
-        if(Math.random()>.25)return;
-      }
-      localStorage.setItem("last_gemini_post_at",String(Date.now()));
-      const ai=GEMINI_USERS[Math.floor(Math.random()*GEMINI_USERS.length)];
-      let text="";
-      try{
-        text=await callGemini("LoG SNSに投稿する短いポストを1つ。日常・SNS・創作・ひとこと系。ハッシュタグなし。",ai.tone);
-      }catch(e){
-        text=FALLBACK_POSTS[Math.floor(Math.random()*FALLBACK_POSTS.length)];
-        manual&&showToast("Gemini失敗、代替文で投稿");
-      }
-      await addDoc(collection(db,"logs"),{
-        text,uid:ai.uid,authorName:ai.name,authorIcon:ai.icon,authorTitle:"Gemini AI",
-        createdAt:serverTimestamp(),expireAt:new Date(Date.now()+7776e6),likes:[],replyCount:0,isReply:false,isGemini:true
-      });
-      manual&&showToast(`${ai.name}がポストしました`);
-      manual&&reloadNewestPosts();
-    };
-    async function maybeGeminiReply(targetUid,userText){
-      const ai=getGeminiUser(targetUid);
-      if(!ai)return;
-      const room=roomIdFor(currentUser.uid,targetUid);
-      setTimeout(async()=>{
-        let reply="";
-        try{
-          reply=await callGemini(`相手のDM: ${userText}\nこれに自然に短く返信して。`,ai.tone);
-        }catch(e){
-          reply="今ちょっとGeminiが混んでるかも。もう一回送ってみて。";
-        }
-        await addDoc(collection(db,"chats",room,"messages"),{
-          text:reply,senderId:ai.uid,createdAt:serverTimestamp(),expireAt:new Date(Date.now()+7776e6),isGemini:true
-        });
-        await setDoc(doc(db,"dmRooms",room),{
-          members:[currentUser.uid,ai.uid],names:{[currentUser.uid]:myProfile.name||"自分",[ai.uid]:ai.name},
-          lastMessage:reply,updatedAt:serverTimestamp(),expireAt:new Date(Date.now()+7776e6)
-        },{merge:true});
-        await addDoc(collection(db,"notif"),{
-          to:currentUser.uid,from:ai.name,fromUid:ai.uid,type:"dm",read:false,createdAt:serverTimestamp(),expireAt:new Date(Date.now()+7776e6)
-        });
-      },900+Math.random()*1400);
+    function initGuest() {
+      document.body.classList.toggle("dark", localStorage.getItem("theme") === "dark");
+      $("header-icon").src = LOGO_ICON;
+      $("input-icon").src = LOGO_ICON;
+      $("post-text").setAttribute("readonly", "true");
+      $("post-text").style.pointerEvents = "none";
+      $("post-btn").style.pointerEvents = "none";
+      loadTimeline();
+      loadRanking();
     }
 
-    function updateMyProfileUI(){
-      if(!myProfile||!currentUser)return;
-      const icon=myProfile.icon||`https://api.dicebear.com/7.x/notionists/svg?seed=${currentUser.uid}`;
-      $("header-icon").src=$("input-icon").src=$("profile-big-icon").src=icon;
-      $("profile-name").innerText=myProfile.name||"名無し";
-      $("profile-uid").innerText="@"+currentUser.uid.slice(0,8);
-      $("profile-xp").innerText=isAdmin()?"∞":myProfile.xp||0;
-      $("profile-rank").innerText=rank(myProfile.xp||0);
-      if(myProfile.title){$("profile-title").innerText=myProfile.title;$("profile-title").classList.remove("hidden")}else{$("profile-title").classList.add("hidden")}
-      $("profile-admin").classList.toggle("hidden",!isAdmin());
+    function initLoggedIn() {
+      document.body.classList.toggle("dark", localStorage.getItem("theme") === "dark");
+      $("post-text").removeAttribute("readonly");
+      $("post-text").style.pointerEvents = "auto";
+      $("post-btn").style.pointerEvents = "auto";
+      updateMyProfileUI();
+      loadTimeline();
+      loadRanking();
+      loadNotifications(false);
+      startPostNoticeWatcher();
+      clearInterval(notificationTimer);
+      notificationTimer = setInterval(() => loadNotifications(false), 30000);
+    }
+
+    function updateMyProfileUI() {
+      if (!myProfile || !currentUser) return;
+      const icon = myProfile.icon || LOGO_ICON;
+
+      $("header-icon").src = icon;
+      $("input-icon").src = icon;
+      $("profile-big-icon").src = icon;
+      $("profile-name").innerText = myProfile.name || "名無し";
+      $("profile-uid").innerText = "@" + currentUser.uid.slice(0, 8);
+      $("profile-xp").innerText = isAdmin() ? "∞" : myProfile.xp || 0;
+      $("profile-rank").innerText = rank(myProfile.xp || 0);
+
+      if (myProfile.title) {
+        $("profile-title").innerText = myProfile.title;
+        $("profile-title").classList.remove("hidden");
+      } else {
+        $("profile-title").classList.add("hidden");
+      }
+
+      $("profile-admin").classList.toggle("hidden", !isAdmin());
       renderMissions();
     }
-    async function ensureMissions(){
-      if(currentUser&&myProfile&&(!Array.isArray(myProfile.activeMissions)||!myProfile.activeMissions.length)){
-        myProfile.activeMissions=MISSIONS.map((m,i)=>({...m,id:`${m.type}_${i}`,progress:0}));
-        await setDoc(doc(db,"users",currentUser.uid),{activeMissions:myProfile.activeMissions},{merge:true});
+
+    async function ensureMissions() {
+      if (currentUser && myProfile && (!Array.isArray(myProfile.activeMissions) || !myProfile.activeMissions.length)) {
+        myProfile.activeMissions = MISSIONS.map((m, i) => ({ ...m, id: `${m.type}_${i}`, progress: 0 }));
+        await setDoc(doc(db, "users", currentUser.uid), { activeMissions: myProfile.activeMissions }, { merge: true });
       }
     }
-    function renderMissions(){
-      const l=$("mission-list");
-      if(!l||!myProfile)return;
-      l.innerHTML=(myProfile.activeMissions||[]).map(m=>{
-        const p=Math.min(100,Math.round(((m.progress||0)/m.target)*100));
-        return `<div class="bg-[var(--border)]/20 rounded-xl p-3 text-xs"><div class="flex justify-between mb-1"><span class="font-bold">${escapeHtml(m.label)}</span><span>${m.progress||0}/${m.target}</span></div><div class="h-1.5 bg-[var(--border)] rounded-full overflow-hidden"><div class="h-full bg-[var(--success)]" style="width:${p}%"></div></div><div class="mt-1 text-[10px] text-[var(--sub)]">報酬 ${m.xp} XP</div></div>`;
+
+    function renderMissions() {
+      const list = $("mission-list");
+      if (!list || !myProfile) return;
+
+      list.innerHTML = (myProfile.activeMissions || []).map(m => {
+        const p = Math.min(100, Math.round(((m.progress || 0) / m.target) * 100));
+        return `
+          <div class="bg-[var(--border)]/20 rounded-xl p-3 text-xs">
+            <div class="flex justify-between mb-1">
+              <span class="font-bold">${escapeHtml(m.label)}</span>
+              <span>${m.progress || 0}/${m.target}</span>
+            </div>
+            <div class="h-1.5 bg-[var(--border)] rounded-full overflow-hidden">
+              <div class="h-full bg-[var(--success)]" style="width:${p}%"></div>
+            </div>
+            <div class="mt-1 text-[10px] text-[var(--sub)]">報酬 ${m.xp} XP</div>
+          </div>
+        `;
       }).join("");
     }
-    async function progressMission(type){
-      if(!currentUser||!myProfile)return;
-      let xp=0,changed=false;
-      const ms=(myProfile.activeMissions||[]).map(m=>{
-        if(m.type!==type)return m;
-        changed=true;
-        const n={...m,progress:(m.progress||0)+1};
-        if(n.progress>=n.target){xp+=n.xp;return{...MISSIONS[Math.floor(Math.random()*MISSIONS.length)],id:`m_${Date.now()}_${Math.random()}`,progress:0}}
-        return n;
+
+    async function progressMission(type) {
+      if (!currentUser || !myProfile) return;
+      let xpAdd = 0;
+      let changed = false;
+
+      const next = (myProfile.activeMissions || []).map(m => {
+        if (m.type !== type) return m;
+        changed = true;
+        const updated = { ...m, progress: (m.progress || 0) + 1 };
+        if (updated.progress >= updated.target) {
+          xpAdd += updated.xp;
+          const replacement = MISSIONS[Math.floor(Math.random() * MISSIONS.length)];
+          return { ...replacement, id: `m_${Date.now()}_${Math.random()}`, progress: 0 };
+        }
+        return updated;
       });
-      if(!changed)return;
-      myProfile.activeMissions=ms;
-      const up={activeMissions:ms};
-      if(xp&&!isAdmin()){up.xp=increment(xp);myProfile.xp=(myProfile.xp||0)+xp;showToast(`ミッション達成 +${xp}XP`)}
-      await updateDoc(doc(db,"users",currentUser.uid),up);
+
+      if (!changed) return;
+
+      myProfile.activeMissions = next;
+      const updates = { activeMissions: next };
+
+      if (xpAdd && !isAdmin()) {
+        updates.xp = increment(xpAdd);
+        myProfile.xp = (myProfile.xp || 0) + xpAdd;
+        showToast(`ミッション達成 +${xpAdd}XP`);
+      }
+
+      await updateDoc(doc(db, "users", currentUser.uid), updates);
       updateMyProfileUI();
     }
 
-    $("post-btn").onclick=async()=>{
-      if(!requireAuth())return;
-      const text=$("post-text").value.trim();
-      if(!text)return;
-      const exp=new Date(Date.now()+7776e6);
-      await addDoc(collection(db,"logs"),{
-        text,uid:currentUser.uid,authorName:myProfile.name||"名無し",authorIcon:myProfile.icon||`https://api.dicebear.com/7.x/notionists/svg?seed=${currentUser.uid}`,
-        authorTitle:myProfile.title||"",createdAt:serverTimestamp(),expireAt:exp,likes:[],replyCount:0,isReply:false
+    $("post-btn").onclick = async () => {
+      if (!requireAuth()) return;
+      const text = $("post-text").value.trim();
+      if (!text) return;
+
+      const exp = new Date(Date.now() + 90 * 24 * 60 * 60 * 1000);
+
+      await addDoc(collection(db, "logs"), {
+        text,
+        uid: currentUser.uid,
+        authorName: myProfile.name || "名無し",
+        authorIcon: myProfile.icon || LOGO_ICON,
+        authorTitle: myProfile.title || "",
+        createdAt: serverTimestamp(),
+        expireAt: exp,
+        likes: [],
+        replyCount: 0,
+        isReply: false
       });
-      if(!isAdmin()){
-        await updateDoc(doc(db,"users",currentUser.uid),{xp:increment(15)});
-        myProfile.xp=(myProfile.xp||0)+15;
+
+      if (!isAdmin()) {
+        await updateDoc(doc(db, "users", currentUser.uid), { xp: increment(15) });
+        myProfile.xp = (myProfile.xp || 0) + 15;
       }
+
       await progressMission("post");
       await notifyFollowersPost(text);
-      $("post-text").value="";
+      $("post-text").value = "";
       cancelQuote();
       updateMyProfileUI();
       showToast("投稿しました。更新で反映");
     };
-    async function notifyFollowersPost(text){
-      try{
-        const s=await getDocs(query(collection(db,"users"),where("following","array-contains",currentUser.uid),limit(30)));
-        const jobs=[];
-        const exp=new Date(Date.now()+7776e6);
-        s.forEach(d=>{
-          if(d.id!==currentUser.uid){
-            jobs.push(addDoc(collection(db,"notif"),{to:d.id,from:myProfile.name||"名無し",fromUid:currentUser.uid,type:"post",text:text.slice(0,80),read:false,createdAt:serverTimestamp(),expireAt:exp}));
+
+    async function notifyFollowersPost(text) {
+      try {
+        const snap = await getDocs(query(collection(db, "users"), where("following", "array-contains", currentUser.uid), limit(30)));
+        const jobs = [];
+        const exp = new Date(Date.now() + 90 * 24 * 60 * 60 * 1000);
+
+        snap.forEach(d => {
+          if (d.id !== currentUser.uid) {
+            jobs.push(addDoc(collection(db, "notif"), {
+              to: d.id,
+              from: myProfile.name || "名無し",
+              fromUid: currentUser.uid,
+              type: "post",
+              text: text.slice(0, 80),
+              read: false,
+              createdAt: serverTimestamp(),
+              expireAt: exp
+            }));
           }
         });
+
         await Promise.all(jobs);
-      }catch(e){console.warn(e)}
+      } catch (e) {
+        console.warn(e);
+      }
     }
-    function startPostNoticeWatcher(){
-      if(!currentUser)return;
+
+    function startPostNoticeWatcher() {
+      if (!currentUser) return;
       postNoticeUnsub?.();
-      postNoticeUnsub=onSnapshot(query(collection(db,"logs"),orderBy("createdAt","desc"),limit(1)),snap=>{
-        if(snap.empty)return;
-        const d=snap.docs[0];
-        const p=d.data();
-        if(!lastSeenTopPostId){lastSeenTopPostId=d.id;return}
-        if(d.id===lastSeenTopPostId||p.isReply||p.replyTo||p.uid===currentUser.uid)return;
-        lastSeenTopPostId=d.id;
-        $("new-post-notice").innerHTML=`${escapeHtml(p.authorName||"誰か")}さんが新しく投稿しました。<button onclick="reloadNewestPosts()" class="underline ml-2">読み込む</button>`;
+
+      postNoticeUnsub = onSnapshot(query(collection(db, "logs"), orderBy("createdAt", "desc"), limit(1)), snap => {
+        if (snap.empty) return;
+        const d = snap.docs[0];
+        const data = d.data();
+
+        if (!lastSeenTopPostId) {
+          lastSeenTopPostId = d.id;
+          return;
+        }
+
+        if (d.id === lastSeenTopPostId || data.isReply || data.replyTo || data.uid === currentUser.uid) return;
+
+        lastSeenTopPostId = d.id;
+        $("new-post-notice").innerHTML = `${escapeHtml(data.authorName || "誰か")}さんが新しく投稿しました。<button onclick="reloadNewestPosts()" class="underline ml-2">読み込む</button>`;
         $("new-post-notice").classList.remove("hidden");
       });
     }
-    window.reloadNewestPosts=()=>{postLimit=10;$("new-post-notice").classList.add("hidden");loadTimeline()};
-    window.loadMorePosts=()=>{postLimit+=10;loadTimeline()};
-    async function loadTimeline(){
-      const c=$("timeline");
-      c.innerHTML='<div class="p-6 text-center text-sm text-[var(--sub)]">読み込み中...</div>';
-      try{
-        const s=await getDocs(query(collection(db,"logs"),orderBy("createdAt","desc"),limit(Math.max(30,postLimit*3))));
-        let h="",n=0;
-        s.forEach(d=>{
-          const data=d.data();
-          if(!lastSeenTopPostId&&!data.isReply&&!data.replyTo)lastSeenTopPostId=d.id;
-          if(data.isReply||data.replyTo||n>=postLimit)return;
-          h+=buildPostHTML(d.id,data);
-          n++;
-        });
-        c.innerHTML=h||'<div class="p-8 text-center text-sm text-[var(--sub)]">まだポストがありません</div>';
-        c.innerHTML+='<div class="p-6 text-center"><button onclick="loadMorePosts()" class="px-6 py-3 rounded-full bg-[var(--border)] font-bold">さらに10件読み込む</button></div>';
-      }catch(e){
-        c.innerHTML=`<div class="p-6 text-center text-sm text-red-500">読み込み失敗: ${escapeHtml(e.message)}</div>`;
-      }
-      currentUser&&currentProfileTab==="posts"&&loadMyPosts(false);
-    }
-    function buildPostHTML(id,d,isPin=false,inThread=false){
-      const liked=currentUser&&Array.isArray(d.likes)&&d.likes.includes(currentUser.uid);
-      const safeText=escapeHtml(d.text||"");
-      const safeAuthor=escapeHtml(d.authorName||"名無し");
-      const safeTitle=escapeHtml(d.authorTitle||"");
-      const safeUid=escapeHtml((d.uid||"").slice(0,8));
-      const quoteText=escapeAttr(d.text||"");
-      const quoteName=escapeAttr(d.authorName||"名無し");
-      const canDelete=currentUser&&(d.uid===currentUser.uid||isAdmin());
-      const click=inThread?"":`onclick="openThread('${id}')"`;
-      return `<article class="post flex gap-3" ${click}><img src="${escapeAttr(d.authorIcon||'https://api.dicebear.com/7.x/notionists/svg?seed=guest')}" class="w-10 h-10 rounded-full object-cover flex-shrink-0 cursor-pointer" onclick="event.stopPropagation(); viewUser('${escapeAttr(d.uid||"")}')" /><div class="flex-1 min-w-0 overflow-hidden"><div class="flex justify-between items-start gap-2"><div class="min-w-0"><div class="flex items-center gap-1 min-w-0 flex-wrap"><button class="font-bold text-[15px] truncate hover:underline" onclick="event.stopPropagation(); viewUser('${escapeAttr(d.uid||"")}')">${safeAuthor}</button>${d.isGemini||isGeminiUid(d.uid)?'<span class="badge gemini-badge">Gemini</span>':safeTitle?`<span class="badge title-badge">${safeTitle}</span>`:""}<span class="text-[var(--sub)] text-sm truncate">@${safeUid}</span></div><div class="text-xs text-[var(--sub)] mt-0.5">${formatTime(d.createdAt)}</div></div>${canDelete&&!isPin?`<button onclick="event.stopPropagation(); del('${id}')" class="text-[var(--danger)] text-xs font-bold px-2 py-1 rounded-full bg-red-500/10">削除</button>`:""}</div>${d.isReply?`<div class="text-xs text-blue-400 font-bold mt-2 mb-1">↪ ${escapeHtml(d.replyToName||"ポスト")} へのリプライ</div>`:""}<p class="text-[15px] mt-2 whitespace-pre-wrap leading-relaxed break-words">${safeText}</p><div class="flex justify-between items-center mt-3 max-w-sm text-[var(--sub)] pr-4"><button onclick="event.stopPropagation(); openReply('${id}', '${quoteName}')" class="btn-ghost"><span class="material-icons-round text-lg">reply</span><span class="text-xs font-bold">${d.replyCount||0}</span></button><button onclick="event.stopPropagation(); setQuote('${quoteText}', '${quoteName}')" class="btn-ghost"><span class="material-icons-round text-lg">cached</span></button><button onclick="event.stopPropagation(); like('${id}', '${escapeAttr(d.uid||"")}')" class="btn-ghost ${liked?'text-[#f91880]':''}"><span class="material-icons-round text-lg">${liked?'favorite':'favorite_border'}</span><span class="text-xs font-bold">${Array.isArray(d.likes)?d.likes.length:0}</span></button></div></div></article>`;
-    }
-    window.openThread=async postId=>{
-      const m=$("thread-modal"),c=$("thread-posts");
-      c.innerHTML='<div class="p-6 text-center text-sm text-[var(--sub)]">読み込み中...</div>';
-      m.classList.remove("hidden");
-      try{
-        const p=await getDoc(doc(db,"logs",postId));
-        if(!p.exists())return c.innerHTML='<div class="p-6 text-center">投稿が存在しません</div>';
-        let h=buildPostHTML(p.id,p.data(),false,true);
-        const s=await getDocs(query(collection(db,"logs"),where("replyTo","==",postId),limit(80)));
-        const rs=[];
-        s.forEach(x=>rs.push({id:x.id,data:x.data()}));
-        rs.sort((a,b)=>(toDate(a.data.createdAt)?.getTime()||0)-(toDate(b.data.createdAt)?.getTime()||0));
-        if(rs.length)h+='<div class="px-4 py-2 text-xs text-[var(--sub)] font-bold">リプライ</div>';
-        rs.forEach(r=>h+=`<div class="ml-6 border-l-2 border-[var(--border)] pl-3">${buildPostHTML(r.id,r.data,false,true)}</div>`);
-        c.innerHTML=h;
-      }catch(e){
-        c.innerHTML=`<div class="p-6 text-center text-red-500">読み込み失敗: ${escapeHtml(e.message)}</div>`;
-      }
-    };
-    window.openReply=(id,name)=>{
-      if(!requireAuth())return;
-      currentReplyPost=id;
-      currentReplyAuthor=name||"ポスト";
-      $("reply-target").innerText=`${currentReplyAuthor} に返信`;
-      $("reply-modal").classList.remove("hidden");
-      setTimeout(()=>$("reply-input").focus(),80);
-    };
-    window.closeReplyModal=()=>{currentReplyPost=null;currentReplyAuthor="";$("reply-input").value="";$("reply-modal").classList.add("hidden")};
-    window.sendReply=async()=>{
-      if(!requireAuth()||!currentReplyPost)return;
-      const text=$("reply-input").value.trim();
-      if(!text)return;
-      const parentRef=doc(db,"logs",currentReplyPost);
-      const parentSnap=await getDoc(parentRef);
-      const parent=parentSnap.exists()?parentSnap.data():null;
-      const exp=new Date(Date.now()+7776e6);
-      await addDoc(collection(db,"logs"),{
-        text,uid:currentUser.uid,authorName:myProfile.name||"名無し",authorIcon:myProfile.icon,authorTitle:myProfile.title||"",
-        createdAt:serverTimestamp(),expireAt:exp,likes:[],replyCount:0,replyTo:currentReplyPost,replyToName:parent?parent.authorName||"":currentReplyAuthor,isReply:true
-      });
-      parentSnap.exists()&&await updateDoc(parentRef,{replyCount:increment(1)});
-      await progressMission("reply");
-      parent?.uid&&parent.uid!==currentUser.uid&&await addDoc(collection(db,"notif"),{to:parent.uid,from:myProfile.name||"名無し",fromUid:currentUser.uid,type:"reply",read:false,createdAt:serverTimestamp(),expireAt:exp});
-      const opened=currentReplyPost;
-      closeReplyModal();
-      openThread(opened);
-    };
-    window.setQuote=(text,name)=>{if(!requireAuth())return;quoteData={text,name};$("quote-preview").classList.remove("hidden");$("quote-target-name").innerText=name;$("quote-target-text").innerText=text;switchTab("home");$("post-text").focus()};
-    window.cancelQuote=()=>{quoteData=null;$("quote-preview").classList.add("hidden")};
-    window.like=async(id,to)=>{
-      if(!requireAuth())return;
-      const ref=doc(db,"logs",id);
-      const s=await getDoc(ref);
-      if(!s.exists())return;
-      const d=s.data();
-      const liked=Array.isArray(d.likes)&&d.likes.includes(currentUser.uid);
-      if(liked)await updateDoc(ref,{likes:arrayRemove(currentUser.uid)});
-      else{
-        await updateDoc(ref,{likes:arrayUnion(currentUser.uid)});
-        await progressMission("like");
-        to&&to!==currentUser.uid&&await addDoc(collection(db,"notif"),{to,from:myProfile.name||"名無し",fromUid:currentUser.uid,type:"like",read:false,createdAt:serverTimestamp(),expireAt:new Date(Date.now()+7776e6)});
-      }
-      showToast(liked?"いいねを外しました":"いいねしました");
-    };
-    window.del=async id=>{
-      if(!requireAuth()||!confirm("このポストを削除する？"))return;
-      const s=await getDoc(doc(db,"logs",id));
-      if(!s.exists())return;
-      const d=s.data();
-      if(d.uid!==currentUser.uid&&!isAdmin())return showToast("削除権限なし");
-      await deleteDoc(doc(db,"logs",id));
+
+    window.reloadNewestPosts = () => {
+      postLimit = 10;
+      $("new-post-notice").classList.add("hidden");
       loadTimeline();
     };
 
-    async function loadRanking(){
-      const l=$("explore-list");
-      l.innerHTML='<div class="p-6 text-center text-sm text-[var(--sub)]">読み込み中...</div>';
-      try{
-        const s=await getDocs(query(collection(db,"users"),orderBy("xp","desc"),limit(30)));
-        let h="",i=1;
-        GEMINI_USERS.forEach(ai=>h+=userRow(ai.uid,{...ai,xp:777,isGemini:true},"AI"));
-        s.forEach(x=>{if(isGeminiUid(x.id))return;h+=userRow(x.id,normalizeProfile(x.data()),i++)});
-        l.innerHTML=h||'<div class="p-6 text-center">ユーザーなし</div>';
-      }catch(e){l.innerHTML='<div class="p-6 text-center text-red-500">読み込み失敗</div>'}
-    }
-    function userRow(uid,u,rankLabel){
-      return `<button class="w-full p-4 flex items-center gap-3 text-left hover:bg-[var(--border)]/20" onclick="viewUser('${uid}')"><span class="w-8 text-center font-black text-[var(--sub)]">${rankLabel}</span><img src="${escapeAttr(u.icon||`https://api.dicebear.com/7.x/notionists/svg?seed=${uid}`)}" class="w-10 h-10 rounded-full"><div class="flex-1 min-w-0"><div class="font-bold text-sm truncate">${escapeHtml(u.name||"名無し")} ${u.isGemini?'<span class="badge gemini-badge">Gemini</span>':''}</div><div class="text-xs text-[var(--sub)]">${u.xp||0} XP</div></div></button>`;
-    }
-    window.searchUsers=()=>{
-      const v=$("search-input").value.toLowerCase();
-      document.querySelectorAll("#explore-list > button").forEach(el=>el.style.display=el.innerText.toLowerCase().includes(v)?"flex":"none");
+    window.loadMorePosts = () => {
+      postLimit += 10;
+      loadTimeline();
     };
-    window.viewUser=async uid=>{
-      if(!requireAuth()||!uid)return;
-      if(uid===currentUser.uid)return switchTab("profile");
-      let u;
-      if(isGeminiUid(uid))u={...getGeminiUser(uid),xp:777,isGemini:true};
-      else{
-        const s=await getDoc(doc(db,"users",uid));
-        if(!s.exists())return showToast("ユーザーが見つかりません");
-        u=normalizeProfile(s.data());
+
+    async function loadTimeline() {
+      const timeline = $("timeline");
+      timeline.innerHTML = '<div class="p-6 text-center text-sm text-[var(--sub)]">読み込み中...</div>';
+
+      try {
+        const snap = await getDocs(query(collection(db, "logs"), orderBy("createdAt", "desc"), limit(Math.max(30, postLimit * 3))));
+        let html = "";
+        let count = 0;
+
+        snap.forEach(d => {
+          const data = d.data();
+          if (!lastSeenTopPostId && !data.isReply && !data.replyTo) lastSeenTopPostId = d.id;
+          if (data.isReply || data.replyTo || count >= postLimit) return;
+          html += buildPostHTML(d.id, data);
+          count++;
+        });
+
+        timeline.innerHTML = html || '<div class="p-8 text-center text-sm text-[var(--sub)]">まだポストがありません</div>';
+        timeline.innerHTML += '<div class="p-6 text-center"><button onclick="loadMorePosts()" class="px-6 py-3 rounded-full bg-[var(--border)] font-bold">さらに10件読み込む</button></div>';
+      } catch (e) {
+        timeline.innerHTML = `<div class="p-6 text-center text-sm text-red-500">読み込み失敗: ${escapeHtml(e.message)}</div>`;
       }
-      $("other-name").innerText=u.name||"名無し";
-      $("other-icon").src=u.icon||`https://api.dicebear.com/7.x/notionists/svg?seed=${uid}`;
-      $("other-uid").innerText="@"+uid.slice(0,8);
-      $("other-xp").innerText=u.xp||0;
-      $("other-rank").innerText=u.isGemini?"Gemini AI":rank(u.xp||0);
-      $("other-ai").classList.toggle("hidden",!u.isGemini);
-      if(u.title){$("other-title").innerText=u.title;$("other-title").classList.remove("hidden")}else{$("other-title").classList.add("hidden")}
-      const f=(myProfile.following||[]).includes(uid);
-      $("other-follow-btn").innerText=f?"フォロー中":"フォローする";
-      $("other-follow-btn").onclick=()=>toggleFollow(uid);
-      $("other-dm-btn").onclick=()=>openChat(uid,u.name||"User");
+
+      if (currentUser && currentProfileTab === "posts") loadMyPosts(false);
+    }
+
+    function buildPostHTML(id, d, isPin = false, inThread = false) {
+      const liked = currentUser && Array.isArray(d.likes) && d.likes.includes(currentUser.uid);
+      const safeText = escapeHtml(d.text || "");
+      const safeAuthor = escapeHtml(d.authorName || "名無し");
+      const safeTitle = escapeHtml(d.authorTitle || "");
+      const safeUid = escapeHtml((d.uid || "").slice(0, 8));
+      const quoteText = escapeAttr(d.text || "");
+      const quoteName = escapeAttr(d.authorName || "名無し");
+      const canDelete = currentUser && (d.uid === currentUser.uid || isAdmin());
+      const click = inThread ? "" : `onclick="openThread('${id}')"`;
+
+      return `
+        <article class="post flex gap-3" ${click}>
+          <img src="${escapeAttr(d.authorIcon || LOGO_ICON)}" class="w-10 h-10 rounded-full object-cover flex-shrink-0 cursor-pointer" onclick="event.stopPropagation(); viewUser('${escapeAttr(d.uid || "")}')" />
+          <div class="flex-1 min-w-0 overflow-hidden">
+            <div class="flex justify-between items-start gap-2">
+              <div class="min-w-0">
+                <div class="flex items-center gap-1 min-w-0 flex-wrap">
+                  <button class="font-bold text-[15px] truncate hover:underline" onclick="event.stopPropagation(); viewUser('${escapeAttr(d.uid || "")}')">${safeAuthor}</button>
+                  ${safeTitle ? `<span class="badge title-badge">${safeTitle}</span>` : ""}
+                  <span class="text-[var(--sub)] text-sm truncate">@${safeUid}</span>
+                </div>
+                <div class="text-xs text-[var(--sub)] mt-0.5">${formatTime(d.createdAt)}</div>
+              </div>
+              ${canDelete && !isPin ? `<button onclick="event.stopPropagation(); del('${id}')" class="text-[var(--danger)] text-xs font-bold px-2 py-1 rounded-full bg-red-500/10">削除</button>` : ""}
+            </div>
+            ${d.isReply ? `<div class="text-xs text-blue-400 font-bold mt-2 mb-1">↪ ${escapeHtml(d.replyToName || "ポスト")} へのリプライ</div>` : ""}
+            <p class="text-[15px] mt-2 whitespace-pre-wrap leading-relaxed break-words">${safeText}</p>
+            <div class="flex justify-between items-center mt-3 max-w-sm text-[var(--sub)] pr-4">
+              <button onclick="event.stopPropagation(); openReply('${id}', '${quoteName}')" class="btn-ghost"><span class="material-icons-round text-lg">reply</span><span class="text-xs font-bold">${d.replyCount || 0}</span></button>
+              <button onclick="event.stopPropagation(); setQuote('${quoteText}', '${quoteName}')" class="btn-ghost"><span class="material-icons-round text-lg">cached</span></button>
+              <button onclick="event.stopPropagation(); like('${id}', '${escapeAttr(d.uid || "")}')" class="btn-ghost ${liked ? 'text-[#f91880]' : ''}"><span class="material-icons-round text-lg">${liked ? 'favorite' : 'favorite_border'}</span><span class="text-xs font-bold">${Array.isArray(d.likes) ? d.likes.length : 0}</span></button>
+            </div>
+          </div>
+        </article>
+      `;
+    }
+
+    window.openThread = async postId => {
+      const modal = $("thread-modal");
+      const container = $("thread-posts");
+      container.innerHTML = '<div class="p-6 text-center text-sm text-[var(--sub)]">読み込み中...</div>';
+      modal.classList.remove("hidden");
+
+      try {
+        const parentSnap = await getDoc(doc(db, "logs", postId));
+        if (!parentSnap.exists()) {
+          container.innerHTML = '<div class="p-6 text-center">投稿が存在しません</div>';
+          return;
+        }
+
+        let html = buildPostHTML(parentSnap.id, parentSnap.data(), false, true);
+        const replySnap = await getDocs(query(collection(db, "logs"), where("replyTo", "==", postId), limit(80)));
+        const replies = [];
+
+        replySnap.forEach(x => replies.push({ id: x.id, data: x.data() }));
+        replies.sort((a, b) => (toDate(a.data.createdAt)?.getTime() || 0) - (toDate(b.data.createdAt)?.getTime() || 0));
+
+        if (replies.length) html += '<div class="px-4 py-2 text-xs text-[var(--sub)] font-bold">リプライ</div>';
+        replies.forEach(r => {
+          html += `<div class="ml-6 border-l-2 border-[var(--border)] pl-3">${buildPostHTML(r.id, r.data, false, true)}</div>`;
+        });
+
+        container.innerHTML = html;
+      } catch (e) {
+        container.innerHTML = `<div class="p-6 text-center text-red-500">読み込み失敗: ${escapeHtml(e.message)}</div>`;
+      }
+    };
+
+    window.openReply = (id, name) => {
+      if (!requireAuth()) return;
+      currentReplyPost = id;
+      currentReplyAuthor = name || "ポスト";
+      $("reply-target").innerText = `${currentReplyAuthor} に返信`;
+      $("reply-modal").classList.remove("hidden");
+      setTimeout(() => $("reply-input").focus(), 80);
+    };
+
+    window.closeReplyModal = () => {
+      currentReplyPost = null;
+      currentReplyAuthor = "";
+      $("reply-input").value = "";
+      $("reply-modal").classList.add("hidden");
+    };
+
+    window.sendReply = async () => {
+      if (!requireAuth() || !currentReplyPost) return;
+      const text = $("reply-input").value.trim();
+      if (!text) return;
+
+      const parentRef = doc(db, "logs", currentReplyPost);
+      const parentSnap = await getDoc(parentRef);
+      const parent = parentSnap.exists() ? parentSnap.data() : null;
+      const exp = new Date(Date.now() + 90 * 24 * 60 * 60 * 1000);
+
+      await addDoc(collection(db, "logs"), {
+        text,
+        uid: currentUser.uid,
+        authorName: myProfile.name || "名無し",
+        authorIcon: myProfile.icon || LOGO_ICON,
+        authorTitle: myProfile.title || "",
+        createdAt: serverTimestamp(),
+        expireAt: exp,
+        likes: [],
+        replyCount: 0,
+        replyTo: currentReplyPost,
+        replyToName: parent ? parent.authorName || "" : currentReplyAuthor,
+        isReply: true
+      });
+
+      if (parentSnap.exists()) await updateDoc(parentRef, { replyCount: increment(1) });
+      await progressMission("reply");
+
+      if (parent?.uid && parent.uid !== currentUser.uid) {
+        await addDoc(collection(db, "notif"), {
+          to: parent.uid,
+          from: myProfile.name || "名無し",
+          fromUid: currentUser.uid,
+          type: "reply",
+          read: false,
+          createdAt: serverTimestamp(),
+          expireAt: exp
+        });
+      }
+
+      const opened = currentReplyPost;
+      closeReplyModal();
+      openThread(opened);
+    };
+
+    window.setQuote = (text, name) => {
+      if (!requireAuth()) return;
+      quoteData = { text, name };
+      $("quote-preview").classList.remove("hidden");
+      $("quote-target-name").innerText = name;
+      $("quote-target-text").innerText = text;
+      switchTab("home");
+      $("post-text").focus();
+    };
+
+    window.cancelQuote = () => {
+      quoteData = null;
+      $("quote-preview").classList.add("hidden");
+    };
+
+    window.like = async (id, to) => {
+      if (!requireAuth()) return;
+      const ref = doc(db, "logs", id);
+      const snap = await getDoc(ref);
+      if (!snap.exists()) return;
+
+      const data = snap.data();
+      const liked = Array.isArray(data.likes) && data.likes.includes(currentUser.uid);
+
+      if (liked) {
+        await updateDoc(ref, { likes: arrayRemove(currentUser.uid) });
+      } else {
+        await updateDoc(ref, { likes: arrayUnion(currentUser.uid) });
+        await progressMission("like");
+
+        if (to && to !== currentUser.uid) {
+          await addDoc(collection(db, "notif"), {
+            to,
+            from: myProfile.name || "名無し",
+            fromUid: currentUser.uid,
+            type: "like",
+            read: false,
+            createdAt: serverTimestamp(),
+            expireAt: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000)
+          });
+        }
+      }
+
+      showToast(liked ? "いいねを外しました" : "いいねしました");
+    };
+
+    window.del = async id => {
+      if (!requireAuth()) return;
+      if (!confirm("このポストを削除する？")) return;
+
+      const snap = await getDoc(doc(db, "logs", id));
+      if (!snap.exists()) return;
+      const data = snap.data();
+
+      if (data.uid !== currentUser.uid && !isAdmin()) return showToast("削除権限なし");
+
+      await deleteDoc(doc(db, "logs", id));
+      loadTimeline();
+    };
+
+    async function loadRanking() {
+      const list = $("explore-list");
+      list.innerHTML = '<div class="p-6 text-center text-sm text-[var(--sub)]">読み込み中...</div>';
+
+      try {
+        const snap = await getDocs(query(collection(db, "users"), orderBy("xp", "desc"), limit(30)));
+        let html = "";
+        let i = 1;
+
+        snap.forEach(d => {
+          html += userRow(d.id, normalizeProfile(d.data()), i++);
+        });
+
+        list.innerHTML = html || '<div class="p-6 text-center">ユーザーなし</div>';
+      } catch (e) {
+        list.innerHTML = '<div class="p-6 text-center text-red-500">読み込み失敗</div>';
+      }
+    }
+
+    function userRow(uid, user, rankLabel) {
+      return `
+        <button class="w-full p-4 flex items-center gap-3 text-left hover:bg-[var(--border)]/20" onclick="viewUser('${uid}')">
+          <span class="w-8 text-center font-black text-[var(--sub)]">${rankLabel}</span>
+          <img src="${escapeAttr(user.icon || LOGO_ICON)}" class="w-10 h-10 rounded-full">
+          <div class="flex-1 min-w-0">
+            <div class="font-bold text-sm truncate">${escapeHtml(user.name || "名無し")}</div>
+            <div class="text-xs text-[var(--sub)]">${user.xp || 0} XP</div>
+          </div>
+        </button>
+      `;
+    }
+
+    window.searchUsers = () => {
+      const value = $("search-input").value.toLowerCase();
+      document.querySelectorAll("#explore-list > button").forEach(el => {
+        el.style.display = el.innerText.toLowerCase().includes(value) ? "flex" : "none";
+      });
+    };
+
+    window.viewUser = async uid => {
+      if (!requireAuth() || !uid) return;
+      if (uid === currentUser.uid) return switchTab("profile");
+
+      const snap = await getDoc(doc(db, "users", uid));
+      if (!snap.exists()) return showToast("ユーザーが見つかりません");
+
+      const user = normalizeProfile(snap.data());
+      $("other-name").innerText = user.name || "名無し";
+      $("other-icon").src = user.icon || LOGO_ICON;
+      $("other-uid").innerText = "@" + uid.slice(0, 8);
+      $("other-xp").innerText = user.xp || 0;
+      $("other-rank").innerText = rank(user.xp || 0);
+
+      if (user.title) {
+        $("other-title").innerText = user.title;
+        $("other-title").classList.remove("hidden");
+      } else {
+        $("other-title").classList.add("hidden");
+      }
+
+      const following = (myProfile.following || []).includes(uid);
+      $("other-follow-btn").innerText = following ? "フォロー中" : "フォローする";
+      $("other-follow-btn").onclick = () => toggleFollow(uid);
+      $("other-dm-btn").onclick = () => openChat(uid, user.name || "User");
+
       switchTab("other-profile");
       await loadOtherPosts(uid);
     };
-    async function loadOtherPosts(uid){
-      const c=$("other-timeline");
-      c.innerHTML='<div class="p-6 text-center text-sm text-[var(--sub)]">読み込み中...</div>';
-      const s=await getDocs(query(collection(db,"logs"),where("uid","==",uid),limit(40)));
-      const docs=[];
-      s.forEach(x=>{const d=x.data();if(!d.isReply&&!d.replyTo)docs.push({id:x.id,data:d})});
-      docs.sort((a,b)=>(toDate(b.data.createdAt)?.getTime()||0)-(toDate(a.data.createdAt)?.getTime()||0));
-      c.innerHTML=docs.map(d=>buildPostHTML(d.id,d.data)).join("")||'<div class="p-6 text-center text-sm text-[var(--sub)]">ポストなし</div>';
+
+    async function loadOtherPosts(uid) {
+      const box = $("other-timeline");
+      box.innerHTML = '<div class="p-6 text-center text-sm text-[var(--sub)]">読み込み中...</div>';
+
+      const snap = await getDocs(query(collection(db, "logs"), where("uid", "==", uid), limit(40)));
+      const docs = [];
+      snap.forEach(d => {
+        const data = d.data();
+        if (!data.isReply && !data.replyTo) docs.push({ id: d.id, data });
+      });
+
+      docs.sort((a, b) => (toDate(b.data.createdAt)?.getTime() || 0) - (toDate(a.data.createdAt)?.getTime() || 0));
+      box.innerHTML = docs.map(d => buildPostHTML(d.id, d.data)).join("") || '<div class="p-6 text-center text-sm text-[var(--sub)]">ポストなし</div>';
     }
-    window.toggleFollow=async uid=>{
-      if(!requireAuth())return;
-      const f=myProfile.following||[];
-      const ref=doc(db,"users",currentUser.uid);
-      if(f.includes(uid)){
-        await updateDoc(ref,{following:arrayRemove(uid)});
-        myProfile.following=f.filter(x=>x!==uid);
+
+    window.toggleFollow = async uid => {
+      if (!requireAuth()) return;
+      const following = myProfile.following || [];
+      const ref = doc(db, "users", currentUser.uid);
+
+      if (following.includes(uid)) {
+        await updateDoc(ref, { following: arrayRemove(uid) });
+        myProfile.following = following.filter(x => x !== uid);
         showToast("フォロー解除しました");
-      }else{
-        await updateDoc(ref,{following:arrayUnion(uid)});
-        myProfile.following=[...f,uid];
+      } else {
+        await updateDoc(ref, { following: arrayUnion(uid) });
+        myProfile.following = [...following, uid];
         showToast("フォローしました");
       }
+
       viewUser(uid);
     };
 
-    async function loadNotifications(markRead=false){
-      if(!currentUser)return;
-      const l=$("notif-list");
-      try{
-        const s=await getDocs(query(collection(db,"notif"),where("to","==",currentUser.uid),limit(40)));
-        const docs=[];
-        s.forEach(x=>docs.push({id:x.id,data:x.data()}));
-        docs.sort((a,b)=>(toDate(b.data.createdAt)?.getTime()||0)-(toDate(a.data.createdAt)?.getTime()||0));
-        let unread=false;
-        l.innerHTML=docs.map(n=>{
-          if(!n.data.read)unread=true;
-          const icon=n.data.type==="like"?"favorite":n.data.type==="dm"?"mail":n.data.type==="post"?"campaign":"reply";
-          const verb=n.data.type==="post"?"新しく投稿しました":n.data.type==="dm"?"DMを送信しました":n.data.type==="like"?"いいねしました":"リプライしました";
-          const body=n.data.type==="post"&&n.data.text?`<div class="text-xs text-[var(--sub)] mt-1 truncate">「${escapeHtml(n.data.text)}」</div>`:"";
-          return `<div class="p-4 flex gap-3 ${!n.data.read?'bg-[var(--accent)]/10':''}"><span class="material-icons-round text-[var(--accent)]">${icon}</span><div class="text-sm min-w-0"><span class="font-bold">${escapeHtml(n.data.from||"誰か")}</span>さんが${verb}${body}<div class="text-xs text-[var(--sub)] mt-1">${formatTime(n.data.createdAt)}</div></div></div>`;
-        }).join("")||'<div class="p-8 text-center text-sm text-[var(--sub)]">通知なし</div>';
-        $("nav-badge").style.display=unread?"block":"none";
-        if(markRead){await Promise.all(docs.filter(n=>!n.data.read).map(n=>updateDoc(doc(db,"notif",n.id),{read:true})));$("nav-badge").style.display="none"}
-      }catch(e){l.innerHTML='<div class="p-6 text-center text-sm text-red-500">通知読み込み失敗</div>'}
-    }
-    window.loadNotifications=loadNotifications;
+    async function loadNotifications(markRead = false) {
+      if (!currentUser) return;
+      const list = $("notif-list");
 
-    function renderAIShortcuts(){
-      $("ai-dm-shortcuts").innerHTML=GEMINI_USERS.map(ai=>`<button onclick="openChat('${ai.uid}','${escapeAttr(ai.name)}')" class="p-3 rounded-2xl border border-[var(--border)] text-center bg-purple-500/5"><img src="${ai.icon}" class="w-10 h-10 rounded-full mx-auto mb-1"><div class="text-xs font-black truncate">${ai.name}</div><div class="text-[10px] text-[var(--sub)]">Gemini</div></button>`).join("");
+      try {
+        const snap = await getDocs(query(collection(db, "notif"), where("to", "==", currentUser.uid), limit(40)));
+        const docs = [];
+        snap.forEach(d => docs.push({ id: d.id, data: d.data() }));
+        docs.sort((a, b) => (toDate(b.data.createdAt)?.getTime() || 0) - (toDate(a.data.createdAt)?.getTime() || 0));
+
+        let unread = false;
+        list.innerHTML = docs.map(n => {
+          if (!n.data.read) unread = true;
+          const icon = n.data.type === "like" ? "favorite" : n.data.type === "dm" ? "mail" : n.data.type === "post" ? "campaign" : "reply";
+          const verb = n.data.type === "post" ? "新しく投稿しました" : n.data.type === "dm" ? "DMを送信しました" : n.data.type === "like" ? "いいねしました" : "リプライしました";
+          const body = n.data.type === "post" && n.data.text ? `<div class="text-xs text-[var(--sub)] mt-1 truncate">「${escapeHtml(n.data.text)}」</div>` : "";
+
+          return `
+            <div class="p-4 flex gap-3 ${!n.data.read ? 'bg-[var(--accent)]/10' : ''}">
+              <span class="material-icons-round text-[var(--accent)]">${icon}</span>
+              <div class="text-sm min-w-0">
+                <span class="font-bold">${escapeHtml(n.data.from || "誰か")}</span>さんが${verb}
+                ${body}
+                <div class="text-xs text-[var(--sub)] mt-1">${formatTime(n.data.createdAt)}</div>
+              </div>
+            </div>
+          `;
+        }).join("") || '<div class="p-8 text-center text-sm text-[var(--sub)]">通知なし</div>';
+
+        $("nav-badge").style.display = unread ? "block" : "none";
+
+        if (markRead) {
+          await Promise.all(docs.filter(n => !n.data.read).map(n => updateDoc(doc(db, "notif", n.id), { read: true })));
+          $("nav-badge").style.display = "none";
+        }
+      } catch (e) {
+        list.innerHTML = '<div class="p-6 text-center text-sm text-red-500">通知読み込み失敗</div>';
+      }
     }
-    window.startDMListWatcher=(force=false)=>{
-      if(!requireAuth())return;
-      if(dmRoomsUnsub&&!force)return;
+
+    window.loadNotifications = loadNotifications;
+
+    window.startDMListWatcher = (force = false) => {
+      if (!requireAuth()) return;
+      if (dmRoomsUnsub && !force) return;
+
       dmRoomsUnsub?.();
-      const box=$("dm-list");
-      box.innerHTML='<div class="p-6 text-center text-sm text-[var(--sub)]">DM接続中...</div>';
-      dmRoomsUnsub=onSnapshot(query(collection(db,"dmRooms"),where("members","array-contains",currentUser.uid),limit(40)),s=>{
-        const rooms=[];
-        s.forEach(x=>rooms.push({id:x.id,data:x.data()}));
+      const box = $("dm-list");
+      box.innerHTML = '<div class="p-6 text-center text-sm text-[var(--sub)]">DM接続中...</div>';
+
+      dmRoomsUnsub = onSnapshot(query(collection(db, "dmRooms"), where("members", "array-contains", currentUser.uid), limit(40)), snap => {
+        const rooms = [];
+        snap.forEach(d => rooms.push({ id: d.id, data: d.data() }));
         renderDMRooms(rooms);
-      },e=>{
-        box.innerHTML='<div class="p-6 text-center text-sm text-red-500">DM接続失敗<br><button onclick="startDMListWatcher(true)" class="btn-soft mt-3">再接続</button></div>';
+      }, () => {
+        box.innerHTML = '<div class="p-6 text-center text-sm text-red-500">DM接続失敗<br><button onclick="startDMListWatcher(true)" class="btn-soft mt-3">再接続</button></div>';
       });
     };
-    function renderDMRooms(rooms){
-      const box=$("dm-list");
-      rooms.sort((a,b)=>(toDate(b.data.updatedAt)?.getTime()||0)-(toDate(a.data.updatedAt)?.getTime()||0));
-      let h="";
-      for(const r of rooms){
-        const other=(r.data.members||[]).find(x=>x!==currentUser.uid);
-        if(!other)continue;
-        const name=r.data.names?.[other]||getGeminiUser(other)?.name||"User";
-        h+=`<button onclick="openChat('${other}', '${escapeAttr(name)}')" class="w-full text-left p-4 border border-[var(--border)] rounded-2xl hover:bg-[var(--border)]/20"><div class="flex justify-between gap-2"><div class="font-bold truncate">${escapeHtml(name)} ${isGeminiUid(other)?'<span class="badge gemini-badge">Gemini</span>':''}</div><div class="text-[10px] text-[var(--sub)] flex-shrink-0">${formatTime(r.data.updatedAt)}</div></div><div class="text-xs text-[var(--sub)] truncate mt-1">${escapeHtml(r.data.lastMessage||"")}</div></button>`;
+
+    function renderDMRooms(rooms) {
+      const box = $("dm-list");
+      rooms.sort((a, b) => (toDate(b.data.updatedAt)?.getTime() || 0) - (toDate(a.data.updatedAt)?.getTime() || 0));
+
+      let html = "";
+      for (const room of rooms) {
+        const other = (room.data.members || []).find(x => x !== currentUser.uid);
+        if (!other) continue;
+        const name = room.data.names?.[other] || "User";
+
+        html += `
+          <button onclick="openChat('${other}', '${escapeAttr(name)}')" class="w-full text-left p-4 border border-[var(--border)] rounded-2xl hover:bg-[var(--border)]/20">
+            <div class="flex justify-between gap-2">
+              <div class="font-bold truncate">${escapeHtml(name)}</div>
+              <div class="text-[10px] text-[var(--sub)] flex-shrink-0">${formatTime(room.data.updatedAt)}</div>
+            </div>
+            <div class="text-xs text-[var(--sub)] truncate mt-1">${escapeHtml(room.data.lastMessage || "")}</div>
+          </button>
+        `;
       }
-      box.innerHTML=h||'<div class="p-8 text-center text-sm text-[var(--sub)]">DMなし。上のGeminiに送ってみて。</div>';
+
+      box.innerHTML = html || '<div class="p-8 text-center text-sm text-[var(--sub)]">DMなし</div>';
     }
-    window.openChat=async(uid,name="")=>{
-      if(!requireAuth())return;
-      currentChatUser=uid;
-      currentChatName=name||getGeminiUser(uid)?.name||"User";
-      $("chat-target-name").innerText=currentChatName+(isGeminiUid(uid)?"  Gemini":"");
+
+    window.openChat = async (uid, name = "") => {
+      if (!requireAuth()) return;
+      currentChatUser = uid;
+      currentChatName = name || "User";
+      $("chat-target-name").innerText = currentChatName;
       switchTab("chat");
       startChatWatcher(uid);
     };
-    function startChatWatcher(uid){
-      if(!currentUser||!uid)return;
+
+    function startChatWatcher(uid) {
+      if (!currentUser || !uid) return;
       chatUnsub?.();
-      const box=$("chat-messages"),room=roomIdFor(currentUser.uid,uid);
-      box.innerHTML='<div class="p-6 text-center text-sm text-[var(--sub)]">DM接続中...</div>';
-      chatUnsub=onSnapshot(query(collection(db,"chats",room,"messages"),orderBy("createdAt","asc"),limit(80)),s=>{
-        let h="";
-        s.forEach(x=>{
-          const m=x.data(),mine=m.senderId===currentUser.uid;
-          h+=`<div class="flex ${mine?'justify-end':'justify-start'}"><div class="dm-bubble px-4 py-2 rounded-2xl text-[15px] ${mine?'bg-blue-500 text-white rounded-br-sm':'bg-gray-100 text-black rounded-bl-sm'}"><div>${escapeHtml(m.text||"")}</div><div class="text-[10px] opacity-70 mt-1 text-right">${formatTime(m.createdAt)}</div></div></div>`;
+
+      const box = $("chat-messages");
+      const room = roomIdFor(currentUser.uid, uid);
+      box.innerHTML = '<div class="p-6 text-center text-sm text-[var(--sub)]">DM接続中...</div>';
+
+      chatUnsub = onSnapshot(query(collection(db, "chats", room, "messages"), orderBy("createdAt", "asc"), limit(80)), snap => {
+        let html = "";
+
+        snap.forEach(d => {
+          const msg = d.data();
+          const mine = msg.senderId === currentUser.uid;
+          html += `
+            <div class="flex ${mine ? 'justify-end' : 'justify-start'}">
+              <div class="dm-bubble px-4 py-2 rounded-2xl text-[15px] ${mine ? 'bg-blue-500 text-white rounded-br-sm' : 'bg-gray-100 text-black rounded-bl-sm'}">
+                <div>${escapeHtml(msg.text || "")}</div>
+                <div class="text-[10px] opacity-70 mt-1 text-right">${formatTime(msg.createdAt)}</div>
+              </div>
+            </div>
+          `;
         });
-        box.innerHTML=h||'<div class="p-8 text-center text-sm text-[var(--sub)]">まだメッセージなし</div>';
-        requestAnimationFrame(()=>box.scrollTop=box.scrollHeight);
-      },e=>{
-        box.innerHTML='<div class="p-6 text-center text-sm text-red-500">DM接続失敗<br><button onclick="startChatWatcher(currentChatUser)" class="btn-soft mt-3">再接続</button></div>';
+
+        box.innerHTML = html || '<div class="p-8 text-center text-sm text-[var(--sub)]">まだメッセージなし</div>';
+        requestAnimationFrame(() => box.scrollTop = box.scrollHeight);
+      }, () => {
+        box.innerHTML = '<div class="p-6 text-center text-sm text-red-500">DM接続失敗<br><button onclick="startChatWatcher(currentChatUser)" class="btn-soft mt-3">再接続</button></div>';
       });
     }
-    $("chat-send-btn").onclick=async()=>{
-      if(!requireAuth()||!currentChatUser)return;
-      const input=$("chat-input"),text=input.value.trim();
-      if(!text)return;
-      const room=roomIdFor(currentUser.uid,currentChatUser),exp=new Date(Date.now()+7776e6),targetName=currentChatName||getGeminiUser(currentChatUser)?.name||"User";
-      await addDoc(collection(db,"chats",room,"messages"),{text,senderId:currentUser.uid,createdAt:serverTimestamp(),expireAt:exp});
-      await setDoc(doc(db,"dmRooms",room),{members:[currentUser.uid,currentChatUser],names:{[currentUser.uid]:myProfile.name||"自分",[currentChatUser]:targetName},lastMessage:text,updatedAt:serverTimestamp(),expireAt:exp},{merge:true});
-      if(!isGeminiUid(currentChatUser))await addDoc(collection(db,"notif"),{to:currentChatUser,from:myProfile.name||"名無し",fromUid:currentUser.uid,type:"dm",read:false,createdAt:serverTimestamp(),expireAt:exp});
-      input.value="";
+
+    $("chat-send-btn").onclick = async () => {
+      if (!requireAuth() || !currentChatUser) return;
+      const input = $("chat-input");
+      const text = input.value.trim();
+      if (!text) return;
+
+      const room = roomIdFor(currentUser.uid, currentChatUser);
+      const exp = new Date(Date.now() + 90 * 24 * 60 * 60 * 1000);
+      const targetName = currentChatName || "User";
+
+      await addDoc(collection(db, "chats", room, "messages"), {
+        text,
+        senderId: currentUser.uid,
+        createdAt: serverTimestamp(),
+        expireAt: exp
+      });
+
+      await setDoc(doc(db, "dmRooms", room), {
+        members: [currentUser.uid, currentChatUser],
+        names: {
+          [currentUser.uid]: myProfile.name || "自分",
+          [currentChatUser]: targetName
+        },
+        lastMessage: text,
+        updatedAt: serverTimestamp(),
+        expireAt: exp
+      }, { merge: true });
+
+      await addDoc(collection(db, "notif"), {
+        to: currentChatUser,
+        from: myProfile.name || "名無し",
+        fromUid: currentUser.uid,
+        type: "dm",
+        read: false,
+        createdAt: serverTimestamp(),
+        expireAt: exp
+      });
+
+      input.value = "";
       await progressMission("dm");
-      await maybeGeminiReply(currentChatUser,text);
     };
 
-    window.saveProfile=async()=>{
-      if(!currentUser)return;
-      const name=$("edit-name-input").value.trim();
-      if(!name)return showToast("表示名を入力して");
-      const icon=`https://api.dicebear.com/7.x/notionists/svg?seed=${currentUser.uid}_${Date.now()}`;
-      const profile={name,icon,xp:100,following:[],title:"見習い",adminMode:false,activeMissions:MISSIONS.map((m,i)=>({...m,id:`${m.type}_${i}`,progress:0})),expireAt:new Date(Date.now()+7776e6)};
-      await setDoc(doc(db,"users",currentUser.uid),profile,{merge:true});
-      myProfile=normalizeProfile(profile);
+    window.saveProfile = async () => {
+      if (!currentUser) return;
+      const name = $("edit-name-input").value.trim();
+      if (!name) return showToast("表示名を入力して");
+
+      const icon = LOGO_ICON;
+      const profile = {
+        name,
+        icon,
+        xp: 100,
+        following: [],
+        title: "見習い",
+        adminMode: false,
+        activeMissions: MISSIONS.map((m, i) => ({ ...m, id: `${m.type}_${i}`, progress: 0 })),
+        expireAt: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000)
+      };
+
+      await setDoc(doc(db, "users", currentUser.uid), profile, { merge: true });
+      myProfile = normalizeProfile(profile);
       $("profile-modal").classList.add("hidden");
       initLoggedIn();
       showToast("プロフィールを作成しました");
     };
-    window.rerollIcon=async()=>{
-      if(!requireAuth())return;
-      const icon=`https://api.dicebear.com/7.x/notionists/svg?seed=${currentUser.uid}_${Date.now()}_${Math.random().toString(36).slice(2)}`;
-      await updateDoc(doc(db,"users",currentUser.uid),{icon});
-      myProfile.icon=icon;
+
+    window.rerollIcon = async () => {
+      if (!requireAuth()) return;
+      const icon = `https://api.dicebear.com/7.x/notionists/svg?seed=${currentUser.uid}_${Date.now()}_${Math.random().toString(36).slice(2)}`;
+      await updateDoc(doc(db, "users", currentUser.uid), { icon });
+      myProfile.icon = icon;
       updateMyProfileUI();
     };
-    window.setAdmin=async()=>{
-      if(!requireAuth())return;
-      const code=prompt("管理者コード");
-      if(code!==ADMIN_CODE)return showToast("コード違い");
-      await updateDoc(doc(db,"users",currentUser.uid),{adminMode:true});
-      myProfile.adminMode=true;
+
+    window.setAdmin = async () => {
+      if (!requireAuth()) return;
+      const code = prompt("管理者コード");
+      if (code !== ADMIN_CODE) return showToast("コード違い");
+      await updateDoc(doc(db, "users", currentUser.uid), { adminMode: true });
+      myProfile.adminMode = true;
       updateMyProfileUI();
       showToast("管理者ON");
     };
-    window.switchProfileSubTab=t=>{
-      currentProfileTab=t;
-      $("tab-btn-posts").className=t==="posts"?'flex-1 text-center py-3 font-bold border-b-2 border-[var(--text)]':'flex-1 text-center py-3 font-bold text-[var(--sub)]';
-      $("tab-btn-likes").className=t==="likes"?'flex-1 text-center py-3 font-bold border-b-2 border-[var(--text)]':'flex-1 text-center py-3 font-bold text-[var(--sub)]';
-      t==="posts"?loadMyPosts():loadMyLikes();
+
+    window.switchProfileSubTab = tab => {
+      currentProfileTab = tab;
+      $("tab-btn-posts").className = tab === "posts"
+        ? 'flex-1 text-center py-3 font-bold border-b-2 border-[var(--text)]'
+        : 'flex-1 text-center py-3 font-bold text-[var(--sub)]';
+      $("tab-btn-likes").className = tab === "likes"
+        ? 'flex-1 text-center py-3 font-bold border-b-2 border-[var(--text)]'
+        : 'flex-1 text-center py-3 font-bold text-[var(--sub)]';
+      tab === "posts" ? loadMyPosts() : loadMyLikes();
     };
-    async function loadMyPosts(){
-      if(!currentUser)return;
-      const c=$("my-timeline");
-      c.innerHTML='<div class="p-6 text-center text-sm text-[var(--sub)]">読み込み中...</div>';
-      const s=await getDocs(query(collection(db,"logs"),where("uid","==",currentUser.uid),limit(60)));
-      const docs=[];
-      s.forEach(d=>{const data=d.data();if(!data.isReply&&!data.replyTo)docs.push({id:d.id,data})});
-      docs.sort((a,b)=>(toDate(b.data.createdAt)?.getTime()||0)-(toDate(a.data.createdAt)?.getTime()||0));
-      c.innerHTML=docs.slice(0,20).map(d=>buildPostHTML(d.id,d.data)).join("")||'<div class="p-6 text-center text-sm text-[var(--sub)]">ポストなし</div>';
+
+    async function loadMyPosts() {
+      if (!currentUser) return;
+      const box = $("my-timeline");
+      box.innerHTML = '<div class="p-6 text-center text-sm text-[var(--sub)]">読み込み中...</div>';
+
+      const snap = await getDocs(query(collection(db, "logs"), where("uid", "==", currentUser.uid), limit(60)));
+      const docs = [];
+      snap.forEach(d => {
+        const data = d.data();
+        if (!data.isReply && !data.replyTo) docs.push({ id: d.id, data });
+      });
+
+      docs.sort((a, b) => (toDate(b.data.createdAt)?.getTime() || 0) - (toDate(a.data.createdAt)?.getTime() || 0));
+      box.innerHTML = docs.slice(0, 20).map(d => buildPostHTML(d.id, d.data)).join("") || '<div class="p-6 text-center text-sm text-[var(--sub)]">ポストなし</div>';
     }
-    async function loadMyLikes(){
-      if(!currentUser)return;
-      const c=$("my-timeline");
-      c.innerHTML='<div class="p-6 text-center text-sm text-[var(--sub)]">読み込み中...</div>';
-      const s=await getDocs(query(collection(db,"logs"),where("likes","array-contains",currentUser.uid),limit(30)));
-      const docs=[];
-      s.forEach(d=>docs.push({id:d.id,data:d.data()}));
-      docs.sort((a,b)=>(toDate(b.data.createdAt)?.getTime()||0)-(toDate(a.data.createdAt)?.getTime()||0));
-      c.innerHTML=docs.map(d=>buildPostHTML(d.id,d.data)).join("")||'<div class="p-6 text-center text-sm text-[var(--sub)]">いいねなし</div>';
+
+    async function loadMyLikes() {
+      if (!currentUser) return;
+      const box = $("my-timeline");
+      box.innerHTML = '<div class="p-6 text-center text-sm text-[var(--sub)]">読み込み中...</div>';
+
+      const snap = await getDocs(query(collection(db, "logs"), where("likes", "array-contains", currentUser.uid), limit(30)));
+      const docs = [];
+      snap.forEach(d => docs.push({ id: d.id, data: d.data() }));
+      docs.sort((a, b) => (toDate(b.data.createdAt)?.getTime() || 0) - (toDate(a.data.createdAt)?.getTime() || 0));
+      box.innerHTML = docs.map(d => buildPostHTML(d.id, d.data)).join("") || '<div class="p-6 text-center text-sm text-[var(--sub)]">いいねなし</div>';
     }
-    window.openSettings=()=>$("settings-modal").classList.remove("hidden");
-    window.toggleDarkMode=()=>{document.body.classList.toggle("dark");localStorage.setItem("theme",document.body.classList.contains("dark")?"dark":"light")};
-    window.signOutApp=()=>{signOut(auth);$("settings-modal").classList.add("hidden")};
-    window.switchTab=t=>{
-      if(["dm","notif","profile","chat"].includes(t)&&!requireAuth())return;
-      ["home","explore","dm","notif","profile","other-profile","chat"].forEach(x=>{const el=$(`tab-${x}`);el&&el.classList.add("hidden")});
-      const target=$(`tab-${t}`);
-      target&&target.classList.remove("hidden");
-      document.querySelectorAll(".nav-item").forEach(b=>b.classList.remove("nav-active"));
-      const b=document.querySelector(`.nav-item[data-target="${t}"]`);
-      b&&b.classList.add("nav-active");
-      t==="explore"&&loadRanking();
-      t==="dm"&&startDMListWatcher();
-      t==="notif"&&loadNotifications(true);
-      if(t==="profile"){
+
+    window.openSettings = () => $("settings-modal").classList.remove("hidden");
+
+    window.toggleDarkMode = () => {
+      document.body.classList.toggle("dark");
+      localStorage.setItem("theme", document.body.classList.contains("dark") ? "dark" : "light");
+    };
+
+    window.signOutApp = () => {
+      signOut(auth);
+      $("settings-modal").classList.add("hidden");
+    };
+
+    window.switchTab = tab => {
+      if (["dm", "notif", "profile", "chat"].includes(tab) && !requireAuth()) return;
+
+      ["home", "explore", "dm", "notif", "profile", "other-profile", "chat"].forEach(name => {
+        const el = $(`tab-${name}`);
+        if (el) el.classList.add("hidden");
+      });
+
+      const target = $(`tab-${tab}`);
+      if (target) target.classList.remove("hidden");
+
+      document.querySelectorAll(".nav-item").forEach(btn => btn.classList.remove("nav-active"));
+      const nav = document.querySelector(`.nav-item[data-target="${tab}"]`);
+      if (nav) nav.classList.add("nav-active");
+
+      if (tab === "explore") loadRanking();
+      if (tab === "dm") startDMListWatcher();
+      if (tab === "notif") loadNotifications(true);
+
+      if (tab === "profile") {
         updateMyProfileUI();
-        currentProfileTab==="posts"?loadMyPosts():loadMyLikes();
+        currentProfileTab === "posts" ? loadMyPosts() : loadMyLikes();
       }
-      if(t!=="chat"){
-        chatUnsub?.();chatUnsub=null;
-        window.scrollTo({top:0,behavior:"smooth"});
+
+      if (tab !== "chat") {
+        chatUnsub?.();
+        chatUnsub = null;
+        window.scrollTo({ top: 0, behavior: "smooth" });
       }
     };
-    window.testGemini=async()=>{
-      try{
-        showToast("Gemini接続中...");
-        const t=await callGemini("接続テスト。10文字くらいで返して。","元気で短く");
-        showToast("成功: "+t);
-      }catch(e){showToast(e.message)}
-    };
-    document.addEventListener("gesturestart",e=>e.preventDefault());
-    window.addEventListener("resize",()=>{document.body.style.width=window.innerWidth+"px"});
+
+    document.addEventListener("gesturestart", e => e.preventDefault());
+    window.addEventListener("resize", () => {
+      document.body.style.width = window.innerWidth + "px";
+    });
   </script>
+
 </body>
 </html>
