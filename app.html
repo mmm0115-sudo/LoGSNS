@@ -31,6 +31,8 @@
       --danger: #f4212e;
       --success: #00ba7c;
       --nav: rgba(255,255,255,.94);
+      --app-height: 100dvh;
+      --bottom-nav-height: calc(72px + env(safe-area-inset-bottom));
     }
 
     .dark {
@@ -56,6 +58,7 @@
       -webkit-tap-highlight-color: transparent;
       -webkit-overflow-scrolling: touch;
       overscroll-behavior-x: none;
+      touch-action: manipulation;
     }
 
     * { box-sizing: border-box; }
@@ -75,6 +78,7 @@
     .app-shell {
       min-height: 100vh;
       min-height: 100dvh;
+      min-height: var(--app-height);
     }
 
     .btn-primary {
@@ -232,7 +236,7 @@
 
     .toast {
       position: fixed;
-      bottom: 86px;
+      bottom: calc(var(--bottom-nav-height) + 14px);
       left: 50%;
       transform: translateX(-50%) translateY(18px);
       background: rgba(0,0,0,.84);
@@ -287,7 +291,121 @@
     #tab-chat {
       height: calc(100vh - 132px);
       height: calc(100dvh - 132px);
+      height: calc(var(--app-height) - 132px);
       min-height: 0;
+    }
+
+    .bottom-nav {
+      min-height: var(--bottom-nav-height);
+    }
+
+    body.chat-active .bottom-nav {
+      display: none;
+    }
+
+    body.chat-active .app-shell {
+      padding-bottom: 0;
+    }
+
+    .modal-overlay {
+      overflow-y: auto;
+      overscroll-behavior: contain;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .modal-panel {
+      max-height: calc(var(--app-height) - 32px);
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    body.keyboard-open .modal-overlay {
+      align-items: flex-start;
+      padding-top: max(12px, env(safe-area-inset-top));
+      padding-bottom: 12px;
+    }
+
+    .wide-sidebar {
+      display: none;
+    }
+
+    .side-panel {
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: var(--bg);
+      overflow: hidden;
+    }
+
+    .side-panel-title {
+      padding: 12px 14px;
+      border-bottom: 1px solid var(--border);
+      font-size: .8rem;
+      font-weight: 900;
+      color: var(--sub);
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+
+    .side-panel-body {
+      max-height: 30vh;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    @media (min-width: 1024px) and (orientation: landscape) {
+      .app-shell {
+        max-width: 1120px;
+        display: grid;
+        grid-template-columns: minmax(0, 672px) 336px;
+        gap: 20px;
+        padding: 0 20px;
+        padding-bottom: 32px;
+        border-left: 0;
+        border-right: 0;
+        box-shadow: none;
+      }
+
+      .app-shell > header,
+      .app-shell > main {
+        grid-column: 1;
+        border-left: 1px solid var(--border);
+        border-right: 1px solid var(--border);
+      }
+
+      .app-shell > header {
+        top: 0;
+      }
+
+      .wide-sidebar {
+        display: flex;
+        grid-column: 2;
+        grid-row: 1 / span 2;
+        position: sticky;
+        top: 0;
+        height: var(--app-height);
+        padding: 16px 0;
+        flex-direction: column;
+        gap: 12px;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+      }
+
+      .bottom-nav {
+        display: none;
+      }
+
+      #tab-home,
+      #tab-explore,
+      #tab-dm,
+      #tab-notif,
+      #tab-profile,
+      #tab-other-profile {
+        padding-bottom: 32px;
+      }
+
+      #tab-chat {
+        height: calc(var(--app-height) - 58px);
+      }
     }
 
     @media (max-width: 640px) {
@@ -300,6 +418,21 @@
       .btn-primary {
         padding-left: 12px;
         padding-right: 12px;
+      }
+    }
+
+    @supports (-webkit-touch-callout: none) {
+      input,
+      textarea {
+        font-size: 16px !important;
+      }
+
+      .sticky {
+        transform: translateZ(0);
+      }
+
+      .app-shell {
+        min-height: -webkit-fill-available;
       }
     }
   </style>
@@ -483,7 +616,22 @@
   </section>
 </main>
 
-<nav class="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-2xl bg-[var(--nav)] border-t border-[var(--border)] flex justify-around py-3 z-50 backdrop-blur pb-[calc(env(safe-area-inset-bottom)+12px)]">
+<aside class="wide-sidebar" aria-label="PC横画面サイドバー">
+  <section class="side-panel">
+    <div class="side-panel-title">DM</div>
+    <div id="side-dm-list" class="side-panel-body"></div>
+  </section>
+  <section class="side-panel">
+    <div class="side-panel-title">通知</div>
+    <div id="side-notif-list" class="side-panel-body"></div>
+  </section>
+  <section class="side-panel">
+    <div class="side-panel-title">XP Ranking</div>
+    <div id="side-ranking-list" class="side-panel-body"></div>
+  </section>
+</aside>
+
+<nav class="bottom-nav fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-2xl bg-[var(--nav)] border-t border-[var(--border)] flex justify-around py-3 z-50 backdrop-blur pb-[calc(env(safe-area-inset-bottom)+12px)]">
   <button onclick="switchTab('home')" class="nav-item nav-active" data-target="home" aria-label="ホーム"><span class="material-icons-round text-3xl">home</span></button>
   <button onclick="switchTab('explore')" class="nav-item" data-target="explore" aria-label="検索"><span class="material-icons-round text-3xl">search</span></button>
   <button onclick="switchTab('dm')" class="nav-item" data-target="dm" aria-label="DM"><span class="material-icons-round text-3xl">mail</span></button>
@@ -494,7 +642,7 @@
   </div>
 
   <div id="auth-modal" class="modal-overlay hidden fixed inset-0 z-50 flex items-center justify-center p-4">
-    <div class="bg-[var(--card)] p-8 rounded-3xl w-full max-w-sm shadow-2xl border border-[var(--border)] text-center relative">
+    <div class="modal-panel bg-[var(--card)] p-8 rounded-3xl w-full max-w-sm shadow-2xl border border-[var(--border)] text-center relative">
       <button onclick="closeAuthModal()" class="absolute top-4 right-4 text-[var(--sub)]"><span class="material-icons-round">close</span></button>
       <img src="logo-main.png" alt="LoG" class="h-20 mx-auto mb-3 object-contain" />
       <h1 class="text-2xl font-black mb-2">LoGをはじめよう</h1>
@@ -533,7 +681,7 @@
   </div>
 
   <div id="profile-modal" class="modal-overlay hidden fixed inset-0 z-50 flex items-center justify-center p-4">
-    <div class="bg-[var(--card)] p-6 rounded-2xl w-full max-w-sm shadow-2xl border border-[var(--border)] text-center">
+    <div class="modal-panel bg-[var(--card)] p-6 rounded-2xl w-full max-w-sm shadow-2xl border border-[var(--border)] text-center">
       <h2 class="text-xl font-black mb-2">プロフィール作成</h2>
       <div id="profile-invite-note" class="hidden p-3 mb-4 rounded-2xl bg-blue-500/10 border border-blue-500/20 text-sm font-bold text-blue-500"></div>
       <input id="edit-name-input" type="text" class="w-full bg-[var(--border)]/30 rounded-xl border border-[var(--border)] p-4 mb-4 font-bold outline-none" placeholder="表示名" />
@@ -542,7 +690,7 @@
   </div>
 
   <div id="reply-modal" class="modal-overlay hidden fixed inset-0 z-50 flex items-center justify-center p-4">
-    <div class="bg-[var(--card)] p-6 rounded-2xl w-full max-w-md shadow-2xl border border-[var(--border)]">
+    <div class="modal-panel bg-[var(--card)] p-6 rounded-2xl w-full max-w-md shadow-2xl border border-[var(--border)]">
       <h2 class="text-xl font-black mb-4">リプライ</h2>
       <div id="reply-target" class="text-sm text-[var(--sub)] mb-3"></div>
       <textarea id="reply-input" rows="4" class="w-full bg-[var(--border)]/30 rounded-xl p-3 mb-4 text-sm outline-none resize-none" placeholder="返信を書く"></textarea>
@@ -554,7 +702,7 @@
   </div>
 
   <div id="thread-modal" class="modal-overlay hidden fixed inset-0 z-50 flex items-center justify-center p-4">
-    <div class="bg-[var(--card)] w-full max-w-xl rounded-2xl overflow-hidden border border-[var(--border)] max-h-[90vh] flex flex-col">
+    <div class="modal-panel bg-[var(--card)] w-full max-w-xl rounded-2xl overflow-hidden border border-[var(--border)] max-h-[90vh] flex flex-col">
       <div class="p-4 border-b border-[var(--border)] flex justify-between items-center">
         <div class="font-black text-lg">スレッド</div>
         <button onclick="document.getElementById('thread-modal').classList.add('hidden')"><span class="material-icons-round">close</span></button>
@@ -564,7 +712,7 @@
   </div>
 
   <div id="settings-modal" class="modal-overlay hidden fixed inset-0 z-50 flex items-center justify-center p-4">
-    <div class="bg-[var(--card)] p-6 rounded-2xl w-80 shadow-2xl border border-[var(--border)]">
+    <div class="modal-panel bg-[var(--card)] p-6 rounded-2xl w-80 shadow-2xl border border-[var(--border)]">
       <button onclick="toggleDarkMode()" class="w-full flex justify-between items-center p-3 font-bold mb-2 rounded-lg hover:bg-[var(--border)]/50">ダークモード<span class="material-icons-round">dark_mode</span></button>
       <button onclick="setAdmin()" class="w-full flex justify-between items-center p-3 font-bold mb-2 rounded-lg hover:bg-[var(--border)]/50">管理者権限<span class="material-icons-round">admin_panel_settings</span></button>
       <button onclick="signOutApp()" class="w-full text-left p-3 text-[var(--danger)] font-bold rounded-lg hover:bg-red-500/10">ログアウト</button>
@@ -600,6 +748,7 @@
     let currentChatName = "";
     let currentReplyPost = null;
     let currentReplyAuthor = "";
+    let replySending = false;
     let quoteData = null;
     let postLimit = 10;
     let notificationTimer = null;
@@ -638,7 +787,25 @@
       toastTimer = setTimeout(() => toast.classList.remove("show"), 2600);
     };
 
-    const authErr = e => showToast("Error: " + (e.message || e));
+    const friendlyError = (e, fallback = "うまく処理できませんでした。少し時間をおいてもう一度試してください。") => {
+      const code = e?.code || "";
+      if (code === "permission-denied") return "権限がないか、ログイン状態が切れています。もう一度ログインして試してください。";
+      if (code === "unauthenticated") return "ログインが必要です。もう一度ログインして試してください。";
+      if (code === "unavailable") return "通信が不安定です。少し時間をおいてもう一度試してください。";
+      if (code === "resource-exhausted") return "しばらく時間をおいてからもう一度試してください。";
+      if (code === "failed-precondition") return "準備がまだ整っていません。少し時間をおいてもう一度試してください。";
+      return fallback;
+    };
+
+    const authErr = e => showToast(friendlyError(e, "ログインに失敗しました。入力内容を確認してください。"));
+
+    const runOptional = async (label, job) => {
+      try {
+        await job();
+      } catch (e) {
+        console.warn(label, e);
+      }
+    };
 
     const escapeHtml = (v = "") => String(v).replace(/[&<>"]/g, s => ({
       "&": "&amp;",
@@ -652,6 +819,85 @@
     const roomIdFor = (a, b) => [a, b].sort().join("_");
     const toDate = ts => ts?.toDate ? ts.toDate() : ts ? new Date(ts) : null;
     const validReferralUid = uid => typeof uid === "string" && /^[A-Za-z0-9_-]{8,128}$/.test(uid);
+    const RETENTION_MS = 90 * 24 * 60 * 60 * 1000;
+
+    const expiresAtForNewDoc = () => new Date(Date.now() + RETENTION_MS);
+
+    function isExpired(data = {}) {
+      const exp = toDate(data.expireAt);
+      if (exp) return exp.getTime() <= Date.now();
+
+      const created = toDate(data.createdAt);
+      return created ? Date.now() - created.getTime() > RETENTION_MS : false;
+    }
+
+    function isGeneratedContent(data = {}) {
+      const uid = String(data.uid || data.fromUid || data.senderId || "").toLowerCase();
+      const name = String(data.authorName || data.from || "").toLowerCase();
+      const names = Object.values(data.names || {}).join(" ").toLowerCase();
+      return data.ai === true
+        || data.isAI === true
+        || data.bot === true
+        || data.isBot === true
+        || uid.startsWith("ai_")
+        || uid.startsWith("bot_")
+        || uid === "system"
+        || name === "ai"
+        || name.startsWith("ai ")
+        || name.includes("ai bot")
+        || name.includes("ai投稿")
+        || name.includes("bot")
+        || names.includes("ai bot")
+        || names.includes("ai投稿")
+        || names.includes("bot");
+    }
+
+    function visibleDocsFromSnapshot(snap, collectionName) {
+      const docs = [];
+      snap.forEach(item => {
+        const data = item.data();
+        if (isGeneratedContent(data)) {
+          runOptional(`generated ${collectionName} cleanup failed`, async () => deleteDoc(doc(db, collectionName, item.id)));
+          return;
+        }
+        if (isExpired(data)) {
+          runOptional(`expired ${collectionName} cleanup failed`, async () => deleteDoc(doc(db, collectionName, item.id)));
+          return;
+        }
+        docs.push({ id: item.id, data });
+      });
+      return docs;
+    }
+
+    function setHTML(ids, html) {
+      ids.forEach(id => {
+        const el = $(id);
+        if (el) el.innerHTML = html;
+      });
+    }
+
+    function syncViewportHeight() {
+      const height = window.visualViewport?.height || window.innerHeight;
+      document.documentElement.style.setProperty("--app-height", `${height}px`);
+    }
+
+    syncViewportHeight();
+    window.addEventListener("resize", syncViewportHeight);
+    window.visualViewport?.addEventListener("resize", syncViewportHeight);
+    window.visualViewport?.addEventListener("scroll", syncViewportHeight);
+
+    document.addEventListener("focusin", e => {
+      if (e.target?.matches?.("input, textarea")) document.body.classList.add("keyboard-open");
+    });
+
+    document.addEventListener("focusout", e => {
+      if (e.target?.matches?.("input, textarea")) {
+        setTimeout(() => {
+          if (!document.activeElement?.matches?.("input, textarea")) document.body.classList.remove("keyboard-open");
+          syncViewportHeight();
+        }, 120);
+      }
+    });
 
     function captureReferral() {
       const params = new URLSearchParams(location.search);
@@ -794,6 +1040,8 @@
       $("post-btn").style.pointerEvents = "none";
       loadTimeline();
       loadRanking();
+      setHTML(["dm-list", "side-dm-list"], '<div class="p-8 text-center text-sm text-[var(--sub)]">ログインするとDMを表示できます</div>');
+      setHTML(["notif-list", "side-notif-list"], '<div class="p-8 text-center text-sm text-[var(--sub)]">ログインすると通知を表示できます</div>');
       if (showLogin) openAuthModal();
     }
 
@@ -807,6 +1055,7 @@
       loadRanking();
       loadNotifications(false);
       startPostNoticeWatcher();
+      startDMListWatcher(true);
       clearInterval(notificationTimer);
       notificationTimer = setInterval(() => loadNotifications(false), 30000);
     }
@@ -926,7 +1175,7 @@
       const text = $("post-text").value.trim();
       if (!text) return;
 
-      const exp = new Date(Date.now() + 90 * 24 * 60 * 60 * 1000);
+      const exp = expiresAtForNewDoc();
 
       await addDoc(collection(db, "logs"), {
         text,
@@ -960,7 +1209,7 @@
       try {
         const snap = await getDocs(query(collection(db, "users"), where("following", "array-contains", currentUser.uid), limit(30)));
         const jobs = [];
-        const exp = new Date(Date.now() + 90 * 24 * 60 * 60 * 1000);
+        const exp = expiresAtForNewDoc();
 
         snap.forEach(d => {
           if (d.id !== currentUser.uid) {
@@ -992,6 +1241,7 @@
         const d = snap.docs[0];
         const data = d.data();
 
+        if (isGeneratedContent(data) || isExpired(data)) return;
         if (!lastSeenTopPostId) {
           lastSeenTopPostId = d.id;
           return;
@@ -1025,20 +1275,17 @@
         let html = "";
         let count = 0;
 
-        snap.forEach(d => {
-          const data = d.data();
-          if (!lastSeenTopPostId && !data.isReply && !data.replyTo) lastSeenTopPostId = d.id;
-          if (data.isReply || data.replyTo || count >= postLimit) return;
-          html += buildPostHTML(d.id, data);
+        visibleDocsFromSnapshot(snap, "logs").forEach(item => {
+          if (!lastSeenTopPostId && !item.data.isReply && !item.data.replyTo) lastSeenTopPostId = item.id;
+          if (item.data.isReply || item.data.replyTo || count >= postLimit) return;
+          html += buildPostHTML(item.id, item.data);
           count++;
         });
 
         timeline.innerHTML = html || '<div class="p-8 text-center text-sm text-[var(--sub)]">まだポストがありません</div>';
         timeline.innerHTML += '<div class="p-6 text-center"><button onclick="loadMorePosts()" class="px-6 py-3 rounded-full bg-[var(--border)] font-bold">さらに10件読み込む</button></div>';
       } catch (e) {
-        const message = e.code === "permission-denied"
-          ? "ログインするとタイムラインを表示できます。"
-          : `読み込み失敗: ${escapeHtml(e.message)}`;
+        const message = friendlyError(e, "タイムラインを読み込めませんでした。少し時間をおいてもう一度試してください。");
         timeline.innerHTML = `<div class="p-6 text-center text-sm text-[var(--sub)]">${message}</div>`;
       }
 
@@ -1102,12 +1349,14 @@
           container.innerHTML = '<div class="p-6 text-center">投稿が存在しません</div>';
           return;
         }
+        if (isGeneratedContent(parentSnap.data()) || isExpired(parentSnap.data())) {
+          container.innerHTML = '<div class="p-6 text-center">投稿は表示できません</div>';
+          return;
+        }
 
         let html = buildPostHTML(parentSnap.id, parentSnap.data(), false, true);
         const replySnap = await getDocs(query(collection(db, "logs"), where("replyTo", "==", postId), limit(80)));
-        const replies = [];
-
-        replySnap.forEach(x => replies.push({ id: x.id, data: x.data() }));
+        const replies = visibleDocsFromSnapshot(replySnap, "logs");
         replies.sort((a, b) => (toDate(a.data.createdAt)?.getTime() || 0) - (toDate(b.data.createdAt)?.getTime() || 0));
 
         if (replies.length) html += '<div class="px-4 py-2 text-xs text-[var(--sub)] font-bold">リプライ</div>';
@@ -1117,7 +1366,8 @@
 
         container.innerHTML = html;
       } catch (e) {
-        container.innerHTML = `<div class="p-6 text-center text-red-500">読み込み失敗: ${escapeHtml(e.message)}</div>`;
+        const message = friendlyError(e, "リプライを読み込めませんでした。少し時間をおいてもう一度試してください。");
+        container.innerHTML = `<div class="p-6 text-center text-sm text-[var(--sub)]">${message}</div>`;
       }
     };
 
@@ -1138,48 +1388,72 @@
     };
 
     window.sendReply = async () => {
-      if (!requireAuth() || !currentReplyPost) return;
+      if (replySending || !requireAuth() || !currentReplyPost) return;
       const text = $("reply-input").value.trim();
       if (!text) return;
 
-      const parentRef = doc(db, "logs", currentReplyPost);
-      const parentSnap = await getDoc(parentRef);
-      const parent = parentSnap.exists() ? parentSnap.data() : null;
-      const exp = new Date(Date.now() + 90 * 24 * 60 * 60 * 1000);
+      replySending = true;
+      const replyPostId = currentReplyPost;
+      const replyAuthor = currentReplyAuthor;
 
-      await addDoc(collection(db, "logs"), {
-        text,
-        uid: currentUser.uid,
-        authorName: myProfile.name || "名無し",
-        authorIcon: myProfile.icon || LOGO_ICON,
-        authorTitle: myProfile.title || "",
-        createdAt: serverTimestamp(),
-        expireAt: exp,
-        likes: [],
-        replyCount: 0,
-        replyTo: currentReplyPost,
-        replyToName: parent ? parent.authorName || "" : currentReplyAuthor,
-        isReply: true
-      });
+      try {
+        const parentRef = doc(db, "logs", replyPostId);
+        let parentSnap = null;
+        let parent = null;
 
-      if (parentSnap.exists()) await updateDoc(parentRef, { replyCount: increment(1) });
-      await progressMission("reply");
+        try {
+          parentSnap = await getDoc(parentRef);
+          parent = parentSnap.exists() ? parentSnap.data() : null;
+        } catch (e) {
+          console.warn("reply parent lookup failed", e);
+        }
 
-      if (parent?.uid && parent.uid !== currentUser.uid) {
-        await addDoc(collection(db, "notif"), {
-          to: parent.uid,
-          from: myProfile.name || "名無し",
-          fromUid: currentUser.uid,
-          type: "reply",
-          read: false,
+        const exp = expiresAtForNewDoc();
+
+        await addDoc(collection(db, "logs"), {
+          text,
+          uid: currentUser.uid,
+          authorName: myProfile.name || "名無し",
+          authorIcon: myProfile.icon || LOGO_ICON,
+          authorTitle: myProfile.title || "",
           createdAt: serverTimestamp(),
-          expireAt: exp
+          expireAt: exp,
+          likes: [],
+          replyCount: 0,
+          quoteName: "",
+          quoteText: "",
+          replyTo: replyPostId,
+          replyToName: parent ? parent.authorName || "" : replyAuthor,
+          isReply: true
         });
-      }
 
-      const opened = currentReplyPost;
-      closeReplyModal();
-      openThread(opened);
+        const opened = replyPostId;
+        closeReplyModal();
+        showToast("リプライしました");
+
+        runOptional("reply count update failed", async () => {
+          if (parentSnap?.exists()) await updateDoc(parentRef, { replyCount: increment(1) });
+        });
+        runOptional("reply mission update failed", async () => progressMission("reply"));
+        runOptional("reply notification failed", async () => {
+          if (!parent?.uid || parent.uid === currentUser.uid) return;
+          await addDoc(collection(db, "notif"), {
+            to: parent.uid,
+            from: myProfile.name || "名無し",
+            fromUid: currentUser.uid,
+            type: "reply",
+            read: false,
+            createdAt: serverTimestamp(),
+            expireAt: exp
+          });
+        });
+
+        openThread(opened);
+      } catch (e) {
+        showToast(friendlyError(e, "リプライを送信できませんでした。少し時間をおいてもう一度試してください。"));
+      } finally {
+        replySending = false;
+      }
     };
 
     window.setQuote = (text, name) => {
@@ -1220,7 +1494,7 @@
             type: "like",
             read: false,
             createdAt: serverTimestamp(),
-            expireAt: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000)
+            expireAt: expiresAtForNewDoc()
           });
         }
       }
@@ -1243,8 +1517,7 @@
     };
 
     async function loadRanking() {
-      const list = $("explore-list");
-      list.innerHTML = '<div class="p-6 text-center text-sm text-[var(--sub)]">読み込み中...</div>';
+      setHTML(["explore-list", "side-ranking-list"], '<div class="p-6 text-center text-sm text-[var(--sub)]">読み込み中...</div>');
 
       try {
         const snap = await getDocs(query(collection(db, "users"), orderBy("xp", "desc"), limit(30)));
@@ -1252,15 +1525,15 @@
         let i = 1;
 
         snap.forEach(d => {
-          html += userRow(d.id, normalizeProfile(d.data()), i++);
+          const user = normalizeProfile(d.data());
+          if (isGeneratedContent({ ...user, uid: d.id })) return;
+          html += userRow(d.id, user, i++);
         });
 
-        list.innerHTML = html || '<div class="p-6 text-center">ユーザーなし</div>';
+        setHTML(["explore-list", "side-ranking-list"], html || '<div class="p-6 text-center text-sm text-[var(--sub)]">ユーザーなし</div>');
       } catch (e) {
-        const message = e.code === "permission-denied"
-          ? "ログインするとユーザー一覧を表示できます。"
-          : "読み込み失敗";
-        list.innerHTML = `<div class="p-6 text-center text-sm text-[var(--sub)]">${message}</div>`;
+        const message = friendlyError(e, "ランキングを読み込めませんでした。");
+        setHTML(["explore-list", "side-ranking-list"], `<div class="p-6 text-center text-sm text-[var(--sub)]">${message}</div>`);
       }
     }
 
@@ -1320,9 +1593,8 @@
 
       const snap = await getDocs(query(collection(db, "logs"), where("uid", "==", uid), limit(40)));
       const docs = [];
-      snap.forEach(d => {
-        const data = d.data();
-        if (!data.isReply && !data.replyTo) docs.push({ id: d.id, data });
+      visibleDocsFromSnapshot(snap, "logs").forEach(d => {
+        if (!d.data.isReply && !d.data.replyTo) docs.push(d);
       });
 
       docs.sort((a, b) => (toDate(b.data.createdAt)?.getTime() || 0) - (toDate(a.data.createdAt)?.getTime() || 0));
@@ -1349,17 +1621,20 @@
     };
 
     async function loadNotifications(markRead = false) {
-      if (!currentUser) return;
+      if (!currentUser) {
+        setHTML(["notif-list", "side-notif-list"], '<div class="p-8 text-center text-sm text-[var(--sub)]">ログインすると通知を表示できます</div>');
+        return;
+      }
       const list = $("notif-list");
+      setHTML(["notif-list", "side-notif-list"], '<div class="p-6 text-center text-sm text-[var(--sub)]">読み込み中...</div>');
 
       try {
         const snap = await getDocs(query(collection(db, "notif"), where("to", "==", currentUser.uid), limit(40)));
-        const docs = [];
-        snap.forEach(d => docs.push({ id: d.id, data: d.data() }));
+        const docs = visibleDocsFromSnapshot(snap, "notif");
         docs.sort((a, b) => (toDate(b.data.createdAt)?.getTime() || 0) - (toDate(a.data.createdAt)?.getTime() || 0));
 
         let unread = false;
-        list.innerHTML = docs.map(n => {
+        const html = docs.map(n => {
           if (!n.data.read) unread = true;
           const icon = n.data.type === "like" ? "favorite" : n.data.type === "dm" ? "mail" : n.data.type === "post" ? "campaign" : n.data.type === "invite" ? "group_add" : "reply";
           const verb = n.data.type === "post" ? "新しく投稿しました" : n.data.type === "dm" ? "DMを送信しました" : n.data.type === "like" ? "いいねしました" : n.data.type === "invite" ? "招待から参加しました" : "リプライしました";
@@ -1376,6 +1651,7 @@
             </div>
           `;
         }).join("") || '<div class="p-8 text-center text-sm text-[var(--sub)]">通知なし</div>';
+        setHTML(["notif-list", "side-notif-list"], html);
 
         $("nav-badge").style.display = unread ? "block" : "none";
 
@@ -1384,7 +1660,7 @@
           $("nav-badge").style.display = "none";
         }
       } catch (e) {
-        list.innerHTML = '<div class="p-6 text-center text-sm text-red-500">通知読み込み失敗</div>';
+        setHTML(["notif-list", "side-notif-list"], '<div class="p-6 text-center text-sm text-red-500">通知読み込み失敗</div>');
       }
     }
 
@@ -1395,20 +1671,17 @@
       if (dmRoomsUnsub && !force) return;
 
       dmRoomsUnsub?.();
-      const box = $("dm-list");
-      box.innerHTML = '<div class="p-6 text-center text-sm text-[var(--sub)]">DM接続中...</div>';
+      setHTML(["dm-list", "side-dm-list"], '<div class="p-6 text-center text-sm text-[var(--sub)]">DM接続中...</div>');
 
       dmRoomsUnsub = onSnapshot(query(collection(db, "dmRooms"), where("members", "array-contains", currentUser.uid), limit(40)), snap => {
-        const rooms = [];
-        snap.forEach(d => rooms.push({ id: d.id, data: d.data() }));
+        const rooms = visibleDocsFromSnapshot(snap, "dmRooms");
         renderDMRooms(rooms);
       }, () => {
-        box.innerHTML = '<div class="p-6 text-center text-sm text-red-500">DM接続失敗<br><button onclick="startDMListWatcher(true)" class="btn-soft mt-3">再接続</button></div>';
+        setHTML(["dm-list", "side-dm-list"], '<div class="p-6 text-center text-sm text-red-500">DM接続失敗<br><button onclick="startDMListWatcher(true)" class="btn-soft mt-3">再接続</button></div>');
       });
     };
 
     function renderDMRooms(rooms) {
-      const box = $("dm-list");
       rooms.sort((a, b) => (toDate(b.data.updatedAt)?.getTime() || 0) - (toDate(a.data.updatedAt)?.getTime() || 0));
 
       let html = "";
@@ -1429,7 +1702,7 @@
         `;
       }
 
-      box.innerHTML = html || '<div class="p-8 text-center text-sm text-[var(--sub)]">DMなし</div>';
+      setHTML(["dm-list", "side-dm-list"], html || '<div class="p-8 text-center text-sm text-[var(--sub)]">DMなし</div>');
     }
 
     window.openChat = async (uid, name = "") => {
@@ -1452,8 +1725,8 @@
       chatUnsub = onSnapshot(query(collection(db, "chats", room, "messages"), orderBy("createdAt", "asc"), limit(80)), snap => {
         let html = "";
 
-        snap.forEach(d => {
-          const msg = d.data();
+        visibleDocsFromSnapshot(snap, `chats/${room}/messages`).forEach(d => {
+          const msg = d.data;
           const mine = msg.senderId === currentUser.uid;
           html += `
             <div class="flex ${mine ? 'justify-end' : 'justify-start'}">
@@ -1481,7 +1754,7 @@
       if (!text) return;
 
       const room = roomIdFor(currentUser.uid, currentChatUser);
-      const exp = new Date(Date.now() + 90 * 24 * 60 * 60 * 1000);
+      const exp = expiresAtForNewDoc();
       const targetName = currentChatName || "User";
 
       await addDoc(collection(db, "chats", room, "messages"), {
@@ -1536,7 +1809,7 @@
           type: "invite",
           read: false,
           createdAt: serverTimestamp(),
-          expireAt: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000)
+          expireAt: expiresAtForNewDoc()
         });
       } catch (e) {
         console.warn(e);
@@ -1559,8 +1832,7 @@
         adminMode: false,
         referralCount: 0,
         referredBy,
-        activeMissions: STARTER_MISSIONS.map((m, i) => ({ ...m, id: `starter_${m.type}_${i}`, progress: 0 })),
-        expireAt: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000)
+        activeMissions: STARTER_MISSIONS.map((m, i) => ({ ...m, id: `starter_${m.type}_${i}`, progress: 0 }))
       };
 
       await setDoc(doc(db, "users", currentUser.uid), profile, { merge: true });
@@ -1638,9 +1910,8 @@
 
       const snap = await getDocs(query(collection(db, "logs"), where("uid", "==", currentUser.uid), limit(60)));
       const docs = [];
-      snap.forEach(d => {
-        const data = d.data();
-        if (!data.isReply && !data.replyTo) docs.push({ id: d.id, data });
+      visibleDocsFromSnapshot(snap, "logs").forEach(d => {
+        if (!d.data.isReply && !d.data.replyTo) docs.push(d);
       });
 
       docs.sort((a, b) => (toDate(b.data.createdAt)?.getTime() || 0) - (toDate(a.data.createdAt)?.getTime() || 0));
@@ -1653,8 +1924,7 @@
       box.innerHTML = '<div class="p-6 text-center text-sm text-[var(--sub)]">読み込み中...</div>';
 
       const snap = await getDocs(query(collection(db, "logs"), where("likes", "array-contains", currentUser.uid), limit(30)));
-      const docs = [];
-      snap.forEach(d => docs.push({ id: d.id, data: d.data() }));
+      const docs = visibleDocsFromSnapshot(snap, "logs");
       docs.sort((a, b) => (toDate(b.data.createdAt)?.getTime() || 0) - (toDate(a.data.createdAt)?.getTime() || 0));
       box.innerHTML = docs.map(d => buildPostHTML(d.id, d.data)).join("") || '<div class="p-6 text-center text-sm text-[var(--sub)]">いいねなし</div>';
     }
@@ -1681,6 +1951,8 @@
 
       const target = $(`tab-${tab}`);
       if (target) target.classList.remove("hidden");
+      document.body.classList.toggle("chat-active", tab === "chat");
+      syncViewportHeight();
 
       document.querySelectorAll(".nav-item").forEach(btn => btn.classList.remove("nav-active"));
       const nav = document.querySelector(`.nav-item[data-target="${tab}"]`);
