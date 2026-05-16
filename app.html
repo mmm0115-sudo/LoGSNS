@@ -833,23 +833,47 @@
 
     function isGeneratedContent(data = {}) {
       const uid = String(data.uid || data.fromUid || data.senderId || "").toLowerCase();
-      const name = String(data.authorName || data.from || "").toLowerCase();
+      const name = String(data.authorName || data.from || data.name || data.displayName || data.username || "").toLowerCase();
       const names = Object.values(data.names || {}).join(" ").toLowerCase();
       return data.ai === true
         || data.isAI === true
         || data.bot === true
         || data.isBot === true
+        || data.aiAccount === true
+        || data.generated === true
+        || data.synthetic === true
         || uid.startsWith("ai_")
         || uid.startsWith("bot_")
+        || uid.includes("_ai_")
+        || uid.includes("_bot_")
         || uid === "system"
         || name === "ai"
         || name.startsWith("ai ")
+        || name.startsWith("bot ")
         || name.includes("ai bot")
         || name.includes("ai投稿")
+        || name.includes("人工知能")
         || name.includes("bot")
         || names.includes("ai bot")
         || names.includes("ai投稿")
         || names.includes("bot");
+    }
+
+    async function cleanupGeneratedAccounts() {
+      try {
+        const snap = await getDocs(query(collection(db, "users"), limit(100)));
+        const jobs = [];
+
+        snap.forEach(item => {
+          const data = item.data();
+          if (!isGeneratedContent({ ...data, uid: item.id })) return;
+          jobs.push(deleteDoc(doc(db, "users", item.id)));
+        });
+
+        await Promise.allSettled(jobs);
+      } catch (e) {
+        console.warn("generated account cleanup failed", e);
+      }
     }
 
     function visibleDocsFromSnapshot(snap, collectionName) {
@@ -1040,6 +1064,7 @@
       $("post-btn").style.pointerEvents = "none";
       loadTimeline();
       loadRanking();
+      runOptional("generated account cleanup failed", cleanupGeneratedAccounts);
       setHTML(["dm-list", "side-dm-list"], '<div class="p-8 text-center text-sm text-[var(--sub)]">ログインするとDMを表示できます</div>');
       setHTML(["notif-list", "side-notif-list"], '<div class="p-8 text-center text-sm text-[var(--sub)]">ログインすると通知を表示できます</div>');
       if (showLogin) openAuthModal();
@@ -1051,6 +1076,7 @@
       $("post-text").style.pointerEvents = "auto";
       $("post-btn").style.pointerEvents = "auto";
       updateMyProfileUI();
+      runOptional("generated account cleanup failed", cleanupGeneratedAccounts);
       loadTimeline();
       loadRanking();
       loadNotifications(false);
@@ -1526,7 +1552,10 @@
 
         snap.forEach(d => {
           const user = normalizeProfile(d.data());
-          if (isGeneratedContent({ ...user, uid: d.id })) return;
+          if (isGeneratedContent({ ...user, uid: d.id })) {
+            runOptional("generated account cleanup failed", async () => deleteDoc(doc(db, "users", d.id)));
+            return;
+          }
           html += userRow(d.id, user, i++);
         });
 
